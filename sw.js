@@ -1,6 +1,6 @@
-const CACHE = "eik-predictive-v44";
+const CACHE = "eik-predictive-v45";
 const DYN = "eik-dyn-v1";
-const VERSION = "44.0.0";
+const VERSION = "45.0.0";
 const CORE = [
   "./",
   "./index.html",
