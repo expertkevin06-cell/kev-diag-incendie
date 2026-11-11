@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#120507">
+<title>Hors ligne — Étude incendie by Kevin</title>
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--text:#fff4ef;--muted:#c9a9a4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(900px 600px at 50% -10%,#3a0d18,#120507 65%);color:var(--text);font-family:Inter,system-ui,sans-serif;text-align:center;padding:1.2rem}
+.card{max-width:560px;background:linear-gradient(160deg,var(--surface),#1d080d);border:1px solid var(--line);border-radius:22px;padding:2rem;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.flame{font-size:3.4rem;filter:drop-shadow(0 10px 24px rgba(255,107,53,.45))}h1{margin:.6rem 0;font-size:1.7rem}p{color:var(--muted)}
+button,a.btn{display:inline-block;cursor:pointer;border:1px solid var(--line);background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:900;border-radius:12px;padding:.75rem 1.1rem;text-decoration:none;margin:.3rem}
+.pill{display:inline-block;font-size:.75rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--line);color:var(--fire2);margin-top:.8rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="flame">🔥</div>
+  <h1>Mode hors ligne actif</h1>
+  <p>L’application reste utilisable avec la base locale sauvegardée. Les demandes d’accès, décisions admin, fonds d’écran et annonces seront synchronisés dès le retour du réseau.</p>
+  <button onclick="location.reload()">🔄 Réessayer</button>
+  <a class="btn" href="./">🏠 Accueil application</a>
+  <div class="pill" id="state">Vérification du réseau…</div>
+</div>
+<script>
+(function(){
+var s=document.getElementById("state");
+function update(){s.textContent=navigator.onLine?"🟢 Réseau revenu — rechargement possible":"🟠 Hors ligne — base locale active";}
+update();window.addEventListener("online",function(){update();setTimeout(function(){location.replace("./");},900);});window.addEventListener("offline",update);
+})();
+</script>
+</body>
+</html>
