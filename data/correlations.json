@@ -18,6 +18,7 @@
     { "brand": "Volkswagen", "model": "Tiguan", "engine": "2.0 TDI", "failure": "FAP colmaté", "probability": 7, "severity": "Élevé", "system": "echappement", "description": "Colmatage FAP TDI." },
     { "brand": "Ford", "model": "Focus", "engine": "1.5 EcoBlue", "failure": "Courroie humide délaminée", "probability": 8, "severity": "Critique", "system": "distribution", "description": "Délamination courroie EcoBlue." },
     { "brand": "Ford", "model": "Kuga", "engine": "1.5 EcoBlue", "failure": "Courroie humide délaminée", "probability": 8, "severity": "Critique", "system": "distribution", "description": "Délamination courroie EcoBlue." },
+    { "brand": "Ford", "model": "Fiesta", "engine": "1.0 EcoBoost", "failure": "Refroidissement / surchauffe", "probability": 7, "severity": "Critique", "system": "refroidissement", "description": "Durite de dégazage fragile sur 1.0 EcoBoost." },
     { "brand": "Hyundai", "model": "Kona", "engine": "Kona Electric", "failure": "Runaway batterie HT", "probability": 5, "severity": "Critique", "system": "ht", "description": "Emballement thermique batterie." },
     { "brand": "Tesla", "model": "Model 3", "engine": "Tesla LR", "failure": "Runaway batterie HT", "probability": 4, "severity": "Critique", "system": "ht", "description": "Emballement thermique batterie." },
     { "brand": "Renault", "model": "Clio", "engine": "1.5 Blue dCi", "failure": "EGR encrassée", "probability": 6, "severity": "Modéré", "system": "egr", "description": "Encrassement EGR dCi." },
