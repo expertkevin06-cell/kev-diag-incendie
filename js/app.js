@@ -1,52 +1,60 @@
-// js/app.js
 (function(){
 "use strict";
+
 var D=document,W=window;
 function $(s,r){return (r||D).querySelector(s);}
 function $all(s,r){return Array.prototype.slice.call((r||D).querySelectorAll(s));}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function norm(s){return String(s==null?"":s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
-function safeUrl(u){return /^https?:\/\//i.test(String(u||""))?u:"#";}
+function safeUrl(u){return /^https?:\/\//i.test(String(u||""))?String(u):"#";}
 function uid(){return (W.crypto&&crypto.randomUUID)?crypto.randomUUID():"id-"+Date.now()+"-"+Math.random().toString(16).slice(2);}
-function toast(msg){var t=D.createElement("div");t.className="toast";t.textContent=msg;$("#toasts").appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},4700);}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function listify(x){return Array.isArray(x)?x.filter(Boolean):(x?[x]:[]);}
+function lines(x){return String(x||"").split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);}
+function csv(x){return String(x||"").split(/[,;]/).map(function(s){return s.trim();}).filter(Boolean);}
+function uniq(a){var o={},r=[];a.forEach(function(x){if(!o[x]){o[x]=1;r.push(x);}});return r;}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast("Stockage local saturé");}}
 function read(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-function uniq(a){return a.filter(function(v,i){return a.indexOf(v)===i;});}
-function listify(x){return Array.isArray(x)?x:(x?[x]:[]);}
+function toast(msg,kind){var t=D.createElement("div");t.className="toast"+(kind?" "+kind:"");t.textContent=msg;$("#toasts").appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},4700);}
+function download(name,text,type){var b=new Blob([text],{type:type||"application/json"});var a=D.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);}
 
-var CFG={PASSWORD:"Kevin83600",TOPIC:"eik-incendie-x7Q9mW4pL2",NTFY:"https://ntfy.sh",LOCK_MIN:15,APK_URL:"https://github.com/expertkevin06-cell/etude-incendie-technique-by-kevin/releases"};
+var CFG={PASSWORD:"Kevin83600",TOPIC:"eik-incendie-x7Q9mW4pL2",NTFY:"https://ntfy.sh",LOCK_MIN:15};
 var LABEL={pending:"⏳ En attente",granted:"✅ Accordé",denied:"⛔ Refusé",revoked:"🔄 Révoqué"};
 var myId=localStorage.getItem("eik-id")||uid();localStorage.setItem("eik-id",myId);
 var isAdmin=sessionStorage.getItem("eik-admin")==="1";
 var state=read("eik-state",{devices:{},refs:{},wp:null,stateTs:0});
-var lockTimer=null,lastRebroadcast=0,currentAnalysis=null,currentHits=[],active=-1,INDEX=[],KB=[],EXPAND={},SYSTEMS=[],btDevice=null,deferredPrompt=null;
-var deckChapters=[],deckIdx=0,slideIdx=0,touchX=null,autoTimer=null;
+var local=read("eik-local",{overrides:{},deleted:{},order:[],views:{}});
+var baseKB=[],KB=[],SYSTEMS=[],EXPAND={},INDEX=[],currentAnalysis=null,currentHits=[],active=-1;
+var selected={},undoStack=[],lockTimer=null,lastRebroadcast=0,deferredPrompt=null;
+var deckChapters=[],deckIdx=0,slideIdx=0,touchX=null,autoTimer=null,dragId=null;
 
 var FALLBACK_SYSTEMS=[
-{id:"distribution",label:"⛓️ Distribution / courroie",kw:["courroie","distribution","puretech","ecoblue","calage","tendeur","chaîne","galet"]},
-{id:"injection",label:"⛽ Injection / carburant",kw:["injecteur","rampe","carburant","gdi","common rail","pompe hp"]},
-{id:"gpl",label:"⛽ GPL",kw:["gpl","multivalve","réservoir"]},
-{id:"echappement",label:"🌫️ Échappement / FAP / cata",kw:["fap","dpf","catalyseur","cata","collecteur","échappement","regen"]},
+{id:"distribution",label:"⛓️ Distribution / courroie",kw:["courroie","distribution","puretech","ecoblue","calage","tendeur","chaine","galet","crepine","pompe a vide"]},
+{id:"lubrification",label:"🛢️ Lubrification / huile",kw:["huile","lubrification","crepine","pression huile","pompe a huile","coussinet","dilution"]},
+{id:"injection",label:"⛽ Injection / carburant",kw:["injecteur","rampe","carburant","gdi","common rail","pompe hp","essence","diesel"]},
+{id:"echappement",label:"🌫️ Échappement / FAP / cata",kw:["fap","dpf","catalyseur","cata","collecteur","echappement","regen","vegetation"]},
 {id:"egr",label:"♻️ EGR / dépollution",kw:["egr","vanne egr","refroidisseur egr","calamine"]},
-{id:"adblue",label:"💧 AdBlue / SCR",kw:["adblue","scr","nox","urée","p20ee"]},
-{id:"turbo",label:"🌀 Turbo",kw:["turbo","suralimentation","wastegate"]},
-{id:"refroidissement",label:"🌡️ Refroidissement / surchauffe",kw:["surchauffe","ldr","glycol","pompe à eau","thermostat","grippage"]},
-{id:"basse12",label:"🔋 12V / DC-DC / USB",kw:["12v","cosse","dc-dc","usb","chargeur","h2"]},
-{id:"ht",label:"🔌 Pack HT / cellules",kw:["pack","cellule","runaway","nmc","lfp","bms","busbar","immersion"]},
-{id:"charge",label:"🔌 Charge DC / OBC",kw:["charge","obc","contacteur","broches","wallbox","onduleur"]},
-{id:"freins",label:"🛑 Freins",kw:["frein","étrier","disque","plaquette"]},
-{id:"faisceau",label:"⚡ Faisceau / courts-circuits",kw:["faisceau","court","arc","gaine","rongeur","pcb"]},
-{id:"habitacle",label:"🚬 Habitacle / usager",kw:["mégot","habitacle","siège","mousse"]},
-{id:"transmission",label:"⚙️ Boîte / embrayage",kw:["boîte","bva","dsg","eat","mécatronic","embrayage","volant moteur"]}
+{id:"adblue",label:"💧 AdBlue / SCR",kw:["adblue","scr","nox","uree","p20ee"]},
+{id:"turbo",label:"🌀 Turbo / suralimentation",kw:["turbo","suralimentation","wastegate","reniflard"]},
+{id:"refroidissement",label:"🌡️ Refroidissement / surchauffe",kw:["surchauffe","ldr","glycol","pompe a eau","thermostat","grippage","radiateur"]},
+{id:"basse12",label:"🔋 12V / DC-DC / USB",kw:["12v","cosse","dc-dc","usb","chargeur","h2","alternateur"]},
+{id:"ht",label:"🔌 Pack HT / cellules",kw:["pack","cellule","runaway","nmc","lfp","bms","busbar","immersion","isolation"]},
+{id:"charge",label:"🔌 Charge AC/DC / OBC",kw:["charge","obc","contacteur","broches","wallbox","onduleur","trappe"]},
+{id:"freins",label:"🛑 Freins / roues",kw:["frein","etrier","disque","plaquette","pneu","roulement"]},
+{id:"faisceau",label:"⚡ Faisceau / courts-circuits",kw:["faisceau","court","arc","gaine","rongeur","pcb","connectique"]},
+{id:"habitacle",label:"🚬 Habitacle / usager",kw:["megot","habitacle","siege","mousse","chargeur"]},
+{id:"gpl",label:"⛽ GPL / gaz",kw:["gpl","multivalve","reservoir","gaz"]},
+{id:"transmission",label:"⚙️ Boîte / embrayage",kw:["boite","bva","dsg","eat","mecatronic","embrayage","volant moteur","atf"]}
 ];
+
 var FALLBACK_EXPAND={
-courroie:["distribution","courroie humide","wet belt","Stellantis 1.2 PureTech","Ford 1.5 EcoBlue","Ford 2.0 EcoBlue","EB2","délamination","crépine","pompe à vide","dilution essence","huile","lubrification","P0016","P0017","P0521","calage distribution"],
+courroie:["distribution","courroie humide","wet belt","Stellantis 1.2 PureTech","Ford 1.5 EcoBlue","Ford 2.0 EcoBlue","EB2","délamination","crépine","pompe à vide","dilution essence","huile","lubrification","P0016","P0017","P0521"],
 humide:["courroie humide","wet belt","distribution immergée","PureTech","EcoBlue"],
 distribution:["courroie","chaîne","calage","P0016","PureTech","EcoBlue","tendeur","galet"],
-puretech:["courroie humide","distribution","EB2","Stellantis","1.2 essence","dilution huile","rappel courroie"],
+puretech:["courroie humide","distribution","EB2","Stellantis","1.2 essence","dilution huile","crépine"],
 ecoblue:["courroie humide","distribution","Ford 1.5","Ford 2.0","wet belt"],
-crepine:["crépine d'aspiration d'huile","colmatage","débris courroie","pression huile","lubrification"],
+crepine:["crépine d'aspiration d'huile","colmatage","débris courroie","pression huile","lubrification","P0521","P0522"],
 delamination:["délamination courroie","désagrégation","débris noirs","crépine","pression huile"],
+huile:["lubrification","pression huile","crépine","dilution essence","P0521","P0522","courroie humide"],
 fap:["DPF","filtre à particules","régénération","P2463","P244A","P2002","catalyseur","herbe sèche","paille"],
 dpf:["FAP","filtre à particules","régénération","P2463"],
 catalyseur:["cata","P0420","surchauffe","collecteur","échappement"],
@@ -72,138 +80,171 @@ rappel:["campagne constructeur","RappelConso","NHTSA","Safety Gate","L421-3"],
 vice:["vice caché","article 1641","antériorité","expertise"],
 boite:["boîte de vitesses","DSG","EAT","BVA","mécatronic","huile ATF","volant moteur"]
 };
-var FALLBACK_KB=[
-{id:"wet-belt-puretech",t:"Courroie de distribution humide — 1.2 PureTech (EB2)",sys:"distribution",en:"Thermique",zone:"Bloc moteur / distribution",sev:"Critique",prio:100,kw:["courroie humide","courroie distribution","puretech","1.2 puretech","eb2","wet belt","delamination","crepine","pompe a vide","dilution essence","huile","lubrification","distribution"],eng:["1.2 PureTech EB2 / EB2DT / EB2DTS","Peugeot 208/308/2008/3008","Citroën C3/C4/Rifter","Opel Crossland/Corsa","DS3/DS4"],origin:"Courroie de distribution immergée dans l'huile moteur (architecture wet belt).",mech:"Détérioration de la courroie par délamination / désagrégation du caoutchouc sous contraintes thermiques et chimiques.",roots:["Huile non conforme à la spécification constructeur ou vidanges espacées","Dilution de l'huile par de l'essence (trajets courts, démarrages à froid, injection directe)","Oxydation de l'huile et contraintes thermiques","Qualité / lot de courroie selon millésimes"],cons:["Débris de courroie dans l'huile → obstruction de la crépine d'aspiration","Chute de pression d'huile → défaut de lubrification (coussinets, turbo, AAC)","Perte d'assistance au freinage (pompe à vide lubrifiée par l'huile)","Surchauffe / grippage turbo / casse moteur par serrage","Déphasage distribution → contact soupapes/pistons (moteur interférentiel)"],sym:["Voyant pression huile","Bruit anormal distribution","Perte de puissance","Perte d'assistance au freinage","Fumée anormale"],dtc:["P0016","P0017","P0521","P0522","P0523","P0011","P0014"],idx:["Courroie fissurée / délaminée visible par bouchon de remplissage","Débris noirs dans l'huile / carter","Crépine colmatée par débris de courroie","Largeur de courroie mesurée au gabarit constructeur","Analyse d'huile : dilution essence, suies, usure"],act:["Contrôle visuel + gabarit largeur courroie","Vidange filtre avec spécification exacte","Remplacement courroie + galets + pompe à vide si débris","Nettoyage crépine / circuits d'huile + contrôle pression","Contrôle turbo / coussinets / AAC si voyant pression huile"],legal:"Vice caché 1641 si antériorité ; produit défectueux L421-3 si défaut de conception ; obligation de conseil L421-2 sur spécification d'huile ; entretien selon carnet.",src:[{label:"RappelConso",url:"https://rappel.conso.gouv.fr/"},{label:"Légifrance 1641",url:"https://www.legifrance.gouv.fr/search/all?query=1641+vice+cache"}],rel:["wet-belt-ecoblue","turbo-oil-leak","overheat-seizure"]},
-{id:"wet-belt-ecoblue",t:"Courroie humide — Ford 1.5 / 2.0 EcoBlue",sys:"distribution",en:"Thermique",zone:"Bloc moteur / distribution",sev:"Critique",prio:90,kw:["courroie humide","ecoblue","ford ecoblue","wet belt","distribution","delamination","crepine","huile"],eng:["Ford 1.5 EcoBlue","Ford 2.0 EcoBlue","Transit / Focus / Kuga"],origin:"Courroie de distribution / pompe à huile immergée selon version.",mech:"Vieillissement et délamination du matériau en contact huile ; débris dans le circuit de lubrification.",roots:["Spécification d'huile et intervalles d'entretien","Dilution carburant et suies","Contraintes thermiques"],cons:["Colmatage crépine → chute pression huile","Déphasage / rupture distribution → casse moteur","Débris vers turbo et paliers"],sym:["Voyant huile","Claquement distribution","Démarrage difficile"],dtc:["P0016","P0017","P0521"],idx:["Débris dans huile","Crépine chargée","Calage déphasé"],act:["Contrôle courroie selon procédure constructeur","Nettoyage circuit huile","Remplacement kit + pompe à huile si débris"],legal:"Vice caché / produit défectueux selon antériorité et défaut ; entretien opposable selon carnet.",src:[{label:"RappelConso",url:"https://rappel.conso.gouv.fr/"}],rel:["wet-belt-puretech","overheat-seizure"]},
-{id:"fap-regen-fire",t:"FAP / catalyseur + végétation — origine feu sous caisse",sys:"echappement",en:"Thermique",zone:"Soubassement",sev:"Critique",prio:70,kw:["fap","dpf","catalyseur","herbe","paille","regen","regeneration","feu sous caisse","p2463"],eng:["Diesels modernes FAP", "Tous véhicules stationnés sur végétation"],origin:"Ligne d'échappement / FAP en régénération active (600–1200 °C selon zone).",mech:"Rayonnement / convection vers végétation sèche → pyrolyse → inflammation sous caisse.",roots:["Stationnement sur herbe / paille","Régénération active ou post-injection","Écran thermique absent / bouclier dégradé"],cons:["Feu sous caisse → réservoir / durites / bouclier PP","Propagation habitacle / compartiment moteur","Fonte boucliers et faisceaux sous plancher"],sym:["Odeur brûlé","Fumée sous véhicule","Régénération fréquente"],dtc:["P2463","P244A","P2002"],idx:["Végétation carbonisée alignée sous FAP","Boucliers fondus","Log ECU régénération"],act:["Ne pas stationner sur végétation sèche","Contrôle écrans thermiques","Lecture logs régénération"],legal:"Usage / conseil L421-2 ; origine externe si log regen + environnement documenté.",src:[{label:"Légifrance L421-2",url:"https://www.legifrance.gouv.fr/search/all?query=L421-2"}],rel:["turbo-oil-leak","egr-cooler-glycol"]},
-{id:"egr-cooler-glycol",t:"Refroidisseur EGR — fuite glycol / calamine",sys:"egr",en:"Thermique",zone:"Compartiment moteur",sev:"Élevé",prio:65,kw:["egr","refroidisseur egr","glycol","calamine","fuite","p0400","feu moteur"],eng:["Diesels EGR refroidi","BMW/NHTSA campagnes EGR"],origin:"Refroidisseur EGR (échangeur eau/gaz d'échappement).",mech:"Fuite interne glycol + suies → dépôts conducteurs / inflam. → risque thermique ; fuite externe sur point chaud.",roots:["Corrosion / fissure échangeur","Qualité LDR / entretien","Cycles thermiques"],cons:["Perte LDR → surchauffe","Dépôts dans admission → perte puissance","Risque feu si fuite sur échappement"],sym:["Odeur sucrée","Baisse LDR","Fumée blanche","P0400"],dtc:["P0400","P0217","P0401","P0402"],idx:["Traces glycol autour échangeur","Baisse niveau sans fuite externe visible","Suies humides admission"],act:["Test étanchéité échangeur","Remplacement refroidisseur","Contrôle LDR / calorstat"],legal:"Vice caché / produit défectueux selon défaut d'origine ; rappel si campagne.",src:[{label:"NHTSA Recalls",url:"https://www.nhtsa.gov/recalls"}],rel:["fap-regen-fire","overheat-seizure"]},
-{id:"hp-fuel-leak",t:"Fuite carburant HP — GDI / common rail",sys:"injection",en:"Thermique",zone:"Compartiment moteur",sev:"Critique",prio:70,kw:["fuite carburant","injecteur","rampe","gdi","common rail","p0087","flash","feu moteur"],eng:["Essence injection directe","Diesels common rail"],origin:"Ligne / rampe / injecteur haute pression.",mech:"Fuite sous pression → aérosol carburant sur turbo / collecteur → inflammation immédiate.",roots:["Joint / raccord défectueux","Vibration / fatigue ligne","Défaut de serrage / réparation"],cons:["Flash feu baie moteur","Fonte faisceau / durites","Propagation habitacle"],sym:["Odeur carburant","Démarrage difficile","P0087"],dtc:["P0087","P0089","P0190"],idx:["Résidus rampe","Flaque centrale","Odeur persistante après nettoyage"],act:["Contrôle étanchéité HP","Remplacement joints/raccords","Nettoyage sécurisé + contrôle"],legal:"Défaut fabrication L421-3 ; rappel si défaut série ; vice caché si antérieur.",src:[{label:"RappelConso",url:"https://rappel.conso.gouv.fr/"}],rel:["turbo-oil-leak","fap-regen-fire"]},
-{id:"turbo-oil-leak",t:"Huile sur turbo / échappement — auto-inflammation",sys:"turbo",en:"Thermique",zone:"Compartiment moteur",sev:"Critique",prio:68,kw:["turbo","huile","echappement","auto inflammation","reniflard","joint cache culbut","feu baie"],eng:["Tous moteurs suralimentés"],origin:"Fuite huile (cache-culbuteurs, reniflard, turbo) sur pièce chaude.",mech:"Huile 300–350 °C sur collecteur 400–800 °C → auto-inflammation → flamme baie moteur.",roots:["Joint / reniflard défaillant","Pression carter excessive","Entretien / niveau huile"],cons:["Feu baie moteur → habitacle","Fonte Al local (660 °C)","Dommages faisceau / durites"],sym:["Odeur huile brûlée","Fumée échappement","Suintement huile"],dtc:["—"],idx:["Vernis brun orienté","Départ sous fuite","Al fondu localement"],act:["Réparation fuite + nettoyage dégraissant","Contrôle pression carter","Contrôle turbo (jeu axial/radial)"],legal:"Vice caché si antérieur ; rappel L421-3 ; expertise contradictoire.",src:[{label:"Légifrance 1641",url:"https://www.legifrance.gouv.fr/search/all?query=1641+vice+cache"}],rel:["hp-fuel-leak","overheat-seizure"]}
-];
-SYSTEMS=FALLBACK_SYSTEMS.slice();EXPAND=FALLBACK_EXPAND;KB=FALLBACK_KB.slice();
 
-var DTC=[
-{code:"P0016",txt:"Corrélation vilebrequin / arbre à cames — calage décalé (courroie, chaîne).",q:"courroie distribution",sys:"distribution"},
-{code:"P0017",txt:"Corrélation vilebrequin / AAC échappement — déphasage distribution.",q:"courroie distribution",sys:"distribution"},
-{code:"P0087",txt:"Pression rampe carburant trop basse — fuite HP, pompe, injecteur.",q:"injection fuite",sys:"injection"},
-{code:"P0217",txt:"Surchauffe moteur — pompe à eau, thermostat, perte LDR.",q:"surchauffe refroidissement",sys:"refroidissement"},
-{code:"P0300",txt:"Ratés d’allumage multiples — mélange pauvre, catalyseur chaud.",q:"echappement catalyseur",sys:"echappement"},
-{code:"P0562",txt:"Tension système 12V basse — batterie, cosse, DC-DC.",q:"12v batterie",sys:"basse12"},
-{code:"P2463",txt:"FAP : accumulation de suie — régénérations incomplètes.",q:"fap regeneration",sys:"echappement"},
-{code:"P244A",txt:"FAP : pression différentielle trop basse — filtre fissuré / absent.",q:"fap",sys:"echappement"},
-{code:"P0420",txt:"Rendement catalyseur sous seuil — cata dégradé / surchauffe.",q:"catalyseur",sys:"echappement"},
-{code:"P0AA6",txt:"Défaut d’isolement HT — pack, OBC, câblage haute tension.",q:"ht isolation obc",sys:"ht"},
-{code:"P20EE",txt:"Efficacité SCR NOx sous seuil — AdBlue, injecteur urée.",q:"adblue scr",sys:"adblue"},
-{code:"P0400",txt:"Débit EGR incorrect — vanne encrassée, calamine.",q:"egr",sys:"egr"},
-{code:"P0521","txt":"Pression / portée capteur pression huile — niveau, crépine, pompe.",q:"crepine huile lubrification",sys:"distribution"},
-{code:"P0522","txt":"Capteur pression huile signal bas — crépine colmatée, pompe, capteur.",q:"crepine huile",sys:"distribution"},
-{code:"P0089",txt:"Régulateur pression carburant — performance pompe HP.",q:"injection",sys:"injection"}
+var FALLBACK_KB=[
+{id:"wet-belt-puretech",title:"Courroie de distribution humide — 1.2 PureTech (EB2)",system:"distribution",energy:"Thermique",zone:"Bloc moteur / distribution",severity:"Critique",priority:100,keywords:["courroie humide","courroie distribution","puretech","1.2 puretech","eb2","wet belt","delamination","crepine","pompe a vide","dilution essence","huile","lubrification"],engines:["1.2 PureTech EB2","Peugeot 208/308/2008/3008","Citroën C3/C4","Opel Crossland/Corsa"],origin:"Courroie de distribution immergée dans l'huile moteur.",mechanism:"Détérioration par délamination / désagrégation du caoutchouc sous contraintes thermiques et chimiques.",roots:["Huile non conforme ou vidanges espacées","Dilution de l'huile par l'essence","Oxydation huile / contraintes thermiques","Qualité / lot courroie selon millésime"],consequences:["Débris dans l'huile → obstruction crépine","Chute pression huile → défaut lubrification","Perte assistance freinage via pompe à vide","Grippage turbo / coussinets / casse moteur","Déphasage distribution → contact soupapes/pistons"],symptoms:["Voyant pression huile","Bruit distribution","Perte puissance","Assistance freinage réduite"],dtc:["P0016","P0017","P0521","P0522","P0011"],evidence:["Courroie fissurée/délaminée visible","Débris noirs dans huile/carter","Crépine colmatée","Largeur courroie hors gabarit","Analyse huile : dilution essence / usure"],tests:["Contrôle visuel + gabarit largeur","Mesure pression huile à chaud","Dépose carter/crépine si débris suspectés","Analyse huile : carburant, suies, métaux","Lecture DTC et paramètres de calage"],actions:["Remplacer courroie + galets selon procédure","Nettoyer crépine et circuits d'huile","Contrôler turbo/coussinets/AAC","Utiliser huile à la spécification exacte"],safety:["Ne pas rouler si voyant pression huile","Contrôle freinage avant remise en circulation"],legal:"Vice caché 1641 si antériorité ; produit défectueux L421-3 ; conseil L421-2 sur huile ; entretien selon carnet.",sources:[{label:"RappelConso",url:"https://rappel.conso.gouv.fr/"},{label:"Légifrance 1641",url:"https://www.legifrance.gouv.fr/search/all?query=1641+vice+cache"}],related:["wet-belt-ecoblue","overheat-seizure"]},
+{id:"fap-vegetation",title:"FAP / catalyseur + végétation — feu sous caisse",system:"echappement",energy:"Thermique",zone:"Soubassement",severity:"Critique",priority:80,keywords:["fap","dpf","catalyseur","herbe","paille","regen","feu sous caisse","p2463"],engines:["Diesels FAP","Véhicule stationné sur végétation"],origin:"Ligne échappement / FAP en régénération active.",mechanism:"Rayonnement/convection vers végétation sèche → pyrolyse → inflammation sous caisse.",roots:["Stationnement sur herbe/paille","Régénération active","Écran thermique absent/dégradé"],consequences:["Feu sous caisse → réservoir/durites/bouclier","Propagation habitacle/moteur","Fonte faisceaux sous plancher"],symptoms:["Odeur brûlé","Fumée sous véhicule","Régénération fréquente"],dtc:["P2463","P244A","P2002"],evidence:["Végétation carbonisée alignée sous FAP","Boucliers fondus","Log ECU régénération"],tests:["Relever logs régénération","Inspecter écrans thermiques","Cartographier traces sous caisse"],actions:["Éviter stationnement sur végétation sèche","Restaurer écrans thermiques","Contrôle ligne/FAP"],safety:["Refroidissement surveillé","Extincteur adapté à proximité"],legal:"Usage/conseil L421-2 ; origine externe si environnement + log documentés.",sources:[{label:"Légifrance L421-2",url:"https://www.legifrance.gouv.fr/search/all?query=L421-2"}],related:["turbo-oil-leak"]},
+{id:"ev-runaway-nmc",title:"Runaway interne NMC/NCA — pack HT",system:"ht",energy:"VE",zone:"Plancher / pack HT",severity:"Critique",priority:85,keywords:["runaway","nmc","nca","emballement","jet fire","bms","cellule","p0aa6"],engines:["VE NMC/NCA"],origin:"Cellule Li-ion NMC/NCA.",mechanism:"Court interne → échauffement → dégazage → jet-fire et propagation.",roots:["Défaut cellule/séparateur","Choc/déformation","Surcharge/gestion thermique"],consequences:["Propagation module à module","Gaz toxiques HF/CO","Ré-ignition 24–72 h"],symptoms:["Voyant HT","Codes isolation","Gonflement pack","Odeur âcre"],dtc:["P0AA6","P0A7D"],evidence:["Suie interne pack","Busbars internes","Logs BMS pré-feu"],tests:["Mise en sécurité HT","Lecture BMS","Surveillance thermique prolongée"],actions:["Isolement véhicule","Stockage extérieur surveillé","Expertise pack/cellules"],safety:["Distance de sécurité","Pas de réintervention sans protocole HT"],legal:"Produit défectueux L421-3 ; rappel si campagne ; cause externe si choc documenté.",sources:[{label:"NHTSA",url:"https://www.nhtsa.gov/recalls"}],related:["ev-reignition"]}
 ];
-var LEGAL=[
-{code:"Art. 1641 C. civ.",txt:"Vice caché antérieur à la vente — action rédhibitoire ou estimatoire.",q:"1641 vice cache"},
-{code:"Art. L421-3 C. conso.",txt:"Responsabilité du fait des produits défectueux (10 ans) — défaut de fabrication.",q:"L421-3 produit defectueux"},
-{code:"Art. L421-2 C. conso.",txt:"Obligation générale de sécurité et de conseil — usage, notices.",q:"L421-2 securite"},
-{code:"Expertise CPC",txt:"Expertise contradictoire — mission, sapiteur, conservation des traces.",q:"expertise contradictoire sapiteur"},
-{code:"Art. R4227-1 C. travail",txt:"Prévention incendie sur lieux de travail — extincteurs, alarmes, dégagements.",q:"R4227 travail incendie"},
-{code:"Assurance / CATNAT",txt:"Immersion, crue, catastrophe naturelle : conservation, déclaration, expertise.",q:"catastrophe naturelle immersion"}
-];
-var METHOD=[["Reconnaissance du site","Sécurisation des énergies, périmètre, risques résiduels."],["Reconnaissance préliminaire","Zone d’origine macro, lecture générale des dommages."],["Documentation","Photos avant toute manipulation, relevés, croquis."],["Patterns","V, alligatoring, crazed glass, spalling : orientation et intensité."],["Zone d’origine","Convergence des traces et gradients."],["Point d’origine","Localisation précise du foyer initial."],["Recherche des causes","Élimination méthodique des hypothèses."],["Conclusion","Certain / probable / indéterminé — proportionné aux preuves."]];
-var PATTERNS=[["V-pattern","Pointe basse = origine probable."],["Alligatoring","Écailles brillantes = feu rapide / intense."],["Crazed glass","Verre microfissuré = chauffe rapide."],["Spalling béton","Éclatement = zone de forte chaleur."]];
-var PHENOM=[["Flashover","600–800 °C : généralisation embrasement de la pièce."],["Backdraft","Explosion de fumées lors d’un apport d’air."],["Rollover","Langues de feu au plafond, gaz imbrûlés."],["Auto-inflammation","Huile 300–350 °C, diesel ~210 °C, essence ~280 °C."]];
-var GAZ=[["CO","Combustion incomplète","Mortel dès 0,1 %"],["HCN","Polyuréthane, laine","Toxique cellulaire"],["HF","Batteries Li-ion","Mortel, corrosif"],["HCl","PVC","Corrosif, irritant"],["NOx","Hautes températures","Œdème pulmonaire"]];
-var ZONES=[["Compartiment moteur","Moteur, turbo, catalyseur, FAP, faisceau, alternateur, durites.","Huile / carburant sur chaud, B+, régénération."],["Habitacle","PU, ABS/PC, 12V, USB, sièges, console.","Mégots, chargeurs, résistances de siège."],["Coffre","12V, réservoir, pack HT, hayon.","Bornes, court hayon, dégazage H2."],["Soubassement","Échappement, catalyseur, FAP, pack HT.","Cata sur herbes, impact pack."],["Roues","Disques, pneus, étriers.","600–900 °C, étrier grippé."],["Extérieur","Peinture, pare-chocs PP, végétation.","Feu externe, volontaire, environnement."]];
-var FUSION=[["Aluminium","660","Fusion locale = indice de point chaud."],["Zinc","420","Fusion précoce, zones modérées."],["Plomb","327","Très précoce (bornes, soudures)."],
-["Magnésium","650","Réactif, combustion vive."],["Cuivre","1085","Arc électrique ou feu intense."],["Argent","962","Contacts électriques."],["Or","1064","Connectique fine."],["Acier","1370–1530","Feu très intense ou arc."],["Verre","~700 (ramollissement)","Chauffe rapide, crazed glass."],["Titane","1668","Très haute température."]];
-var PORTALS=[["RappelConso","Rappels officiels France","https://rappel.conso.gouv.fr/"],["NHTSA Recalls","Rappels constructeurs US","https://www.nhtsa.gov/recalls"],["Safety Gate UE","Alertes produits dangereux","https://ec.europa.eu/safety-gate-alerts/screen/search"],["Légifrance","Textes juridiques français","https://www.legifrance.gouv.fr/"]];
 
 var GENERIC={
-distribution:{origin:"Organe de synchronisation moteur (courroie, chaîne, galet, tendeur).",mech:"Usure, décalage de calage ou rupture de transmission du mouvement.",roots:["Entretien / tension / alignement","Qualité de pièce ou lubrification","Âge / kilométrage / contraintes thermiques"],cons:["Déphasage AAC/vilebrequin → perte puissance","Contact soupapes/pistons si moteur interférentiel","Débris → contamination huile"],sym:["Bruits métalliques","Démarrage difficile","P0016/P0017"],dtc:["P0016","P0017"],idx:["Tension / usure courroie","Alignement repères de calage","Débris dans carter"],act:["Contrôle calage au gabarit","Remplacement kit selon préconisation","Contrôle pression huile"],legal:"Entretien opposable selon carnet ; vice caché / produit défectueux si défaut d'origine."},
-injection:{origin:"Circuit carburant haute pression (pompe, rampe, injecteur).",mech:"Perte d'étanchéité ou défaut de pulvérisation → aérosol / mauvais mélange.",roots:["Fatigue joint / raccord","Qualité carburant / filtration","Vibrations / réparation antérieure"],cons:["Fuite sur point chaud → flash feu","Ratés → surchauffe catalyseur","Perte puissance / mode dégradé"],sym:["Odeur carburant","Claquement injecteur","P0087"],dtc:["P0087","P0089","P0190"],idx:["Test étanchéité HP","Résidus autour rampe","Correction débit"],act:["Contrôle pression rampe","Remplacement joints/raccords","Nettoyage sécurisé"],legal:"Défaut fabrication L421-3 ; vice caché si antérieur ; rappel si campagne."},
-echappement:{origin:"Ligne d'échappement, catalyseur, FAP, collecteur.",mech:"Surchauffe locale par post-combustion ou rayonnement vers combustible externe.",roots:["Régénération active / post-injection","Mélange pauvre / ratés","Écran thermique dégradé"],cons:["Feu sous caisse si végétation","Fonte boucliers / faisceaux","Perte efficacité dépollution"],sym:["Odeur brûlé","Fumée sous véhicule","P2463"],dtc:["P2463","P244A","P0420","P0300"],idx:["Coloration thermique ligne","Végétation carbonisée alignée","Logs régénération"],act:["Contrôle écrans thermiques","Lecture logs regen","Éviter stationnement sur herbe"],legal:"Usage / conseil L421-2 ; origine externe documentée."},
-egr:{origin:"Vanne / refroidisseur EGR (recyclage gaz d'échappement).",mech:"Encrassement calamine ou fuite glycol → mauvais débit / dépôts.",roots:["Suies / cycles thermiques","Qualité LDR","Usage urbain / trajets courts"],cons:["Perte puissance / fumées","Fuite LDR → surchauffe","Risque feu si glycol sur chaud"],sym:["Fumée noire","Baisse LDR","P0400"],dtc:["P0400","P0401","P0402"],idx:["Traces glycol","Dépôts admission","Test étanchéité échangeur"],act:["Test étanchéité / remplacement","Nettoyage admission","Contrôle LDR"],legal:"Vice caché / produit défectueux selon défaut ; rappel si campagne."},
-adblue:{origin:"Système SCR / AdBlue (réduction NOx).",mech:"Cristallisation urée / défaut injecteur → obstruction / mauvais dosage.",roots:["Qualité AdBlue / stockage","Cycles thermiques","Défaut pompe / capteur NOx"],cons:["Mode dégradé / interdiction démarrage","Défaut dépollution","Fuite urée corrosive"],sym:["Voyant SCR","Cristaux blancs","P20EE"],dtc:["P20EE","P204F","P20E8"],idx:["Cristaux injecteur","Test débit pompe","Capteurs NOx"],act:["Nettoyage / remplacement injecteur","Contrôle pompe / réservoir","Calibration capteurs"],legal:"Entretien / qualité produit ; vice caché si défaut d'origine."},
-turbo:{origin:"Turbo-compresseur / circuit de suralimentation.",mech:"Défaut lubrification ou fuite huile sur chaud → grippage / auto-inflammation.",roots:["Pression huile / crépine","Joint / reniflard","Arrêts à chaud répétés"],cons:["Casse turbo → débris admission","Feu baie moteur","Perte puissance"],sym:["Sifflement","Fumée bleue","Odeur huile"],dtc:["P0299","P0234"],idx:["Jeu axial/radial","Traces huile dans échangeur","Pression huile"],act:["Contrôle jeu / fuite","Nettoyage / remplacement turbo","Contrôle lubrification"],legal:"Entretien / lubrification ; vice caché si défaut pièce."},
-refroidissement:{origin:"Circuit de refroidissement (pompe, thermostat, LDR, radiateur).",mech:"Perte de circulation ou fuite → élévation thermique non maîtrisée.",roots:["Fuite / niveau LDR","Défaut pompe / thermostat","Ventilation / GMV"],cons:["Surchauffe → joint de culasse","Grippage moteur","Fuite glycol sur chaud → feu"],sym:["Aiguille température","Odeur sucrée","P0217"],dtc:["P0217","P0128"],idx:["Pression circuit","Traces fuite","Test thermostat"],act:["Test étanchéité","Remplacement pompe/thermostat","Purge circuit"],legal:"Entretien ; vice caché si défaut pièce d'origine."},
-basse12:{origin:"Réseau 12V (batterie, cosse, DC-DC, masse).",mech:"Résistance de contact → effet Joule → arc / chute de tension.",roots:["Serrage / corrosion cosse","Batterie vieillissante","Défaut DC-DC / alternateur"],cons:["Arc / explosion H2","Immobilisation","Feu local près batterie"],sym:["Voyant batterie","Démarrage impossible","P0562"],dtc:["P0562","P0560"],idx:["Sulfate / cosse fondue","Test chute tension","Test charge"],act:["Nettoyage / serrage cosse","Test batterie / alternateur","Contrôle masse"],legal:"Entretien / pose ; vice caché si défaut régulateur / DC-DC."},
-ht:{origin:"Pack haute tension / cellules / BMS.",mech:"Court interne / surchauffe → emballement thermique (runaway) selon chimie.",roots:["Défaut cellule / séparateur","Choc / déformation","Surcharge / immersion"],cons:["Jet-fire / gaz toxiques HF","Ré-ignition 24–72 h","Propagation module à module"],sym:["Voyant HT","Codes isolation","Gonflement pack"],dtc:["P0AA6","P0A7D"],idx:["Logs BMS pré-feu","Suie interne pack","Caméra thermique"],act:["Mise en sécurité HT","Surveillance thermique 24–72 h","Expertise pack / cellules"],legal:"Produit défectueux L421-3 ; rappel si campagne ; cause externe si choc documenté."},
-charge:{origin:"Charge AC/DC, OBC, contacteurs, broches, wallbox.",mech:"Résistance de contact / arc DC → échauffement trappe / électronique.",roots:["Contamination broches","Relais soudé / fatigue","Défaut installation wallbox"],cons:["Feu trappe charge → pack","Fonte connectique","Défaut isolement"],sym:["Charge interrompue","Odeur brûlé trappe","Codes isolation"],dtc:["P0AA6"],idx:["Broches picotées","Contacteurs soudés","Logs borne"],act:["Contrôle connectique","Test isolement","Contrôle installation wallbox"],legal:"Installation tierce responsable si défaut pose ; véhicule = rappel si défaut série."},
-freins:{origin:"Freins à disque / étrier / pneu.",mech:"Frottement prolongé → disque 600–900 °C → échauffement pneu / graisse.",roots:["Étrier grippé","Descente sans frein moteur","Usage intensif"],cons:["Feu roue → passage roue → habitacle","Fonte disque / plaquette","Perte efficacité freinage"],sym:["Odeur frein brûlé","Vibration","Fumée roue"],dtc:["—"],idx:["Disque bleui","Pneu fondu côté intérieur","Départ zone roue"],act:["Contrôle étrier / coulisseaux","Remplacement disques/plaquettes","Contrôle flexibles"],legal:"Usage / entretien ; vice caché si étrier défectueux."},
-faisceau:{origin:"Faisceau électrique / connectique / masse.",mech:"Gaine agressée → court à la masse → arc > 2000 °C / perles primaires.",roots:["Frottement / rongeurs","Réparation aftermarket","Vibrations / chaleur"],cons:["Feu faisceau → fluides voisins","Fonte connectique","Pannes multiples"],sym:["Odeur isolant brûlé","Pannes intermittentes","Fusibles fondus"],dtc:["—"],idx:["Perles cuivre brillantes","Œillet fondu","Marques dents / nid"],act:["Réfection faisceau / protection","Contrôle masses","Dépose repose protégée"],legal:"Réparation / aftermarket = cause ; vice caché si défaut d'origine."},
-gpl:{origin:"Circuit GPL (réservoir, multivalve, injecteurs gaz).",mech:"Fuite gaz lourd → nappe au sol → flash retour réservoir.",roots:["Étanchéité multivalve","Remplissage > 80 %","Rétrofit non conforme"],cons:["Boule de feu / souffle","Dommages coffre / soubassement","Risque explosion en zone confinée"],sym:["Odeur gaz","Givre vanne","Démarrage difficile"],dtc:["—"],idx:["Irisation sol","Givre vanne","Souffle arrière"],act:["Test étanchéité installation","Contrôle multivalve","Conformité rétrofit"],legal:"Installateur responsable si rétrofit non conforme ; usine = rappel."},
-habitacle:{origin:"Habitacle (sièges, mousse PU, console, USB, 12V).",mech:"Pyrolyse lente / couvaison → flamme siège / console.",roots:["Mégot vide-poche","Chargeur USB bas de gamme","Résistance siège chauffant"],cons:["Feu siège → plafond / tableau de bord","Fumées toxiques CO/HCN","Propagation rapide en espace clos"],sym:["Odeur brûlé tissu","Fumée habitacle","Prise fondue"],dtc:["—"],idx:["V-pattern siège","Mousse charbonnée","Prise fondue"],act:["Conservation traces","Analyse origine externe","Contrôle chargeurs / résistances"],legal:"Cause externe usager ; exclut vice caché sauf défaut résistance."},
-transmission:{origin:"Boîte de vitesses, mécatronic, embrayage, volant moteur.",mech:"Usure / pression huile ATF / défaut commande → à-coups / patinage / casse.",roots:["Entretien ATF","Charge / usage","Défaut mécatronic / actionneur"],cons:["Perte motricité","Casse boîte / débris","Surchauffe huile ATF"],sym:["À-coups","Patinage","Voyant boîte"],dtc:["P0700","P17BF"],idx:["Limaille huile ATF","Analyse huile","Défauts actionneurs"],act:["Vidange ATF selon spec","Diagnostic actionneurs","Remplacement mécatronic si défaut"],legal:"Entretien / usage ; vice caché si défaut d'origine."},
-generic:{origin:"Système technique du véhicule sollicité par le mot-clé.",mech:"Dégradation progressive ou brutale d'un organe sous contrainte thermique, mécanique ou chimique.",roots:["Entretien / spécification fluide","Défaut de pièce / conception","Usage / environnement"],cons:["Perte de fonction","Dégradation en cascade","Risque thermique / sécurité"],sym:["Voyant / bruit / fuite","Perte de performance","Odeur / fumée anormale"],dtc:["—"],idx:["Lecture DTC + paramètres","Contrôle visuel / mesures","Historique entretien"],act:["Diagnostic ciblé","Mesures conservatoires","Contrôle après réparation"],legal:"Qualification à affiner selon antériorité, défaut d'origine et entretien."}
+distribution:{origin:"Organe de synchronisation moteur.",mechanism:"Usure, décalage de calage ou rupture de transmission du mouvement.",roots:["Entretien/tension/alignement","Qualité pièce ou lubrification","Âge/kilométrage/contraintes thermiques"],consequences:["Déphasage AAC/vilebrequin","Contact soupapes/pistons si interférentiel","Débris vers lubrification"],symptoms:["Bruits métalliques","Démarrage difficile","P0016/P0017"],dtc:["P0016","P0017"],evidence:["Repères calage","Tension/usure courroie","Débris carter"],tests:["Contrôle calage gabarit","Compression/étanchéité","Inspection débris"],actions:["Remplacement kit selon préconisation","Contrôle pression huile"],safety:["Arrêt moteur si bruit anormal ou voyant huile"],legal:"Entretien opposable ; vice caché/produit défectueux si défaut d'origine."},
+lubrification:{origin:"Circuit de lubrification moteur.",mechanism:"Colmatage, pompage insuffisant ou huile dégradée → rupture film d'huile.",roots:["Crépine obstruée","Huile non conforme/diluée","Pompe à huile usée"],consequences:["Coussinets/turbo/AAC endommagés","Serrage moteur","Perte assistance vide"],symptoms:["Voyant huile","Claquement","P0521/P0522"],dtc:["P0521","P0522","P0523"],evidence:["Pression huile basse","Débris/crépine","Analyse huile"],tests:["Mesure pression huile","Dépose crépine","Analyse huile"],actions:["Nettoyage circuit","Remplacement pompe/crépine","Huile spécification exacte"],safety:["Arrêt immédiat si pression huile insuffisante"],legal:"Entretien ; vice caché si défaut conception lubrification."},
+injection:{origin:"Circuit carburant haute pression.",mechanism:"Perte étanchéité ou pulvérisation défaut → aérosol / mauvais mélange.",roots:["Joint/raccord défectueux","Qualité carburant/filtration","Vibrations/réparation"],consequences:["Fuite sur chaud → flash","Ratés → surchauffe cata","Perte puissance"],symptoms:["Odeur carburant","Claquement","P0087"],dtc:["P0087","P0089","P0190"],evidence:["Test étanchéité HP","Résidus rampe","Correction débit"],tests:["Pression rampe","Test injecteurs","Inspection lignes"],actions:["Remplacer joints/raccords","Nettoyage sécurisé"],safety:["Pas de démarrage si fuite active"],legal:"Défaut fabrication L421-3 ; vice caché si antérieur."},
+echappement:{origin:"Ligne échappement / catalyseur / FAP.",mechanism:"Surchauffe par post-combustion ou rayonnement vers combustible.",roots:["Régénération/post-injection","Mélange pauvre/ratés","Écran thermique dégradé"],consequences:["Feu sous caisse","Fonte boucliers/faisceaux","Perte dépollution"],symptoms:["Odeur brûlé","Fumée","P2463"],dtc:["P2463","P244A","P0420","P0300"],evidence:["Coloration thermique","Végétation carbonisée","Logs regen"],tests:["Logs régénération","Inspection écrans","Contrôle ratés"],actions:["Restaurer écrans","Contrôle FAP/cata"],safety:["Éviter végétation sèche"],legal:"Usage/conseil L421-2 ; origine externe documentée."},
+egr:{origin:"Vanne/refroidisseur EGR.",mechanism:"Encrassement calamine ou fuite glycol → débit défaut / dépôts.",roots:["Suies/cycles thermiques","Qualité LDR","Usage urbain"],consequences:["Perte puissance/fumées","Perte LDR → surchauffe","Risque feu si glycol sur chaud"],symptoms:["Fumée","Baisse LDR","P0400"],dtc:["P0400","P0401","P0402"],evidence:["Traces glycol","Dépôts admission","Test étanchéité"],tests:["Test étanchéité échangeur","Contrôle débit EGR"],actions:["Nettoyage/remplacement","Contrôle LDR"],safety:["Surveiller température si fuite LDR"],legal:"Vice caché/produit défectueux ; rappel si campagne."},
+adblue:{origin:"Système SCR/AdBlue.",mechanism:"Cristallisation urée / dosage défaut → obstruction / dépollution.",roots:["Qualité AdBlue/stockage","Cycles thermiques","Pompe/capteur NOx"],consequences:["Mode dégradé / anti-démarrage","Défaut dépollution","Fuite urée corrosive"],symptoms:["Voyant SCR","Cristaux blancs","P20EE"],dtc:["P20EE","P204F","P20E8"],evidence:["Cristaux injecteur","Débit pompe","Capteurs NOx"],tests:["Test débit","Contrôle capteurs"],actions:["Nettoyage/remplacement injecteur","Calibration"],safety:["Produit corrosif : protection"],legal:"Entretien/qualité produit ; vice caché si défaut origine."},
+turbo:{origin:"Turbo / circuit suralimentation.",mechanism:"Défaut lubrification ou fuite huile sur chaud → grippage / inflammation.",roots:["Pression huile/crépine","Joint/reniflard","Arrêts à chaud"],consequences:["Casse turbo → débris admission","Feu baie moteur","Perte puissance"],symptoms:["Sifflement","Fumée bleue","Odeur huile"],dtc:["P0299","P0234"],evidence:["Jeu axial/radial","Huile dans échangeur","Pression huile"],tests:["Contrôle jeu","Test pression huile"],actions:["Remplacement turbo si jeu","Réparation fuite"],safety:["Arrêt si fumée huile importante"],legal:"Entretien/lubrification ; vice caché si défaut pièce."},
+refroidissement:{origin:"Circuit refroidissement.",mechanism:"Perte circulation/fuite → élévation thermique non maîtrisée.",roots:["Fuite/niveau LDR","Pompe/thermostat","GMV/radiateur"],consequences:["Joint de culasse","Grippage","Glycol sur chaud → feu"],symptoms:["Température haute","Odeur sucrée","P0217"],dtc:["P0217","P0128"],evidence:["Pression circuit","Traces fuite","Test thermostat"],tests:["Test étanchéité","Test GMV"],actions:["Remplacer pompe/thermostat","Purge"],safety:["Arrêt si surchauffe"],legal:"Entretien ; vice caché si défaut pièce."},
+basse12:{origin:"Réseau 12V.",mechanism:"Résistance contact → effet Joule → arc / chute tension.",roots:["Serrage/corrosion","Batterie vieillissante","DC-DC/alternateur"],consequences:["Arc/explosion H2","Immobilisation","Feu local"],symptoms:["Voyant batterie","Démarrage impossible","P0562"],dtc:["P0562","P0560"],evidence:["Cosse fondue/sulfate","Chute tension","Test charge"],tests:["Test batterie","Test alternateur/DC-DC"],actions:["Nettoyage/serrage cosse","Contrôle masses"],safety:["Ventilation battery / pas d'étincelle"],legal:"Entretien/pose ; vice caché si défaut régulateur."},
+ht:{origin:"Pack HT / cellules / BMS.",mechanism:"Court interne / surchauffe → emballement thermique selon chimie.",roots:["Défaut cellule/séparateur","Choc/déformation","Surcharge/immersion"],consequences:["Jet-fire / gaz HF","Ré-ignition","Propagation modules"],symptoms:["Voyant HT","Codes isolation","Gonflement"],dtc:["P0AA6","P0A7D"],evidence:["Logs BMS","Suie interne","Caméra thermique"],tests:["Mise en sécurité HT","Surveillance thermique"],actions:["Isolement stockage","Expertise pack"],safety:["Distance / protocole HT"],legal:"Produit défectueux L421-3 ; rappel ; cause externe si choc."},
+charge:{origin:"Charge AC/DC / OBC / wallbox.",mechanism:"Résistance contact / arc DC → échauffement trappe / électronique.",roots:["Contamination broches","Relais soudé","Défaut wallbox"],consequences:["Feu trappe → pack","Fonte connectique","Défaut isolement"],symptoms:["Charge interrompue","Odeur brûlé","Codes isolation"],dtc:["P0AA6"],evidence:["Broches picotées","Contacteurs soudés","Logs borne"],tests:["Contrôle connectique","Test isolement"],actions:["Remplacement connectique","Contrôle installation"],safety:["Couper charge avant inspection"],legal:"Installation tierce responsable ; véhicule = rappel si défaut série."},
+freins:{origin:"Freins / roue / pneu.",mechanism:"Frottement prolongé → disque chaud → échauffement pneu/graisse.",roots:["Étrier grippé","Descente sans frein moteur","Surcharge"],consequences:["Feu roue → habitacle","Perte freinage"],symptoms:["Odeur frein","Vibration","Fumée roue"],dtc:[],evidence:["Disque bleui","Pneu fondu intérieur","Départ roue"],tests:["Contrôle étrier/coulisseaux","Test roulement"],actions:["Remplacement disques/plaquettes","Contrôle flexibles"],safety:["Ne pas stationner sur combustible après descente"],legal:"Usage/entretien ; vice caché si étrier défectueux."},
+faisceau:{origin:"Faisceau / connectique / masse.",mechanism:"Gaine agressée → court masse → arc / perles primaires.",roots:["Frottement/rongeurs","Réparation aftermarket","Vibrations/chaleur"],consequences:["Feu faisceau → fluides voisins","Fonte connectique","Pannes multiples"],symptoms:["Odeur isolant","Pannes intermittentes","Fusibles fondus"],dtc:[],evidence:["Perles cuivre","Œillet fondu","Marques dents/nid"],tests:["Inspection visuelle","Contrôle continuité/isolement"],actions:["Réfection protégée","Contrôle masses"],safety:["Déconnecter batterie avant intervention"],legal:"Réparation/aftermarket ; vice caché si défaut origine."},
+gpl:{origin:"Circuit GPL.",mechanism:"Fuite gaz lourd → nappe → flash retour réservoir.",roots:["Étanchéité multivalve","Remplissage >80%","Rétrofit non conforme"],consequences:["Boule de feu/souffle","Dommages coffre/soubassement"],symptoms:["Odeur gaz","Givre vanne"],dtc:[],evidence:["Irisation sol","Givre vanne","Souffle arrière"],tests:["Test étanchéité","Conformité rétrofit"],actions:["Réparation multivalve/lignes"],safety:["Ventilation / pas d'étincelle"],legal:"Installateur responsable si rétrofit non conforme ; usine = rappel."},
+habitacle:{origin:"Habitacle / mousse / console.",mechanism:"Pyrolyse lente / couvaison → flamme siège/console.",roots:["Mégot","Chargeur USB bas de gamme","Résistance siège"],consequences:["Feu siège → plafond","Fumées CO/HCN"],symptoms:["Odeur tissu brûlé","Fumée habitacle"],dtc:[],evidence:["V-pattern siège","Mousse charbonnée","Prise fondue"],tests:["Conservation traces","Contrôle chargeurs/résistances"],actions:["Analyse origine externe"],safety:["Évacuation / fumées toxiques"],legal:"Cause externe usager ; vice caché seulement si défaut résistance."},
+transmission:{origin:"Boîte / mécatronic / embrayage.",mechanism:"Usure / pression ATF / commande défaut → patinage / casse.",roots:["Entretien ATF","Usage intensif","Mécatronic/actionneur"],consequences:["Perte motricité","Débris métalliques","Surchauffe ATF"],symptoms:["À-coups","Patinage","Voyant boîte"],dtc:["P0700","P17BF"],evidence:["Limaille ATF","Défauts actionneurs"],tests:["Analyse huile","Diagnostic actionneurs"],actions:["Vidange ATF spec","Remplacement mécatronic"],safety:["Éviter roulage si patinage sévère"],legal:"Entretien/usage ; vice caché si défaut origine."},
+generic:{origin:"Système technique sollicité par le mot-clé.",mechanism:"Dégradation progressive ou brutale sous contrainte thermique, mécanique ou chimique.",roots:["Entretien/spécification fluide","Défaut pièce/conception","Usage/environnement"],consequences:["Perte fonction","Dégradation cascade","Risque thermique/sécurité"],symptoms:["Voyant/bruit/fuite","Perte performance","Odeur/fumée"],dtc:[],evidence:["DTC + paramètres","Contrôle visuel/mesures","Historique entretien"],tests:["Diagnostic ciblé","Mesures conservatoires","Contrôle après réparation"],actions:["Diagnostic ciblé","Mesures conservatoires"],safety:["Mise en sécurité avant essai"],legal:"Qualification à affiner selon antériorité, défaut origine, entretien."}
 };
 
+var METHOD=[
+["Qualifier","Symptôme, système, énergie, zone, conditions d'apparition."],
+["Étendre","Aliases, motorisations, DTC, mécanismes, pannes connues."],
+["Observer","Traces, fuites, débris, coloration, logs, mesures."],
+["Mécanisme","Chaîne physique/chimique reliant cause et effet."],
+["Comparer","Pannes connues, campagnes, cas similaires, alternatives."],
+["Tester","Mesures, étanchéité, pression, isolement, logs, analyse fluide."],
+["Éliminer","Hypothèses alternatives non compatibles avec les preuves."],
+["Conclure","Certain / probable / possible / indéterminé + limites."]
+];
+var EVIDENCE=[
+["Certain","Preuves convergentes + mécanisme compatible + alternatives éliminées.","Cause établie avec éléments objectifs concordants."],
+["Probable","Faisceau d'indices cohérent, mesure/log disponible, alternative moins probable.","Cause probable au vu des éléments disponibles."],
+["Possible","Mécanisme plausible mais preuves partielles ou non discriminantes.","Hypothèse possible nécessitant vérification complémentaire."],
+["Indéterminé","Données insuffisantes ou traces détruites/ambiguës.","Origine indéterminée en l'état des éléments transmis."]
+];
+var DTC=[
+{code:"P0016",txt:"Corrélation vilebrequin/AAC — calage décalé.",q:"courroie distribution"},
+{code:"P0017",txt:"Corrélation vilebrequin/AAC échappement.",q:"courroie distribution"},
+{code:"P0521",txt:"Pression huile — portée/performance.",q:"crepine huile lubrification"},
+{code:"P0522",txt:"Pression huile signal bas.",q:"crepine huile"},
+{code:"P0087",txt:"Pression rampe carburant trop basse.",q:"injection fuite"},
+{code:"P0217",txt:"Surchauffe moteur.",q:"surchauffe refroidissement"},
+{code:"P2463",txt:"FAP accumulation suie.",q:"fap regeneration"},
+{code:"P0420",txt:"Rendement catalyseur sous seuil.",q:"catalyseur"},
+{code:"P0AA6",txt:"Défaut isolement HT.",q:"ht isolation obc"},
+{code:"P0562",txt:"Tension 12V basse.",q:"12v batterie"},
+{code:"P20EE",txt:"Efficacité SCR NOx sous seuil.",q:"adblue scr"},
+{code:"P0400",txt:"Débit EGR incorrect.",q:"egr"}
+];
+var PORTALS=[
+["RappelConso","Rappels officiels France","https://rappel.conso.gouv.fr/"],
+["NHTSA Recalls","Rappels constructeurs US","https://www.nhtsa.gov/recalls"],
+["Safety Gate UE","Alertes produits dangereux","https://ec.europa.eu/safety-gate-alerts/screen/search"],
+["Légifrance","Textes juridiques français","https://www.legifrance.gouv.fr/"]
+];
+
 function sysLabel(id){var s=SYSTEMS.find(function(x){return x.id===id;});return s?s.label:id;}
-function sevClass(s){return norm(s).indexOf("crit")>=0?"sev":(norm(s).indexOf("eleve")>=0?"sev":"");}
+function sevRank(s){s=norm(s);return s.indexOf("crit")>=0?3:s.indexOf("elev")>=0?2:s.indexOf("mod")>=0?1:0;}
+function computeKB(){
+  var map={};
+  baseKB.forEach(function(e){map[e.id]=e;});
+  Object.keys(local.overrides||{}).forEach(function(id){map[id]=local.overrides[id];});
+  var arr=Object.keys(map).map(function(id){return map[id];}).filter(function(e){return e&&!local.deleted[e.id];});
+  var order=local.order||[];
+  arr.sort(function(a,b){
+    var ia=order.indexOf(a.id),ib=order.indexOf(b.id);
+    if(ia>=0&&ib>=0)return ia-ib;
+    if(ia>=0)return -1;
+    if(ib>=0)return 1;
+    return (b.priority||50)-(a.priority||50)||a.title.localeCompare(b.title,"fr");
+  });
+  return arr;
+}
+function saveLocal(){store("eik-local",local);}
+function refreshKB(){KB=computeKB();rebuildIndex();fillFilters();renderLibrary();renderStats();}
 function expandQuery(q){
   var tokens=norm(q).split(/[^a-z0-9]+/).filter(function(t){return t.length>1;});
   var terms=tokens.slice(),chips=[];
-  tokens.forEach(function(tk){Object.keys(EXPAND).forEach(function(key){var k=norm(key);
-    if(tk===k||(tk.length>3&&k.indexOf(tk)===0)||(k.length>3&&tk.indexOf(k)===0)){EXPAND[key].forEach(function(e){var n=norm(e);if(terms.indexOf(n)<0){terms.push(n);if(chips.indexOf(e)<0)chips.push(e);}});}
-  });});
+  tokens.forEach(function(tk){
+    Object.keys(EXPAND).forEach(function(key){
+      var k=norm(key);
+      if(tk===k||(tk.length>3&&k.indexOf(tk)===0)||(k.length>3&&tk.indexOf(k)===0)){
+        EXPAND[key].forEach(function(e){var n=norm(e);if(terms.indexOf(n)<0){terms.push(n);if(chips.indexOf(e)<0)chips.push(e);}});
+      }
+    });
+  });
   return {terms:uniq(terms),chips:chips.slice(0,14)};
 }
-function kbBody(e){return [e.t,e.sys,e.en,e.zone,(e.kw||[]).join(" "),(e.eng||[]).join(" "),e.origin,e.mech,(e.roots||[]).join(" "),(e.cons||[]).join(" "),e.legal].join(" ");}
+function recordBody(e){return [e.title,e.system,e.energy,e.zone,e.mode,(e.keywords||[]).join(" "),(e.engines||[]).join(" "),e.origin,e.mechanism,(e.roots||[]).join(" "),(e.consequences||[]).join(" "),(e.symptoms||[]).join(" "),(e.dtc||[]).join(" "),e.legal].join(" ");}
 function inferSystem(terms){
   var best={id:"generic",score:0};
-  SYSTEMS.forEach(function(s){var sc=0;(s.kw||[]).forEach(function(k){var kn=norm(k);terms.forEach(function(t){if(kn===t||kn.indexOf(t)>=0||t.indexOf(kn)>=0)sc+=3;});});if(sc>best.score)best={id:s.id,score:sc};});
+  SYSTEMS.forEach(function(s){
+    var sc=0;
+    (s.kw||[]).forEach(function(k){var kn=norm(k);terms.forEach(function(t){if(kn===t||kn.indexOf(t)>=0||t.indexOf(kn)>=0)sc+=3;});});
+    if(sc>best.score)best={id:s.id,score:sc};
+  });
   return best.id;
 }
 function analyze(q){
   var ex=expandQuery(q),terms=ex.terms;
   var scored=KB.map(function(e){
-    var sc=0,kw=(e.kw||[]).map(norm),body=norm(kbBody(e)),ti=norm(e.t),eng=(e.eng||[]).map(norm);
+    var sc=0,coverage=0,kw=(e.keywords||[]).map(norm),body=norm(recordBody(e)),ti=norm(e.title),eng=(e.engines||[]).map(norm);
     terms.forEach(function(t){
-      if(kw.some(function(k){return k===t||k.indexOf(t)>=0||t.indexOf(k)>=0;}))sc+=30;
-      if(ti.indexOf(t)>=0)sc+=22;
-      if(norm(e.sys)===t)sc+=16;
-      if(eng.some(function(x){return x.indexOf(t)>=0;}))sc+=14;
-      if(body.indexOf(t)>=0)sc+=6;
+      var hit=false;
+      if(kw.some(function(k){return k===t||k.indexOf(t)>=0||t.indexOf(k)>=0;})){sc+=34;hit=true;}
+      if(ti.indexOf(t)>=0){sc+=24;hit=true;}
+      if(norm(e.system)===t){sc+=16;hit=true;}
+      if(eng.some(function(x){return x.indexOf(t)>=0;})){sc+=16;hit=true;}
+      if(body.indexOf(t)>=0){sc+=7;hit=true;}
+      if(hit)coverage++;
     });
-    return {e:e,sc:sc+(e.prio||0)/10};
+    return {e:e,sc:sc+(e.priority||0)/10,coverage:coverage};
   }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;});
-  var related=scored.slice(1,4).map(function(x){return x.e;});
-  if(scored.length&&scored[0].sc>=25){
-    var e=scored[0].e;
-    return {known:true,query:q,title:e.t,sys:e.sys,sysLabel:sysLabel(e.sys),en:e.en||"Thermique",sev:e.sev||"Élevé",confidence:"Base locale — panne connue",origin:e.origin,mech:e.mech,roots:e.roots||[],cons:e.cons||[],sym:e.sym||[],dtc:e.dtc||[],idx:e.idx||[],act:e.act||[],legal:e.legal||"",src:e.src||[],rel:related,eng:e.eng||[],id:e.id};
+  var top=scored[0],alts=scored.slice(1,4).map(function(x){return x.e;});
+  if(top&&top.sc>=40&&top.coverage>=1){
+    var e=top.e;
+    var level=top.coverage>=3&&top.sc>=90?"Probable à élevé":top.coverage>=2?"Probable":"Possible";
+    return {known:true,query:q,title:e.title,system:e.system,systemLabel:sysLabel(e.system),energy:e.energy||"Thermique",severity:e.severity||"Élevé",level:level,score:Math.round(top.sc),confidence:"Base locale — panne connue documentée",origin:e.origin,mechanism:e.mechanism,roots:e.roots||[],consequences:e.consequences||[],symptoms:e.symptoms||[],dtc:e.dtc||[],evidence:e.evidence||[],tests:e.tests||[],actions:e.actions||[],safety:e.safety||[],legal:e.legal||"",sources:e.sources||[],related:alts,engines:e.engines||[],id:e.id};
   }
   var sid=inferSystem(terms),g=GENERIC[sid]||GENERIC.generic;
-  return {known:false,query:q,title:"Orientation générique — "+sysLabel(sid),sys:sid,sysLabel:sysLabel(sid),en:"Tous",sev:"À confirmer",confidence:"Orientation générique — diagnostic à confirmer",origin:g.origin,mech:g.mech,roots:g.roots,cons:g.cons,sym:g.sym,dtc:g.dtc,idx:g.idx,act:g.act,legal:g.legal,src:[{label:"RappelConso",url:"https://rappel.conso.gouv.fr/"},{label:"NHTSA",url:"https://www.nhtsa.gov/recalls"}],rel:KB.filter(function(e){return e.sys===sid;}).slice(0,3),eng:[],id:"generic-"+sid};
+  return {known:false,query:q,title:"Orientation générique — "+sysLabel(sid),system:sid,systemLabel:sysLabel(sid),energy:"Tous",severity:"À confirmer",level:"Possible / indéterminé",score:0,confidence:"Hypothèse générique — diagnostic à confirmer",origin:g.origin,mechanism:g.mechanism,roots:g.roots,consequences:g.consequences,symptoms:g.symptoms,dtc:g.dtc,evidence:g.evidence,tests:g.tests,actions:g.actions,safety:g.safety,legal:g.legal,sources:[{label:"RappelConso",url:"https://rappel.conso.gouv.fr/"},{label:"NHTSA",url:"https://www.nhtsa.gov/recalls"}],related:KB.filter(function(e){return e.system===sid;}).slice(0,3),engines:[],id:"generic-"+sid};
 }
-function detailCard(title,arr,cls){var a=listify(arr).filter(Boolean);if(!a.length)return "";return '<div class="detail"><h4>'+esc(title)+'</h4><ul>'+a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul></div>';}
+function detailCard(title,arr){var a=listify(arr);if(!a.length)return "";return '<div class="detail"><h4>'+esc(title)+'</h4><ul>'+a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul></div>';}
 function renderAnalysis(a){
   currentAnalysis=a;
-  var chain=[{k:"Origine",v:a.origin,c:"o"},{k:"Mécanisme",v:a.mech,c:"m"},{k:"Causes racines",l:a.roots,c:"r"},{k:"Conséquences",l:a.cons,c:"c"},{k:"Actions",l:a.act,c:"a"}];
+  var chain=[{k:"Origine",v:a.origin,c:"o"},{k:"Mécanisme",v:a.mechanism,c:"m"},{k:"Causes racines",l:a.roots,c:"r"},{k:"Conséquences",l:a.consequences,c:"c"},{k:"Actions",l:a.actions,c:"a"}];
   var nodes=chain.map(function(n){return '<div class="node '+n.c+'"><h4>'+esc(n.k)+'</h4>'+(n.v?'<p>'+esc(n.v)+'</p>':'<ul>'+listify(n.l).map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul>')+'</div>';}).join("");
-  var dtcHtml=a.dtc&&a.dtc.length?'<div class="detail"><h4>Codes DTC</h4><div class="chips">'+a.dtc.map(function(x){return '<span class="chip muted">'+esc(x)+'</span>';}).join("")+'</div></div>':"";
-  var sources=(a.src||[]).map(function(s){return '<a href="'+esc(safeUrl(s.url))+'" target="_blank" rel="noopener">'+esc(s.label)+' ↗</a>';}).join("");
-  var related=(a.rel||[]).map(function(e){return '<button data-rel="'+esc(e.id)+'">🔗 '+esc(e.t)+'</button>';}).join("");
-  var engines=a.eng&&a.eng.length?'<div class="analysis-legal"><b>🚘 Motorisations / modèles concernés :</b> '+esc(a.eng.join(" · "))+'</div>':"";
+  var dtcHtml=a.dtc&&a.dtc.length?'<div class="detail"><h4>DTC / marqueurs</h4><div class="chips">'+a.dtc.map(function(x){return '<span class="chip muted">'+esc(x)+'</span>';}).join("")+'</div></div>':"";
+  var sources=(a.sources||[]).map(function(s){return '<a href="'+esc(safeUrl(s.url))+'" target="_blank" rel="noopener">'+esc(s.label)+' ↗</a>';}).join("");
+  var related=(a.related||[]).map(function(e){return '<button data-rel="'+esc(e.id)+'">🔗 '+esc(e.title)+'</button>';}).join("");
+  var engines=a.engines&&a.engines.length?'<div class="analysis-note"><b>🚘 Motorisations / modèles :</b> '+esc(a.engines.join(" · "))+'</div>':"";
+  var safety=a.safety&&a.safety.length?'<div class="analysis-note warn"><b>🛡️ Sécurité immédiate :</b> '+esc(a.safety.join(" · "))+'</div>':"";
   $("#analysisResult").innerHTML=
-    '<div class="analysis-head"><div><div class="eyebrow">'+(a.known?"🧠 Panne connue identifiée":"🧭 Orientation générique")+'</div><h3>'+esc(a.title)+'</h3><div class="tags"><span class="tag">'+esc(a.sysLabel)+'</span><span class="tag">'+esc(a.en)+'</span><span class="tag sev">'+esc(a.sev)+'</span><span class="tag">'+esc(a.confidence)+'</span></div></div><div class="analysis-actions"><button data-aa="present">📽️ Présenter</button><button data-aa="copy">📋 Copier</button><button data-aa="print">🖨️ Imprimer</button><button data-aa="share">↗ Partager</button></div></div>'+
-    engines+'<div class="chain">'+nodes+'</div><div class="analysis-details">'+detailCard("Symptômes rencontrés",a.sym)+dtcHtml+detailCard("Indices à vérifier",a.idx)+'</div><div class="analysis-legal"><b>⚖️ Qualification juridique :</b> '+esc(a.legal)+'</div><div class="analysis-sources">'+sources+'</div>'+(related?'<div class="analysis-related">'+related+'</div>':'');
+    '<div class="analysis-head"><div><div class="eyebrow">'+(a.known?"🧠 Panne connue identifiée":"🧭 Orientation générique")+'</div><h3>'+esc(a.title)+'</h3><div class="tags"><span class="tag">'+esc(a.systemLabel)+'</span><span class="tag">'+esc(a.energy)+'</span><span class="tag sev">'+esc(a.severity)+'</span><span class="tag ok">'+esc(a.confidence)+'</span></div></div><div class="analysis-actions"><button data-aa="present">📽️ Présenter</button><button data-aa="copy">📋 Copier</button><button data-aa="print">🖨️ Imprimer</button><button data-aa="share">↗ Partager</button></div></div>'+
+    '<div class="verdict"><div><b>Niveau preuve</b><span>'+esc(a.level)+'</span></div><div><b>Score moteur</b><span>'+esc(a.score)+'</span></div><div><b>Système</b><span>'+esc(a.systemLabel)+'</span></div><div><b>Gravité</b><span>'+esc(a.severity)+'</span></div></div>'+
+    engines+safety+'<div class="chain">'+nodes+'</div><div class="analysis-details">'+detailCard("Symptômes rencontrés",a.symptoms)+dtcHtml+detailCard("Preuves attendues / indices",a.evidence)+detailCard("Plan de vérification / tests",a.tests)+'</div><div class="analysis-note"><b>⚖️ Orientation juridique :</b> '+esc(a.legal)+'</div><div class="analysis-sources">'+sources+'</div>'+(related?'<div class="analysis-related">'+related+'</div>':'');
 }
 function analysisText(a){
-  return "ANALYSE TECHNIQUE — ÉTUDE INCENDIE BY KEVIN\n\nMot-clé : "+a.query+"\nRésultat : "+a.title+"\nNiveau : "+a.confidence+"\n\n1) ORIGINE\n"+a.origin+"\n\n2) MÉCANISME\n"+a.mech+"\n\n3) CAUSES RACINES\n"+(a.roots||[]).map(function(x){return "• "+x;}).join("\n")+"\n\n4) CONSÉQUENCES\n"+(a.cons||[]).map(function(x){return "• "+x;}).join("\n")+"\n\n5) SYMPTÔMES\n"+(a.sym||[]).map(function(x){return "• "+x;}).join("\n")+"\n\n6) DTC\n"+(a.dtc||[]).join(", ")+"\n\n7) INDICES À VÉRIFIER\n"+(a.idx||[]).map(function(x){return "• "+x;}).join("\n")+"\n\n8) ACTIONS CORRECTIVES\n"+(a.act||[]).map(function(x){return "• "+x;}).join("\n")+"\n\n9) JURIDIQUE\n"+a.legal+"\n\nSources : "+(a.src||[]).map(function(s){return s.label+" — "+s.url;}).join(" | ");
+  function block(t,arr){return t+"\n"+listify(arr).map(function(x){return "• "+x;}).join("\n");}
+  return "ANALYSE TECHNIQUE — ÉTUDE INCENDIE BY KEVIN\n\nMot-clé : "+a.query+"\nRésultat : "+a.title+"\nNiveau : "+a.level+" · "+a.confidence+"\n\n"+block("1) ORIGINE",[a.origin])+"\n\n"+block("2) MÉCANISME",[a.mechanism])+"\n\n"+block("3) CAUSES RACINES",a.roots)+"\n\n"+block("4) CONSÉQUENCES",a.consequences)+"\n\n"+block("5) SYMPTÔMES",a.symptoms)+"\n\nDTC : "+(a.dtc||[]).join(", ")+"\n\n"+block("6) PREUVES ATTENDUES",a.evidence)+"\n\n"+block("7) PLAN DE VÉRIFICATION",a.tests)+"\n\n"+block("8) ACTIONS",a.actions)+"\n\n"+block("9) SÉCURITÉ",a.safety)+"\n\n10) JURIDIQUE\n"+a.legal+"\n\nSources : "+(a.sources||[]).map(function(s){return s.label+" — "+s.url;}).join(" | ");
 }
 function runAnalysis(q,scroll){
   q=String(q||"").trim();if(q.length<2){toast("Saisissez un mot-clé à analyser");return;}
   $("#aInput").value=q;renderAnalysis(analyze(q));
-  if(scroll!==false){location.hash="#analyse";setTimeout(function(){$("#analysisResult").scrollIntoView({behavior:"smooth",block:"start"});},80);}
+  if(scroll!==false){location.hash="#analyse";setTimeout(function(){var el=$("#analysisResult");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},80);}
 }
 function rebuildIndex(){
   INDEX=[];
-  KB.forEach(function(e){INDEX.push({g:"kb",id:e.id,title:e.t,sub:sysLabel(e.sys)+" · "+(e.en||"")+" · "+(e.sev||""),body:kbBody(e),keys:(e.kw||[]).join(" "),ref:e});});
-  DTC.forEach(function(d){INDEX.push({g:"dtc",id:d.code,title:d.code+" — "+d.txt,sub:"Code défaut · "+sysLabel(d.sys),body:d.q,keys:d.sys,ref:d});});
-  LEGAL.forEach(function(l){INDEX.push({g:"legal",id:l.code,title:l.code+" — "+l.txt,sub:"Référence juridique",body:l.q,keys:"juridique",ref:l});});
-  METHOD.forEach(function(m,i){INDEX.push({g:"tech",id:"m"+i,title:m[0],sub:"NFPA 921 · étape "+(i+1),body:m[1],keys:"methode nfpa",ref:m});});
-  ZONES.forEach(function(z,i){INDEX.push({g:"tech",id:"z"+i,title:z[0],sub:"Zone véhicule",body:z[1]+" "+z[2],keys:"zone",ref:z});});
-  PHENOM.forEach(function(p,i){INDEX.push({g:"tech",id:"p"+i,title:p[0],sub:"Phénomène thermique",body:p[1],keys:"chimie feu",ref:p});});
-  FUSION.forEach(function(f,i){INDEX.push({g:"tech",id:"f"+i,title:f[0]+" — fusion "+f[1]+" °C",sub:"Cartographie de fusion",body:f[2],keys:"fusion temperature materiau",ref:f});});
-  Object.keys(state.refs).forEach(function(k){var r=state.refs[k];INDEX.push({g:"veille",id:r.rid,title:r.title,sub:(r.cat==="juridique"?"⚖️":"🔧")+" Référence admin",body:r.note||"",keys:"veille rappel",ref:r});});
-  $("#statFiches").textContent=KB.length;$("#statKB").textContent=KB.length;
+  KB.forEach(function(e){INDEX.push({g:"record",id:e.id,title:e.title,sub:sysLabel(e.system)+" · "+e.energy+" · "+e.severity,body:recordBody(e),keys:(e.keywords||[]).join(" "),ref:e});});
+  DTC.forEach(function(d){INDEX.push({g:"dtc",id:d.code,title:d.code+" — "+d.txt,sub:"DTC / marqueur",body:d.q,keys:"dtc",ref:d});});
+  METHOD.forEach(function(m,i){INDEX.push({g:"method",id:"m"+i,title:m[0],sub:"Méthode scientifique",body:m[1],keys:"methode preuve",ref:m});});
+  Object.keys(state.refs||{}).forEach(function(k){var r=state.refs[k];INDEX.push({g:"ref",id:r.rid,title:r.title,sub:(r.cat==="juridique"?"⚖️":"🔧")+" Référence admin",body:r.note||"",keys:"veille rappel",ref:r});});
+}
+function renderStats(){
+  $("#statRecords").textContent=KB.length;
+  $("#statSystems").textContent=uniq(KB.map(function(e){return e.system;})).length;
+  $("#statDtc").textContent=uniq(KB.reduce(function(a,e){return a.concat(e.dtc||[]);},[])).length;
 }
 function doSearch(q,scope){
   var ex=expandQuery(q),out=[];
@@ -215,7 +256,7 @@ function doSearch(q,scope){
       else if(ke.indexOf(t)>=0){sc+=10;hits++;}
       else if(bo.indexOf(t)>=0){sc+=5;hits++;}
     });
-    if(d.g==="kb")sc+=8;
+    if(d.g==="record")sc+=8;
     if(hits)out.push({d:d,sc:sc});
   });
   out.sort(function(a,b){return b.sc-a.sc;});
@@ -223,103 +264,186 @@ function doSearch(q,scope){
 }
 function renderSearch(){
   var q=$("#q").value.trim(),scope=$("#qScope").value;
-  if(q.length<2){$("#results").innerHTML="";$("#chips").innerHTML='<span class="chip muted">Suggestions : courroie humide · FAP herbe · runaway LFP · 12V cosse · GPL · freins · EGR glycol · crépine</span>';currentHits=[];active=-1;return;}
+  if(q.length<2){$("#results").innerHTML="";$("#chips").innerHTML='<span class="chip muted">Suggestions : courroie humide · crépine · FAP herbe · runaway LFP · 12V cosse · EGR glycol · charge DC</span>';currentHits=[];active=-1;return;}
   var r=doSearch(q,scope);currentHits=r.hits;active=r.hits.length?0:-1;
   $("#chips").innerHTML=r.ex.chips.length?'<span class="chip muted">🧠 Extension :</span>'+r.ex.chips.map(function(c){return '<button type="button" class="chip" data-chip="'+esc(c)+'">'+esc(c)+'</button>';}).join(""):"";
-  var groups={kb:"🧠 Pannes connues / analyse causale",dtc:"🔧 Codes DTC",legal:"⚖️ Juridique",tech:"🧭 Technique / méthode",veille:"📡 Veille & rappels"};
+  var groups={record:"🧠 Pannes connues / analyse causale",dtc:"🔧 DTC / marqueurs",method:"🧭 Méthode scientifique",ref:"📡 Veille & références"};
   var html="",last="";
-  if(!r.hits.length)html='<div class="empty">Aucun résultat. Essayez « courroie humide », « FAP », « runaway », « 12V », « GPL », « crépine »…</div>';
+  if(!r.hits.length)html='<div class="empty">Aucun résultat. Essayez « courroie humide », « crépine », « FAP », « runaway », « 12V »…</div>';
   r.hits.forEach(function(h,i){
     if(h.d.g!==last){last=h.d.g;html+='<div class="result-group">'+groups[h.d.g]+'</div>';}
     html+='<div class="result'+(i===active?' active':'')+'" data-i="'+i+'"><div><b>'+esc(h.d.title)+'</b><small>'+esc(h.d.sub)+'</small></div><span class="tag">'+Math.round(h.sc)+' pts</span></div>';
   });
   $("#results").innerHTML=html;
 }
+function updateActive(){$all(".result").forEach(function(el,i){el.classList.toggle("active",i===active);});var el=$all(".result")[active];if(el)el.scrollIntoView({block:"nearest"});}
 function openResult(h){
   var d=h.d;
-  if(d.g==="kb"){runAnalysis(d.ref.kw&&d.ref.kw[0]?d.ref.kw[0]:d.ref.t);return;}
-  if(d.g==="dtc")return openDrawer("Code DTC",d.title,'<p>'+esc(d.ref.txt)+'</p><p class="hint">Piste : '+esc(d.ref.q)+'</p>',[{label:"Analyser ce système",fn:function(){closeDrawer();runAnalysis(d.ref.q);}}]);
-  if(d.g==="legal")return openDrawer("Juridique",d.title,'<p>'+esc(d.ref.txt)+'</p>',[{label:"Légifrance ↗",fn:function(){window.open("https://www.legifrance.gouv.fr/search/all?query="+encodeURIComponent(d.ref.q),"_blank","noopener");}}]);
-  if(d.g==="veille"){var u=safeUrl(d.ref.url);if(u!=="#")window.open(u,"_blank","noopener");else location.hash="#veille";return;}
-  openDrawer("Technique",d.title,'<p>'+esc(d.ref[1]||d.ref[2]||"")+'</p>',[]);
+  if(d.g==="record"){runAnalysis((d.ref.keywords&&d.ref.keywords[0])||d.ref.title);return;}
+  if(d.g==="dtc"){openDrawer("DTC / marqueur",d.title,'<p>'+esc(d.ref.txt)+'</p><p class="hint">Piste : '+esc(d.ref.q)+'</p>',[{label:"Analyser ce système",fn:function(){closeDrawer();runAnalysis(d.ref.q);}}]);return;}
+  if(d.g==="ref"){var u=safeUrl(d.ref.url);if(u!=="#")window.open(u,"_blank","noopener");else location.hash="#veille";return;}
+  openDrawer("Méthode",d.title,'<p>'+esc(d.ref[1]||"")+'</p>',[]);
 }
-function legalTags(e){var t=norm(e.legal),o=[];if(t.indexOf("vice cache")>=0)o.push("vice-cache");if(t.indexOf("rappel")>=0||t.indexOf("l421")>=0)o.push("rappel");if(t.indexOf("entretien")>=0||t.indexOf("usage")>=0)o.push("entretien");if(t.indexOf("externe")>=0||t.indexOf("force majeure")>=0||t.indexOf("usager")>=0)o.push("externe");return o;}
 function fillFilters(){
   var z=uniq(KB.map(function(e){return e.zone;})).sort();
-  $("#fZone").innerHTML='<option value="">📍 Zone : toutes</option>'+z.map(function(x){return '<option>'+esc(x)+'</option>';}).join("");
-  $("#fSystem").innerHTML='<option value="">⚙️ Système : tous</option>'+SYSTEMS.map(function(s){return '<option value="'+s.id+'">'+esc(s.label)+'</option>';}).join("");
+  $("#libZone").innerHTML='<option value="">📍 Zone : toutes</option>'+z.map(function(x){return '<option>'+esc(x)+'</option>';}).join("");
+  $("#libSystem").innerHTML='<option value="">⚙️ Système : tous</option>'+SYSTEMS.map(function(s){return '<option value="'+s.id+'">'+esc(s.label)+'</option>';}).join("");
+  $("#f_system").innerHTML=SYSTEMS.map(function(s){return '<option value="'+s.id+'">'+esc(s.label)+'</option>';}).join("");
+  var views=local.views||{};
+  $("#savedViewSelect").innerHTML='<option value="">📌 Vue enregistrée</option>'+Object.keys(views).map(function(n){return '<option>'+esc(n)+'</option>';}).join("");
 }
+function libState(){return {q:$("#libSearch").value,system:$("#libSystem").value,energy:$("#libEnergy").value,zone:$("#libZone").value,severity:$("#libSeverity").value,sort:$("#libSort").value};}
+function applyLibState(s){$("#libSearch").value=s.q||"";$("#libSystem").value=s.system||"";$("#libEnergy").value=s.energy||"";$("#libZone").value=s.zone||"";$("#libSeverity").value=s.severity||"";$("#libSort").value=s.sort||"priority";renderLibrary();}
 function filteredKB(){
-  var list=KB.slice(),en=$("#fEnergy").value,zo=$("#fZone").value,sy=$("#fSystem").value,le=$("#fLegal").value,tx=$("#fText").value.trim(),so=$("#fSort").value;
-  if(en)list=list.filter(function(e){return e.en===en;});
-  if(zo)list=list.filter(function(e){return e.zone===zo;});
-  if(sy)list=list.filter(function(e){return e.sys===sy;});
-  if(le)list=list.filter(function(e){return legalTags(e).indexOf(le)>=0;});
-  if(tx){var terms=expandQuery(tx).terms;list=list.map(function(e){var ti=norm(e.t),bo=norm(kbBody(e)),sc=0;terms.forEach(function(t){if(ti.indexOf(t)>=0)sc+=14;else if(bo.indexOf(t)>=0)sc+=5;});return {e:e,sc:sc};}).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;}).map(function(x){return x.e;});}
-  if(so==="az")list.sort(function(a,b){return a.t.localeCompare(b.t,"fr");});
-  else if(so==="zone")list.sort(function(a,b){return a.zone.localeCompare(b.zone,"fr");});
+  var s=libState(),list=KB.slice();
+  if(s.q){var terms=expandQuery(s.q).terms;list=list.map(function(e){var ti=norm(e.title),bo=norm(recordBody(e)),sc=0;terms.forEach(function(t){if(ti.indexOf(t)>=0)sc+=14;else if(bo.indexOf(t)>=0)sc+=5;});return {e:e,sc:sc};}).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;}).map(function(x){return x.e;});}
+  if(s.system)list=list.filter(function(e){return e.system===s.system;});
+  if(s.energy)list=list.filter(function(e){return e.energy===s.energy;});
+  if(s.zone)list=list.filter(function(e){return e.zone===s.zone;});
+  if(s.severity)list=list.filter(function(e){return e.severity===s.severity;});
+  if(s.sort==="az")list.sort(function(a,b){return a.title.localeCompare(b.title,"fr");});
+  else if(s.sort==="zone")list.sort(function(a,b){return a.zone.localeCompare(b.zone,"fr");});
+  else if(s.sort==="severity")list.sort(function(a,b){return sevRank(b.severity)-sevRank(a.severity);});
+  else if(s.sort==="manual")list.sort(function(a,b){var o=local.order||[],ia=o.indexOf(a.id),ib=o.indexOf(b.id);if(ia<0)ia=9999;if(ib<0)ib=9999;return ia-ib;});
   return list;
 }
-function renderCards(){
-  var list=filteredKB(),grid=$("#proGrid");
-  $("#fCount").textContent=list.length+" fiche"+(list.length>1?"s":"");
-  $("#fEmpty").hidden=list.length>0;grid.hidden=!list.length;
+function renderLibrary(){
+  var list=filteredKB(),grid=$("#libGrid");
+  $("#libCount").textContent=list.length+" fiche"+(list.length>1?"s":"");
+  $("#libEmpty").hidden=list.length>0;grid.hidden=!list.length;
+  $("#bulkBar").hidden=!isAdmin;
+  $("#addRecordBtn").hidden=!isAdmin;$("#importBtn").hidden=!isAdmin;
   grid.innerHTML=list.map(function(e,i){
-    return '<article class="fiche" data-id="'+esc(e.id)+'" style="animation-delay:'+Math.min(i*35,350)+'ms"><div class="fiche-top '+(e.en==="VE"?"ev":"th")+'"><span>'+(e.en==="VE"?"🔋 VE":"🔥 Thermique")+'</span><span>📍 '+esc(e.zone)+'</span></div><h3>'+esc(e.t)+'</h3><p class="cause">'+esc(e.origin)+'</p><div class="tags"><span class="tag">'+esc(sysLabel(e.sys))+'</span><span class="tag sev">'+esc(e.sev||"")+'</span>'+(e.dtc&&e.dtc.length?'<span class="tag dtc">🔧 '+esc(e.dtc.slice(0,2).join(" · "))+'</span>':'')+'</div><div class="fiche-actions"><button class="btn-fire" data-act="analyze">🧠 Analyser</button><button data-act="present">📽️ Présenter</button><button data-act="more">📋 Détails</button></div><div class="fiche-more" hidden><p><b>Mécanisme :</b> '+esc(e.mech)+'</p><p><b>Conséquences :</b> '+esc((e.cons||[]).slice(0,2).join(" ; "))+'</p><p><b>Indices :</b> '+esc((e.idx||[]).slice(0,2).join(" ; "))+'</p><p><b>Juridique :</b> '+esc(e.legal)+'</p></div></article>';
+    var sel=!!selected[e.id];
+    return '<article class="record'+(sel?' selected':'')+'" draggable="'+(isAdmin?'true':'false')+'" data-id="'+esc(e.id)+'" style="animation-delay:'+Math.min(i*30,300)+'ms">'+
+      '<div class="record-top '+(e.energy==="VE"?"ev":"th")+'"><span>'+(e.energy==="VE"?"🔋 VE":"🔥 "+esc(e.energy))+'</span><span>📍 '+esc(e.zone)+'</span></div>'+
+      '<h3>'+esc(e.title)+'</h3><p class="cause">'+esc(e.origin)+'</p>'+
+      '<div class="tags"><span class="tag">'+esc(sysLabel(e.system))+'</span><span class="tag sev">'+esc(e.severity)+'</span>'+(e.dtc&&e.dtc.length?'<span class="tag dtc">🔧 '+esc(e.dtc.slice(0,2).join(" · "))+'</span>':'')+'</div>'+
+      '<div class="record-actions"><button class="btn-fire" data-act="analyze">🧠 Analyser</button><button data-act="details">📋 Détails</button><button data-act="present">📽️ Présenter</button>'+(isAdmin?'<button data-act="edit">✏️ Éditer</button>':'')+'</div>'+
+      '<div class="record-tools">'+(isAdmin?'<label class="row"><input type="checkbox" data-select="'+esc(e.id)+'" '+(sel?'checked':'')+'> Sélection</label><span class="drag" title="Glisser pour réordonner">⠿</span>':'')+'</div>'+
+      '<div class="record-more" hidden><p><b>Mécanisme :</b> '+esc(e.mechanism)+'</p><p><b>Conséquences :</b> '+esc((e.consequences||[]).slice(0,2).join(" ; "))+'</p><p><b>Preuves :</b> '+esc((e.evidence||[]).slice(0,2).join(" ; "))+'</p><p><b>Juridique :</b> '+esc(e.legal)+'</p></div></article>';
   }).join("");
+  var n=Object.keys(selected).filter(function(k){return selected[k];}).length;
+  $("#selCount").textContent=n+" sélectionné"+(n>1?"s":"");
+  $("#selectAll").checked=list.length>0&&list.every(function(e){return selected[e.id];});
+  $("#undoBtn").disabled=undoStack.length===0;
 }
-function ficheSlides(e){return [{h:e.t,cover:true,sub:e.zone},{h:"1 · Origine",b:e.origin},{h:"2 · Mécanisme",b:e.mech},{h:"3 · Causes racines",l:e.roots},{h:"4 · Conséquences",l:e.cons},{h:"5 · Symptômes",l:e.sym},{h:"6 · Codes DTC",l:e.dtc},{h:"7 · Indices à vérifier",l:e.idx},{h:"8 · Actions correctives",l:e.act},{h:"9 · Juridique",b:e.legal},{h:"10 · Sources",src:e.src||[]}];}
-function analysisSlides(a){return [{h:a.title,cover:true,sub:a.sysLabel+" · "+a.sev},{h:"1 · Origine",b:a.origin},{h:"2 · Mécanisme",b:a.mech},{h:"3 · Causes racines",l:a.roots},{h:"4 · Conséquences",l:a.cons},{h:"5 · Symptômes",l:a.sym},{h:"6 · Codes DTC",l:a.dtc},{h:"7 · Indices à vérifier",l:a.idx},{h:"8 · Actions correctives",l:a.act},{h:"9 · Juridique",b:a.legal},{h:"10 · Sources",src:a.src||[]}];}
-function openFicheDeck(list,startId){
-  deckChapters=list.map(function(e){return {title:e.t,en:e.en,slides:ficheSlides(e)};});
-  deckIdx=Math.max(0,list.findIndex(function(e){return e.id===startId;}));slideIdx=0;showDeck();
+function openRecordDrawer(e){
+  var body='<p><b>Origine :</b> '+esc(e.origin)+'</p><p><b>Mécanisme :</b> '+esc(e.mechanism)+'</p>'+
+    '<p><b>Causes racines :</b></p><ul>'+listify(e.roots).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'+
+    '<p><b>Conséquences :</b></p><ul>'+listify(e.consequences).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'+
+    '<p><b>Preuves attendues :</b></p><ul>'+listify(e.evidence).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'+
+    '<p><b>Tests :</b></p><ul>'+listify(e.tests).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'+
+    '<p><b>Sécurité :</b> '+esc(listify(e.safety).join(" · "))+'</p><p><b>Juridique :</b> '+esc(e.legal)+'</p>';
+  var actions=[{label:"🧠 Analyser",fn:function(){closeDrawer();runAnalysis((e.keywords&&e.keywords[0])||e.title);}},{label:"📽️ Présenter",fn:function(){closeDrawer();openRecordDeck([e],e.id);}}];
+  if(isAdmin)actions.push({label:"✏️ Éditer",fn:function(){closeDrawer();openEditor(e);}});
+  openDrawer("Fiche causale locale",e.title,body,actions);
 }
-function openAnalysisDeck(a){deckChapters=[{title:a.title,en:a.en,slides:analysisSlides(a)}];deckIdx=0;slideIdx=0;showDeck();}
+function openEditor(e){
+  if(!isAdmin)return;
+  $("#editorTitle").textContent=e?"Modifier la fiche":"Nouvelle fiche";
+  $("#f_id").value=e?e.id:"";
+  $("#f_title").value=e?e.title:"";
+  $("#f_system").value=e?e.system:(SYSTEMS[0]&&SYSTEMS[0].id);
+  $("#f_energy").value=e?e.energy:"Thermique";
+  $("#f_zone").value=e?e.zone:"";
+  $("#f_severity").value=e?e.severity:"Élevé";
+  $("#f_keywords").value=e?(e.keywords||[]).join(", "):"";
+  $("#f_engines").value=e?(e.engines||[]).join("\n"):"";
+  $("#f_origin").value=e?e.origin:"";
+  $("#f_mechanism").value=e?e.mechanism:"";
+  $("#f_roots").value=e?(e.roots||[]).join("\n"):"";
+  $("#f_consequences").value=e?(e.consequences||[]).join("\n"):"";
+  $("#f_symptoms").value=e?(e.symptoms||[]).join("\n"):"";
+  $("#f_dtc").value=e?(e.dtc||[]).join(", "):"";
+  $("#f_evidence").value=e?(e.evidence||[]).join("\n"):"";
+  $("#f_tests").value=e?(e.tests||[]).join("\n"):"";
+  $("#f_actions").value=e?(e.actions||[]).join("\n"):"";
+  $("#f_safety").value=e?(e.safety||[]).join("\n"):"";
+  $("#f_legal").value=e?e.legal:"";
+  $("#f_sources").value=e?(e.sources||[]).map(function(s){return s.label+" | "+s.url;}).join("\n"):"";
+  $("#editor").hidden=false;
+}
+function closeEditor(){$("#editor").hidden=true;}
+function saveRecordFromForm(){
+  var id=$("#f_id").value||uid();
+  var sources=lines($("#f_sources").value).map(function(l){var p=l.split("|");return {label:(p[0]||"Source").trim(),url:(p[1]||"").trim()};}).filter(function(s){return /^https?:\/\//i.test(s.url);});
+  var rec={id:id,title:$("#f_title").value.trim(),system:$("#f_system").value,energy:$("#f_energy").value,zone:$("#f_zone").value.trim(),severity:$("#f_severity").value,priority:80,keywords:csv($("#f_keywords").value),engines:lines($("#f_engines").value),origin:$("#f_origin").value.trim(),mechanism:$("#f_mechanism").value.trim(),roots:lines($("#f_roots").value),consequences:lines($("#f_consequences").value),symptoms:lines($("#f_symptoms").value),dtc:csv($("#f_dtc").value),evidence:lines($("#f_evidence").value),tests:lines($("#f_tests").value),actions:lines($("#f_actions").value),safety:lines($("#f_safety").value),legal:$("#f_legal").value.trim(),sources:sources,related:[],updated:new Date().toISOString()};
+  if(!rec.title||!rec.origin||!rec.mechanism){toast("Titre, origine et mécanisme requis");return;}
+  local.overrides[id]=rec;delete local.deleted[id];saveLocal();refreshKB();closeEditor();toast("💾 Fiche enregistrée en base locale");
+}
+function deleteRecords(ids){
+  if(!isAdmin||!ids.length)return;
+  var backup={overrides:JSON.parse(JSON.stringify(local.overrides)),deleted:JSON.parse(JSON.stringify(local.deleted)),order:(local.order||[]).slice()};
+  ids.forEach(function(id){var rec=KB.find(function(e){return e.id===id;});if(rec){local.deleted[id]=rec;delete local.overrides[id];}delete selected[id];});
+  undoStack.push(backup);saveLocal();refreshKB();toast("🗑️ "+ids.length+" fiche(s) supprimée(s) — Annuler disponible","undo");
+}
+function undo(){
+  var b=undoStack.pop();if(!b)return;
+  local.overrides=b.overrides;local.deleted=b.deleted;local.order=b.order;saveLocal();refreshKB();toast("↩️ Suppression annulée");
+}
+function importJSON(file){
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var arr=JSON.parse(fr.result);
+      if(!Array.isArray(arr))throw new Error("format");
+      var count=0;
+      arr.forEach(function(e){
+        if(e&&e.id&&e.title&&e.origin&&e.mechanism){local.overrides[e.id]=e;delete local.deleted[e.id];count++;}
+      });
+      saveLocal();refreshKB();toast("⬆️ "+count+" fiche(s) importée(s)");
+    }catch(err){toast("Import invalide : tableau JSON de fiches attendu");}
+  };
+  fr.readAsText(file);
+}
+function recordSlides(e){return [{h:e.title,cover:true,sub:e.zone},{h:"1 · Origine",b:e.origin},{h:"2 · Mécanisme",b:e.mechanism},{h:"3 · Causes racines",l:e.roots},{h:"4 · Conséquences",l:e.consequences},{h:"5 · Symptômes",l:e.symptoms},{h:"6 · DTC / marqueurs",l:e.dtc},{h:"7 · Preuves attendues",l:e.evidence},{h:"8 · Plan de vérification",l:e.tests},{h:"9 · Actions correctives",l:e.actions},{h:"10 · Sécurité",l:e.safety},{h:"11 · Juridique",b:e.legal},{h:"12 · Sources",src:e.sources||[]}];}
+function analysisSlides(a){return [{h:a.title,cover:true,sub:a.systemLabel+" · "+a.level},{h:"1 · Origine",b:a.origin},{h:"2 · Mécanisme",b:a.mechanism},{h:"3 · Causes racines",l:a.roots},{h:"4 · Conséquences",l:a.consequences},{h:"5 · Symptômes",l:a.symptoms},{h:"6 · DTC / marqueurs",l:a.dtc},{h:"7 · Preuves attendues",l:a.evidence},{h:"8 · Plan de vérification",l:a.tests},{h:"9 · Actions",l:a.actions},{h:"10 · Sécurité",l:a.safety},{h:"11 · Juridique",b:a.legal},{h:"12 · Sources",src:a.sources||[]}];}
+function openRecordDeck(list,startId){deckChapters=list.map(function(e){return {title:e.title,en:e.energy,slides:recordSlides(e)};});deckIdx=Math.max(0,list.findIndex(function(e){return e.id===startId;}));slideIdx=0;showDeck();}
+function openAnalysisDeck(a){deckChapters=[{title:a.title,en:a.energy,slides:analysisSlides(a)}];deckIdx=0;slideIdx=0;showDeck();}
 function showDeck(){stopAuto();$("#deck").hidden=false;D.body.classList.add("locked");renderSlide();}
-function closeDeck(){$("#deck").hidden=true;D.body.classList.remove("locked");stopAuto();$("#deckOverview").hidden=true;try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}}
+function closeDeck(){$("#deck").hidden=true;D.body.classList.remove("locked");stopAuto();$("#deckOverview").hidden=true;}
 function curSlides(){return deckChapters[deckIdx].slides;}
-function step(d){
-  var n=curSlides().length;slideIdx+=d;
-  if(slideIdx>=n){if(deckIdx<deckChapters.length-1){deckIdx++;slideIdx=0;}else slideIdx=n-1;}
-  if(slideIdx<0){if(deckIdx>0){deckIdx--;slideIdx=curSlides().length-1;}else slideIdx=0;}
-  renderSlide();
-}
+function step(d){var n=curSlides().length;slideIdx+=d;if(slideIdx>=n){if(deckIdx<deckChapters.length-1){deckIdx++;slideIdx=0;}else slideIdx=n-1;}if(slideIdx<0){if(deckIdx>0){deckIdx--;slideIdx=curSlides().length-1;}else slideIdx=0;}renderSlide();}
 function renderSlide(){
   var ch=deckChapters[deckIdx];if(!ch)return closeDeck();
   var sl=ch.slides,s=sl[slideIdx],box=$("#deckSlide");
   $("#deckTitle").textContent="🔥 "+ch.title;
   box.classList.remove("anim");void box.offsetWidth;box.classList.add("anim");
   if(s.cover)box.innerHTML='<div class="deck-cover"><span class="energy-big '+(ch.en==="VE"?"ev":"th")+'">'+(ch.en==="VE"?"🔋 ÉLECTRIQUE":"🔥 THERMIQUE")+'</span><h2>'+esc(ch.title)+'</h2><p>'+esc(s.sub||"")+'</p><p class="hint">← → pour naviguer · Échap pour quitter</p></div>';
-  else if(s.src!==undefined)box.innerHTML='<h3>'+esc(s.h)+'</h3><ul>'+s.src.map(function(x){return '<li><a href="'+esc(safeUrl(x.url))+'" target="_blank" rel="noopener">'+esc(x.label)+' ↗</a></li>';}).join("")+'</ul>';
+  else if(s.src!==undefined)box.innerHTML='<h3>'+esc(s.h)+'</h3><ul>'+listify(s.src).map(function(x){return '<li><a href="'+esc(safeUrl(x.url))+'" target="_blank" rel="noopener">'+esc(x.label)+' ↗</a></li>';}).join("")+'</ul>';
   else if(s.l!==undefined)box.innerHTML='<h3>'+esc(s.h)+'</h3><ul>'+listify(s.l).map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul>';
   else box.innerHTML='<h3>'+esc(s.h)+'</h3><p class="big">'+esc(s.b||"—")+'</p>';
   $("#deckProgress").style.width=Math.round((slideIdx+1)/sl.length*100)+"%";
   $("#deckDots").innerHTML=sl.map(function(x,i){return '<span class="dot'+(i===slideIdx?' on':'')+'"></span>';}).join("");
   $("#deckCount").textContent="Fiche "+(deckIdx+1)+"/"+deckChapters.length+" · Diapo "+(slideIdx+1)+"/"+sl.length;
 }
-function toggleOverview(){
-  var g=$("#deckOverview");if(!g.hidden){g.hidden=true;return;}
-  g.innerHTML=deckChapters.map(function(ch,i){return '<button class="ov'+(i===deckIdx?' active':'')+'" data-i="'+i+'"><b>'+esc(ch.title)+'</b><small>'+esc(ch.en)+' · '+ch.slides.length+' diapos</small></button>';}).join("");g.hidden=false;
-}
+function toggleOverview(){var g=$("#deckOverview");if(!g.hidden){g.hidden=true;return;}g.innerHTML=deckChapters.map(function(ch,i){return '<button class="ov'+(i===deckIdx?' active':'')+'" data-i="'+i+'"><b>'+esc(ch.title)+'</b><small>'+esc(ch.en)+' · '+ch.slides.length+' diapos</small></button>';}).join("");g.hidden=false;}
 function stopAuto(){clearInterval(autoTimer);autoTimer=null;$("#deckPlay").textContent="▶";}
 function toggleAuto(){if(autoTimer){stopAuto();return;}$("#deckPlay").textContent="⏸";autoTimer=setInterval(function(){step(1);},6000);}
 function openDrawer(kind,title,body,actions){$("#drawerKind").textContent=kind;$("#drawerTitle").textContent=title;$("#drawerBody").innerHTML=body;var a=$("#drawerActions");a.innerHTML="";(actions||[]).forEach(function(x){var b=D.createElement("button");b.textContent=x.label;b.onclick=x.fn;a.appendChild(b);});$("#drawer").hidden=false;}
 function closeDrawer(){$("#drawer").hidden=true;}
 function renderStatic(){
-  $("#steps").innerHTML=METHOD.map(function(m,i){return '<div class="step" data-n="'+(i+1)+'"><b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span></div>';}).join("");
-  $("#patterns").innerHTML=PATTERNS.map(function(p){return '<div class="pattern"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>';}).join("");
-  $("#phenom").innerHTML=PHENOM.map(function(p){return '<div class="card"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>';}).join("");
-  $("#gazBody").innerHTML=GAZ.map(function(g){return '<tr><td><b>'+esc(g[0])+'</b></td><td>'+esc(g[1])+'</td><td>'+esc(g[2])+'</td></tr>';}).join("");
-  $("#zonesGrid").innerHTML=ZONES.map(function(z,i){return '<div class="zone" data-i="'+i+'"><b>📍 '+esc(z[0])+'</b><span>'+esc(z[1])+'</span><span style="margin-top:.4rem;color:var(--fire2)">⚠️ '+esc(z[2])+'</span></div>';}).join("");
-  $("#dtcGrid").innerHTML=DTC.map(function(d,i){return '<div class="dtc" data-i="'+i+'"><b>'+esc(d.code)+'</b><span>'+esc(d.txt)+'</span></div>';}).join("");
-  $("#legalGrid").innerHTML=LEGAL.map(function(l,i){return '<div class="legal" data-i="'+i+'"><b>'+esc(l.code)+'</b><span>'+esc(l.txt)+'</span><a href="https://www.legifrance.gouv.fr/search/all?query='+encodeURIComponent(l.q)+'" target="_blank" rel="noopener">Légifrance ↗</a></div>';}).join("");
+  $("#methodGrid").innerHTML=METHOD.map(function(m,i){return '<div class="step" data-n="'+(i+1)+'"><b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span></div>';}).join("");
+  $("#evidenceGrid").innerHTML=EVIDENCE.map(function(e){return '<tr><td><b>'+esc(e[0])+'</b></td><td>'+esc(e[1])+'</td><td>'+esc(e[2])+'</td></tr>';}).join("");
   $("#portals").innerHTML=PORTALS.map(function(p){return '<a class="portal" href="'+esc(p[2])+'" target="_blank" rel="noopener"><b>'+esc(p[0])+' ↗</b><span>'+esc(p[1])+'</span></a>';}).join("");
   $("#aQuick").innerHTML=["courroie humide","crépine","FAP herbe","EGR glycol","runaway LFP","12V cosse","charge DC","GPL","freins descente","Boîte DSG"].map(function(k){return '<button class="chip" data-ak="'+esc(k)+'">'+esc(k)+'</button>';}).join("");
 }
-function renderRefs(){var list=Object.keys(state.refs).map(function(k){return state.refs[k];}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});$("#refEmpty").hidden=list.length>0;$("#refList").innerHTML=list.map(function(r){return '<div class="ref"><div><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><small>'+esc(r.cat==="juridique"?"⚖️ Juridique":"🔧 Technique")+' · '+esc(r.note||"")+'</small></div>'+(isAdmin?'<button class="danger" data-refdel="'+esc(r.rid)+'">🗑️</button>':'')+'</div>';}).join("");var last=list.reduce(function(a,r){return Math.max(a,r.ts||0);},0);$("#refUpdated").textContent=last?"MAJ "+new Date(last).toLocaleString("fr-FR"):"Base locale chargée";}
-function renderAdmin(){if(!isAdmin)return;var list=Object.keys(state.devices).map(function(id){return {id:id,d:state.devices[id]};}).sort(function(a,b){return (b.d.ts||0)-(a.d.ts||0);});$("#reqCount").textContent=list.length;$("#reqEmpty").hidden=list.length>0;$("#reqList").innerHTML=list.map(function(x){var d=x.d;return '<div class="req"><div class="req-head"><b>'+esc(d.name||"?")+'</b><span class="badge '+esc(d.status)+'">'+esc(LABEL[d.status]||d.status)+'</span><small>'+new Date(d.ts||0).toLocaleString("fr-FR")+'</small></div><div class="req-actions"><button data-id="'+esc(x.id)+'" data-s="granted">✅ Accès</button><button data-id="'+esc(x.id)+'" data-s="denied">⛔ Refus</button><button data-id="'+esc(x.id)+'" data-s="revoked">🔄 Révoquer</button><button class="danger" data-id="'+esc(x.id)+'" data-s="del">🗑️</button></div></div>';}).join("");}
+function renderRefs(){
+  var list=Object.keys(state.refs||{}).map(function(k){return state.refs[k];}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  $("#refEmpty").hidden=list.length>0;
+  $("#refList").innerHTML=list.map(function(r){return '<div class="ref"><div><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><small>'+esc(r.cat==="juridique"?"⚖️ Juridique":"🔧 Technique")+' · '+esc(r.note||"")+'</small></div>'+(isAdmin?'<button class="danger" data-refdel="'+esc(r.rid)+'">🗑️</button>':'')+'</div>';}).join("");
+  var last=list.reduce(function(a,r){return Math.max(a,r.ts||0);},0);
+  $("#refUpdated").textContent=last?"MAJ "+new Date(last).toLocaleString("fr-FR"):"Base locale";
+}
+function renderAdmin(){
+  if(!isAdmin)return;
+  var list=Object.keys(state.devices||{}).map(function(id){return {id:id,d:state.devices[id]};}).sort(function(a,b){return (b.d.ts||0)-(a.d.ts||0);});
+  $("#reqCount").textContent=list.length;$("#reqEmpty").hidden=list.length>0;
+  $("#reqList").innerHTML=list.map(function(x){var d=x.d;return '<div class="req"><div class="req-head"><b>'+esc(d.name||"?")+'</b><span class="badge '+esc(d.status)+'">'+esc(LABEL[d.status]||d.status)+'</span><small>'+new Date(d.ts||0).toLocaleString("fr-FR")+'</small></div><div class="req-actions"><button data-id="'+esc(x.id)+'" data-s="granted">✅ Accès</button><button data-id="'+esc(x.id)+'" data-s="denied">⛔ Refus</button><button data-id="'+esc(x.id)+'" data-s="revoked">🔄 Révoquer</button><button class="danger" data-id="'+esc(x.id)+'" data-s="del">🗑️</button></div></div>';}).join("");
+}
 
-/* Temps réel admin */
+/* Temps réel */
 var BASE=CFG.NTFY+"/"+CFG.TOPIC,seen={},es=null,queue=read("eik-queue",[]);
 function saveState(){store("eik-state",state);}
 function saveQueue(){store("eik-queue",queue.slice(-60));}
@@ -328,11 +452,11 @@ function post(p){return fetch(BASE,{method:"POST",body:JSON.stringify(p)}).then(
 function publish(obj){var p=Object.assign({mid:uid(),ts:Date.now()},obj);deliver(p,true);if(!navigator.onLine){queue.push(p);saveQueue();return;}post(p).catch(function(){queue.push(p);saveQueue();});}
 function flush(){var q=queue.slice();queue=[];saveQueue();q.forEach(function(p){post(p).catch(function(){queue.push(p);saveQueue();});});}
 function publishFile(blob,name){return fetch(BASE,{method:"PUT",headers:{"X-Filename":name},body:blob}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(j){return j.attachment&&j.attachment.url;});}
-function connect(){if(es)es.close();es=new EventSource(BASE+"/sse");es.onopen=function(){syncBadge(true);};es.onerror=function(){syncBadge(false);};es.onmessage=function(ev){try{var m=JSON.parse(ev.data);if(m.event==="message"&&m.message)deliver(JSON.parse(m.message),true);}catch(e){}};}
+function connect(){if(!W.EventSource)return;if(es)es.close();es=new EventSource(BASE+"/sse");es.onopen=function(){syncBadge(true);};es.onerror=function(){syncBadge(false);};es.onmessage=function(ev){try{var m=JSON.parse(ev.data);if(m.event==="message"&&m.message)deliver(JSON.parse(m.message),true);}catch(e){}};}
 function replay(){fetch(BASE+"/json?poll=1&since=12h").then(function(r){return r.text();}).then(function(txt){txt.split("\n").forEach(function(l){if(!l.trim())return;try{var m=JSON.parse(l);if(m.event==="message"&&m.message)deliver(JSON.parse(m.message),true);}catch(e){}});}).catch(function(){});}
 function syncBadge(ok){var b=$("#syncBadge");b.textContent=ok?"☁️ Temps réel":"🔁 Reconnexion…";b.className="pill "+(ok?"ok":"warn");}
 function publishState(){state.stateTs=Date.now();saveState();publish({t:"state",devices:state.devices,ts:state.stateTs});}
-function rebroadcast(){if(!isAdmin||Date.now()-lastRebroadcast<60000)return;lastRebroadcast=Date.now();publishState();Object.keys(state.refs).forEach(function(k){publish(state.refs[k]);});if(state.wp){fetch(state.wp.img).then(function(r){return r.blob();}).then(function(b){return publishFile(b,"fond.jpg");}).then(function(url){publish({t:"wp",url:url,ts:state.wp.ts,opacity:state.wp.opacity});}).catch(function(){});}}
+function rebroadcast(){if(!isAdmin||Date.now()-lastRebroadcast<60000)return;lastRebroadcast=Date.now();publishState();Object.keys(state.refs||{}).forEach(function(k){publish(state.refs[k]);});if(state.wp){fetch(state.wp.img).then(function(r){return r.blob();}).then(function(b){return publishFile(b,"fond.jpg");}).then(function(url){publish({t:"wp",url:url,ts:state.wp.ts,opacity:state.wp.opacity});}).catch(function(){});}}
 function onMsg(m){
   if(!m||!m.t)return;
   if(m.t==="hello"&&isAdmin){rebroadcast();return;}
@@ -344,7 +468,18 @@ function onMsg(m){
   if(m.t==="ref"){if(m.rid){state.refs[m.rid]=m;saveState();renderRefs();rebuildIndex();}return;}
   if(m.t==="refdel"){if(m.rid){delete state.refs[m.rid];saveState();renderRefs();rebuildIndex();}return;}
 }
-function route(){var me=state.devices[myId];var granted=isAdmin||(me&&me.status==="granted");$("#gate").hidden=granted;D.body.classList.toggle("locked",!granted);$("#admin").hidden=!isAdmin;$("#navAdmin").hidden=!isAdmin;if(granted)return;if(me&&me.status==="pending")gateStatus("pending","⏳ Demande envoyée","En attente de validation admin. L’accès s’ouvre automatiquement.");else if(me&&me.status==="denied")gateStatus("denied","⛔ Accès refusé","L’administrateur a refusé cette demande.");else if(me&&me.status==="revoked")gateStatus("revoked","🔄 Accès révoqué","Votre accès a été révoqué en temps réel.");else if(localStorage.getItem("eik-asked")==="1")gateStatus("pending","⏳ Demande envoyée","En attente de validation admin.");else $("#gateStatus").hidden=true;}
+function route(){
+  var me=state.devices[myId],granted=isAdmin||(me&&me.status==="granted");
+  $("#gate").hidden=granted;D.body.classList.toggle("locked",!granted);
+  $("#admin").hidden=!isAdmin;$("#navAdmin").hidden=!isAdmin;
+  $("#bulkBar").hidden=!isAdmin;$("#addRecordBtn").hidden=!isAdmin;$("#importBtn").hidden=!isAdmin;
+  if(granted){renderLibrary();return;}
+  if(me&&me.status==="pending")gateStatus("pending","⏳ Demande envoyée","En attente de validation admin.");
+  else if(me&&me.status==="denied")gateStatus("denied","⛔ Accès refusé","L’administrateur a refusé cette demande.");
+  else if(me&&me.status==="revoked")gateStatus("revoked","🔄 Accès révoqué","Votre accès a été révoqué.");
+  else if(localStorage.getItem("eik-asked")==="1")gateStatus("pending","⏳ Demande envoyée","En attente de validation admin.");
+  else $("#gateStatus").hidden=true;
+}
 function gateStatus(cls,title,msg){var s=$("#gateStatus");s.className="gate-status "+cls;s.innerHTML="<b>"+esc(title)+"</b>"+esc(msg);s.hidden=false;}
 function showGateTab(which){$("#tabTiers").classList.toggle("active",which==="tiers");$("#tabAdmin").classList.toggle("active",which==="admin");$("#paneTiers").hidden=which!=="tiers";$("#paneAdmin").hidden=which!=="admin";if(which==="admin"){$("#adminPass").value="";setTimeout(function(){$("#adminPass").focus();},80);}}
 function askAccess(){var n=$("#gateName").value.trim();if(n.length<2){toast("Prénom trop court");return;}localStorage.setItem("eik-name",n);localStorage.setItem("eik-asked","1");state.devices[myId]={name:n,status:"pending",ts:Date.now()};saveState();route();publish({t:"req",id:myId,name:n});toast("📨 Demande envoyée");}
@@ -352,22 +487,22 @@ function armLock(){clearTimeout(lockTimer);lockTimer=setTimeout(lockAdmin,CFG.LO
 function lockAdmin(){isAdmin=false;sessionStorage.removeItem("eik-admin");clearTimeout(lockTimer);route();toast("🔒 Session admin verrouillée");}
 function loginAdmin(pass){$("#adminPass").value="";if(pass!==CFG.PASSWORD){$("#loginForm").classList.add("shake");setTimeout(function(){$("#loginForm").classList.remove("shake");},450);toast("⛔ Mot de passe incorrect");return;}isAdmin=true;sessionStorage.setItem("eik-admin","1");armLock();route();renderAdmin();publishState();toast("🛡️ Mode admin actif");setTimeout(function(){location.hash="#admin";},120);}
 function applyWp(){var l=$("#wpLayer");if(state.wp){l.style.backgroundImage="url("+state.wp.img+")";l.style.opacity=state.wp.opacity;}else{l.style.backgroundImage="none";l.style.opacity=1;}var p=$("#wpPreview");if(state.wp){p.style.backgroundImage="url("+state.wp.img+")";p.textContent="";}else{p.style.backgroundImage="none";p.textContent="Aucun fond personnalisé";}}
-function fetchWp(m){fetch(m.url).then(function(r){return r.blob();}).then(function(b){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result);};fr.readAsDataURL(b);});}).then(function(img){state.wp={img:img,ts:m.ts,opacity:m.opacity||.25};saveState();applyWp();toast("🖼️ Fond d’écran mis à jour");}).catch(function(){});}
+function fetchWp(m){fetch(m.url).then(function(r){return r.blob();}).then(function(b){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result);};fr.readAsDataURL(b);});}).then(function(img){state.wp={img:img,ts:m.ts,opacity:m.opacity||.25};saveState();applyWp();toast("🖼️ Fond mis à jour");}).catch(function(){});}
 function compress(file,maxDim,q){return new Promise(function(res,rej){var img=new Image();img.onload=function(){var dim=maxDim,quality=q,out="";do{var sc=Math.min(1,dim/Math.max(img.width,img.height));var c=D.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);out=c.toDataURL("image/jpeg",quality);dim=Math.round(dim*.75);quality-=.12;}while(out.length>1400000&&quality>.3);URL.revokeObjectURL(img.src);res(out);};img.onerror=rej;img.src=URL.createObjectURL(file);});}
 function netBadge(){var c=navigator.connection||{},type="";if(c.type==="wifi")type="Wi-Fi";else if(c.type==="cellular")type=(c.effectiveType||"4g").toUpperCase()+"/5G";else if(c.effectiveType)type=c.effectiveType.toUpperCase();var b=$("#netBadge");b.textContent=navigator.onLine?"🟢 En ligne"+(type?" · "+type:""):"🟠 Hors ligne · local";b.className="pill "+(navigator.onLine?"ok":"warn");}
-function btConnect(){if(!navigator.bluetooth){toast("Bluetooth Web indisponible — utilisez Chrome Android ou l’APK.");return;}navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:["battery_service","device_information"]}).then(function(dev){btDevice=dev;dev.addEventListener("gattserverdisconnected",function(){$("#btBadge").hidden=true;toast("Bluetooth déconnecté");});return dev.gatt.connect().then(function(g){var label=dev.name||"Appareil";return g.getPrimaryService("battery_service").then(function(s){return s.getCharacteristic("battery_level");}).then(function(ch){return ch.readValue();}).then(function(v){label+=" 🔋"+v.getUint8(0)+"%";}).catch(function(){}).then(function(){$("#btBadge").hidden=false;$("#btBadge").textContent="🔵 "+label;toast("Bluetooth connecté : "+label);});});}).catch(function(e){if(e&&e.name!=="NotFoundError")toast("Bluetooth : "+e.message);});}
-function install(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;$("#installBtn").hidden=true;}else toast("Pour installer : menu du navigateur → « Ajouter à l’écran d’accueil ».");}
-function share(){var data={title:D.title,text:"Étude incendie technique by Kevin",url:location.href};if(navigator.share)navigator.share(data).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(location.href).then(function(){toast("🔗 Lien copié");}).catch(function(){window.open(CFG.APK_URL,"_blank","noopener");});else window.open(CFG.APK_URL,"_blank","noopener");}
+function btConnect(){if(!navigator.bluetooth){toast("Bluetooth Web indisponible — Chrome Android / APK requis.");return;}navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:["battery_service","device_information"]}).then(function(dev){dev.addEventListener("gattserverdisconnected",function(){$("#btBadge").hidden=true;toast("Bluetooth déconnecté");});return dev.gatt.connect().then(function(g){var label=dev.name||"Appareil";return g.getPrimaryService("battery_service").then(function(s){return s.getCharacteristic("battery_level");}).then(function(ch){return ch.readValue();}).then(function(v){label+=" 🔋"+v.getUint8(0)+"%";}).catch(function(){}).then(function(){$("#btBadge").hidden=false;$("#btBadge").textContent="🔵 "+label;toast("Bluetooth connecté : "+label);});});}).catch(function(e){if(e&&e.name!=="NotFoundError")toast("Bluetooth : "+e.message);});}
+function install(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;$("#installBtn").hidden=true;}else toast("Menu navigateur → Ajouter à l’écran d’accueil.");}
+function share(){var data={title:D.title,text:"Étude incendie technique by Kevin",url:location.href};if(navigator.share)navigator.share(data).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(location.href).then(function(){toast("🔗 Lien copié");});}
 W.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredPrompt=e;$("#installBtn").hidden=false;});
 function embers(){if(W.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;var c=$("#embers"),x=c.getContext("2d"),ps=[],raf=null;function size(){var d=Math.min(devicePixelRatio||1,1.5);c.width=innerWidth*d;c.height=innerHeight*d;x.setTransform(d,0,0,d,0,0);}size();W.addEventListener("resize",size);for(var i=0;i<26;i++)ps.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:1+Math.random()*2.2,s:.25+Math.random()*.7,a:.15+Math.random()*.5,d:Math.random()*6.28});function loop(){x.clearRect(0,0,innerWidth,innerHeight);ps.forEach(function(p){p.y-=p.s;p.x+=Math.sin(p.d+p.y*.01)*.3;if(p.y<-10){p.y=innerHeight+10;p.x=Math.random()*innerWidth;}x.beginPath();x.arc(p.x,p.y,p.r,0,6.28);var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);g.addColorStop(0,"rgba(255,154,61,"+p.a+")");g.addColorStop(1,"rgba(255,107,53,0)");x.fillStyle=g;x.fill();});raf=requestAnimationFrame(loop);}loop();D.addEventListener("visibilitychange",function(){if(D.hidden){cancelAnimationFrame(raf);raf=null;}else if(!raf)loop();});}
-function reveals(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});$all("main section").forEach(function(s){io.observe(s);});var links=$all("nav a"),spy=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+e.target.id);});}});},{rootMargin:"-40% 0px -55% 0px"});$all("main section").forEach(function(s){spy.observe(s);});}
+function reveals(){if(!W.IntersectionObserver){$all("main section").forEach(function(s){s.classList.add("in");});return;}var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});$all("main section").forEach(function(s){io.observe(s);});var links=$all("nav a"),spy=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+e.target.id);});}});},{rootMargin:"-40% 0px -55% 0px"});$all("main section").forEach(function(s){spy.observe(s);});}
 function bind(){
   $("#menuBtn").onclick=function(){$("#nav").classList.toggle("open");};
   $all("nav a").forEach(function(a){a.onclick=function(){$("#nav").classList.remove("open");};});
   $("#heroSearch").onclick=function(){location.hash="#recherche";setTimeout(function(){$("#q").focus();},450);};
-  $("#heroAnalyse").onclick=function(){runAnalysis("courroie humide");};
-  $("#heroPresent").onclick=function(){var l=filteredKB();if(l.length)openFicheDeck(l,l[0].id);};
-  $("#heroMethodo").onclick=function(){location.hash="#methodo";};
+  $("#heroAnalyze").onclick=function(){runAnalysis("courroie humide");};
+  $("#heroPresent").onclick=function(){var l=filteredKB();if(l.length)openRecordDeck(l,l[0].id);};
+  $("#heroMethod").onclick=function(){location.hash="#methode";};
   $("#tabTiers").onclick=function(){showGateTab("tiers");};
   $("#tabAdmin").onclick=function(){showGateTab("admin");};
   $("#gateForm").onsubmit=function(e){e.preventDefault();askAccess();};
@@ -376,18 +511,19 @@ function bind(){
   $("#lockBtn").onclick=lockAdmin;
   $("#admin").addEventListener("pointerdown",function(){if(isAdmin)armLock();});
   $("#reqList").onclick=function(e){var b=e.target.closest("button");if(!b||!isAdmin)return;var id=b.dataset.id,s=b.dataset.s;if(s==="del")delete state.devices[id];else if(state.devices[id])state.devices[id].status=s;saveState();publishState();renderAdmin();toast(s==="del"?"🗑️ Appareil supprimé":"Statut : "+(LABEL[s]||s));};
-  $("#wpFile").onchange=function(e){var f=e.target.files[0];if(!f)return;$("#wpStatus").textContent="Compression…";compress(f,1600,.82).then(function(img){var op=parseFloat($("#wpOpacity").value);state.wp={img:img,ts:Date.now(),opacity:op};saveState();applyWp();return fetch(img).then(function(r){return r.blob();}).then(function(b){return publishFile(b,"fond.jpg");}).then(function(url){publish({t:"wp",url:url,ts:state.wp.ts,opacity:op});$("#wpStatus").textContent="🖼️ Fond diffusé en temps réel.";toast("🖼️ Fond d’écran diffusé");});}).catch(function(){$("#wpStatus").textContent="Fond appliqué localement (réseau indisponible).";});e.target.value="";};
+  $("#wpFile").onchange=function(e){var f=e.target.files[0];if(!f)return;$("#wpStatus").textContent="Compression…";compress(f,1600,.82).then(function(img){var op=parseFloat($("#wpOpacity").value);state.wp={img:img,ts:Date.now(),opacity:op};saveState();applyWp();return fetch(img).then(function(r){return r.blob();}).then(function(b){return publishFile(b,"fond.jpg");}).then(function(url){publish({t:"wp",url:url,ts:state.wp.ts,opacity:op});$("#wpStatus").textContent="🖼️ Fond diffusé.";toast("🖼️ Fond diffusé");});}).catch(function(){$("#wpStatus").textContent="Fond local (réseau indisponible).";});e.target.value="";};
   $("#wpOpacity").oninput=function(){if(state.wp){state.wp.opacity=parseFloat(this.value);saveState();applyWp();}};
   $("#wpClear").onclick=function(){state.wp=null;saveState();applyWp();publish({t:"wpdel"});toast("Fond retiré");};
   $("#pubBtn").onclick=function(){var title=$("#pubTitle").value.trim(),url=$("#pubUrl").value.trim();if(!title||!/^https?:\/\//i.test(url)){toast("Titre + URL https:// requis");return;}publish({t:"ref",rid:uid(),title:title,url:url,cat:$("#pubCat").value,note:$("#pubNote").value.trim().slice(0,200),ts:Date.now()});$("#pubTitle").value=$("#pubUrl").value=$("#pubNote").value="";toast("📚 Référence publiée");};
   $("#noteBtn").onclick=function(){var t=$("#noteTxt").value.trim();if(!t)return;publish({t:"note",text:t.slice(0,300)});$("#noteTxt").value="";};
-  $("#syncTest").onclick=function(){publish({t:"note",text:"🧪 Test du canal temps réel — "+new Date().toLocaleTimeString("fr-FR")});};
+  $("#syncTest").onclick=function(){publish({t:"note",text:"🧪 Test canal — "+new Date().toLocaleTimeString("fr-FR")});};
   $("#refList").onclick=function(e){var b=e.target.closest("[data-refdel]");if(!b||!isAdmin)return;publish({t:"refdel",rid:b.dataset.refdel});};
   var qt=null;
   $("#q").addEventListener("input",function(){clearTimeout(qt);qt=setTimeout(renderSearch,120);});
   $("#q").addEventListener("keydown",function(e){if(e.key==="ArrowDown"||e.key==="ArrowUp"){if(!currentHits.length)return;e.preventDefault();active=(active+(e.key==="ArrowDown"?1:-1)+currentHits.length)%currentHits.length;updateActive();}else if(e.key==="Enter"){if(currentHits[active]){e.preventDefault();openResult(currentHits[active]);}}else if(e.key==="Escape"){$("#results").innerHTML="";currentHits=[];}});
   $("#qScope").onchange=renderSearch;
-  $("#searchBtn").onclick=function(){var q=$("#q").value.trim();if(!q){toast("Saisissez un mot-clé");return;}runAnalysis(q);};
+  $("#searchBtn").onclick=function(){renderSearch();var q=$("#q").value.trim();if(q&&currentHits[0])openResult(currentHits[0]);};
+  $("#analyzeSearchBtn").onclick=function(){runAnalysis($("#q").value);};
   $("#chips").onclick=function(e){var b=e.target.closest("[data-chip]");if(!b)return;$("#q").value=b.dataset.chip;renderSearch();$("#q").focus();};
   $("#results").onclick=function(e){var r=e.target.closest(".result");if(!r)return;openResult(currentHits[+r.dataset.i]);};
   $("#aBtn").onclick=function(){runAnalysis($("#aInput").value);};
@@ -395,29 +531,46 @@ function bind(){
   $("#aQuick").onclick=function(e){var b=e.target.closest("[data-ak]");if(!b)return;runAnalysis(b.dataset.ak);};
   $("#analysisResult").onclick=function(e){
     var b=e.target.closest("[data-aa],[data-rel]");if(!b)return;
-    if(b.dataset.aa){
-      var a=currentAnalysis;if(!a)return;
-      if(b.dataset.aa==="present")openAnalysisDeck(a);
-      else if(b.dataset.aa==="copy"){var txt=analysisText(a);if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast("📋 Rapport copié");}).catch(function(){toast("Copie impossible");});else toast("Copie non supportée");}
-      else if(b.dataset.aa==="print")window.print();
-      else if(b.dataset.aa==="share"){var text=analysisText(a);if(navigator.share)navigator.share({title:a.title,text:text}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(text).then(function(){toast("📋 Analyse copiée");});}
-    } else if(b.dataset.rel){var rel=KB.find(function(x){return x.id===b.dataset.rel;});if(rel)runAnalysis(rel.kw[0]||rel.t);}
+    if(b.dataset.aa){var a=currentAnalysis;if(!a)return;if(b.dataset.aa==="present")openAnalysisDeck(a);else if(b.dataset.aa==="copy"){if(navigator.clipboard)navigator.clipboard.writeText(analysisText(a)).then(function(){toast("📋 Rapport copié");});}else if(b.dataset.aa==="print")window.print();else if(b.dataset.aa==="share"){if(navigator.share)navigator.share({title:a.title,text:analysisText(a)}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(analysisText(a)).then(function(){toast("📋 Analyse copiée");});}}
+    else if(b.dataset.rel){var rel=KB.find(function(x){return x.id===b.dataset.rel;});if(rel)runAnalysis((rel.keywords&&rel.keywords[0])||rel.title);}
   };
-  ["fEnergy","fZone","fSystem","fLegal","fSort"].forEach(function(id){$("#"+id).onchange=renderCards;});
-  var ft=null;$("#fText").addEventListener("input",function(){clearTimeout(ft);ft=setTimeout(renderCards,150);});
-  $("#resetFilters").onclick=$("#emptyReset").onclick=function(){["fEnergy","fZone","fSystem","fLegal"].forEach(function(id){$("#"+id).value="";});$("#fText").value="";$("#fSort").value="pert";renderCards();};
-  $("#presentAll").onclick=function(){var l=filteredKB();if(l.length)openFicheDeck(l,l[0].id);else toast("Aucune fiche à présenter");};
-  $("#proGrid").onclick=function(e){var b=e.target.closest("[data-act]");if(!b)return;var card=e.target.closest(".fiche"),id=card.dataset.id,en=KB.find(function(x){return x.id===id;});if(!en)return;if(b.dataset.act==="analyze")runAnalysis(en.kw[0]||en.t);else if(b.dataset.act==="present")openFicheDeck(filteredKB(),id);else{var m=card.querySelector(".fiche-more");m.hidden=!m.hidden;b.textContent=m.hidden?"📋 Détails":"▲ Réduire";}};
-  $("#zonesGrid").onclick=function(e){var z=e.target.closest(".zone");if(!z)return;var d=ZONES[+z.dataset.i];openDrawer("Zone véhicule",d[0],'<p><b>Composants :</b> '+esc(d[1])+'</p><p><b>Risques :</b> '+esc(d[2])+'</p>',[]);};
-  $("#dtcGrid").onclick=function(e){var d=e.target.closest(".dtc");if(!d)return;var x=DTC[+d.dataset.i];openDrawer("Code DTC",x.code,'<p>'+esc(x.txt)+'</p><p class="hint">Piste : '+esc(x.q)+'</p>',[{label:"Analyser ce système",fn:function(){closeDrawer();runAnalysis(x.q);}}]);};
-  $("#legalGrid").onclick=function(e){var l=e.target.closest(".legal");if(!l||e.target.tagName==="A")return;var x=LEGAL[+l.dataset.i];openDrawer("Juridique",x.code,'<p>'+esc(x.txt)+'</p>',[{label:"Légifrance ↗",fn:function(){window.open("https://www.legifrance.gouv.fr/search/all?query="+encodeURIComponent(x.q),"_blank","noopener");}}]);};
+  ["libSearch","libSystem","libEnergy","libZone","libSeverity","libSort"].forEach(function(id){$("#"+id).addEventListener(id==="libSearch"?"input":"change",function(){clearTimeout(this._t);this._t=setTimeout(renderLibrary,120);});});
+  $("#resetLib").onclick=$("#emptyReset").onclick=function(){applyLibState({sort:"priority"});};
+  $("#presentLib").onclick=function(){var l=filteredKB();if(l.length)openRecordDeck(l,l[0].id);else toast("Aucune fiche à présenter");};
+  $("#exportBtn").onclick=function(){download("base-pannes-etude-incendie.json",JSON.stringify(KB,null,2));toast("⬇️ Base exportée");};
+  $("#importBtn").onclick=function(){if(isAdmin)$("#importFile").click();};
+  $("#importFile").onchange=function(e){var f=e.target.files[0];if(f&&isAdmin)importJSON(f);e.target.value="";};
+  $("#addRecordBtn").onclick=function(){openEditor(null);};
+  $("#saveViewBtn").onclick=function(){var n=prompt("Nom de la vue :");if(!n)return;local.views[n]=libState();saveLocal();fillFilters();toast("💾 Vue enregistrée");};
+  $("#deleteViewBtn").onclick=function(){var n=$("#savedViewSelect").value;if(!n)return;delete local.views[n];saveLocal();fillFilters();toast("Vue supprimée");};
+  $("#savedViewSelect").onchange=function(){var n=this.value;if(n&&local.views[n])applyLibState(local.views[n]);};
+  $("#selectAll").onchange=function(){var list=filteredKB(),v=this.checked;list.forEach(function(e){selected[e.id]=v;});renderLibrary();};
+  $("#deleteSelected").onclick=function(){var ids=Object.keys(selected).filter(function(k){return selected[k];});deleteRecords(ids);};
+  $("#undoBtn").onclick=undo;
+  $("#libGrid").onclick=function(e){
+    var card=e.target.closest(".record");if(!card)return;var id=card.dataset.id,rec=KB.find(function(x){return x.id===id;});
+    if(e.target.dataset.select){selected[id]=e.target.checked;renderLibrary();return;}
+    var b=e.target.closest("[data-act]");if(!b||!rec)return;
+    if(b.dataset.act==="analyze")runAnalysis((rec.keywords&&rec.keywords[0])||rec.title);
+    else if(b.dataset.act==="details")openRecordDrawer(rec);
+    else if(b.dataset.act==="present")openRecordDeck(filteredKB(),id);
+    else if(b.dataset.act==="edit"&&isAdmin)openEditor(rec);
+    else{var m=card.querySelector(".record-more");if(m){m.hidden=!m.hidden;b.textContent=m.hidden?"📋 Détails":"▲ Réduire";}}
+  };
+  $("#libGrid").addEventListener("dragstart",function(e){var card=e.target.closest(".record");if(!card||!isAdmin)return;dragId=card.dataset.id;card.classList.add("dragging");e.dataTransfer.effectAllowed="move";});
+  $("#libGrid").addEventListener("dragend",function(e){var card=e.target.closest(".record");if(card)card.classList.remove("dragging");dragId=null;});
+  $("#libGrid").addEventListener("dragover",function(e){if(!isAdmin||!dragId)return;e.preventDefault();});
+  $("#libGrid").addEventListener("drop",function(e){if(!isAdmin||!dragId)return;e.preventDefault();var card=e.target.closest(".record");if(!card||card.dataset.id===dragId)return;var order=KB.map(function(x){return x.id;});var from=order.indexOf(dragId),to=order.indexOf(card.dataset.id);if(from<0||to<0)return;order.splice(from,1);order.splice(to,0,dragId);local.order=order;saveLocal();$("#libSort").value="manual";refreshKB();toast("⠿ Ordre manuel enregistré");});
+  $("#recordForm").onsubmit=function(e){e.preventDefault();saveRecordFromForm();};
+  $("#cancelRecord").onclick=closeEditor;$("#editorClose").onclick=closeEditor;
+  $("#editor").onclick=function(e){if(e.target.id==="editor")closeEditor();};
   $("#deckClose").onclick=closeDeck;$("#deckPrev").onclick=function(){step(-1);};$("#deckNext").onclick=function(){step(1);};
   $("#deckPrevF").onclick=function(){deckIdx=(deckIdx-1+deckChapters.length)%deckChapters.length;slideIdx=0;renderSlide();};
   $("#deckNextF").onclick=function(){deckIdx=(deckIdx+1)%deckChapters.length;slideIdx=0;renderSlide();};
   $("#deckOverviewBtn").onclick=toggleOverview;$("#deckPlay").onclick=toggleAuto;
   $("#deckFull").onclick=function(){if(D.fullscreenElement)D.exitFullscreen();else if($("#deck").requestFullscreen)$("#deck").requestFullscreen();};
   $("#deckOverview").onclick=function(e){var b=e.target.closest(".ov");if(!b)return;deckIdx=+b.dataset.i;slideIdx=0;$("#deckOverview").hidden=true;renderSlide();};
-  D.addEventListener("keydown",function(e){if(!$("#deck").hidden){if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();step(1);}else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();step(-1);}else if(e.key==="Escape")closeDeck();else if(e.key.toLowerCase()==="f")$("#deckFull").click();return;}if(!$("#drawer").hidden&&e.key==="Escape")closeDrawer();});
+  D.addEventListener("keydown",function(e){if(!$("#deck").hidden){if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();step(1);}else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();step(-1);}else if(e.key==="Escape")closeDeck();else if(e.key.toLowerCase()==="f")$("#deckFull").click();return;}if(!$("#drawer").hidden&&e.key==="Escape")closeDrawer();if(!$("#editor").hidden&&e.key==="Escape")closeEditor();});
   $("#deck").addEventListener("touchstart",function(e){touchX=e.touches[0].clientX;},{passive:true});
   $("#deck").addEventListener("touchend",function(e){if(touchX==null)return;var dx=e.changedTouches[0].clientX-touchX;touchX=null;if(Math.abs(dx)>50)step(dx<0?1:-1);},{passive:true});
   $("#drawerClose").onclick=closeDrawer;$("#drawer").onclick=function(e){if(e.target.id==="drawer")closeDrawer();};
@@ -426,25 +579,25 @@ function bind(){
   W.addEventListener("offline",netBadge);
   if(navigator.connection)navigator.connection.addEventListener("change",netBadge);
 }
-function updateActive(){$all(".result").forEach(function(el,i){el.classList.toggle("active",i===active);});var el=$all(".result")[active];if(el)el.scrollIntoView({block:"nearest"});}
-function loadLocalBase(){
-  var cachedKB=read("eik-kb",null);if(cachedKB&&cachedKB.length){KB=cachedKB;store("eik-kb",KB);}
-  var cachedKW=read("eik-keywords",null);if(cachedKW&&cachedKW.expand){EXPAND=cachedKW.expand;SYSTEMS=cachedKW.themes||SYSTEMS;store("eik-keywords",cachedKW);}
-  rebuildIndex();fillFilters();renderCards();
-  fetch("data/pannes-connues.json").then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.length){KB=j;store("eik-kb",KB);rebuildIndex();fillFilters();renderCards();runAnalysis("courroie humide",false);}}).catch(function(){});
-  fetch("data/keywords.json").then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.expand){EXPAND=j.expand;if(j.themes)SYSTEMS=j.themes;store("eik-keywords",j);rebuildIndex();fillFilters();renderCards();renderSearch();}}).catch(function(){});
-  fetch("data/recalls-feed.json").then(function(r){return r.ok?r.json():null;}).then(function(j){if(!j)return;var arr=Array.isArray(j)?j:(j.items||j.recalls||[]);arr.slice(0,120).forEach(function(r,i){var t=[r.brand||r.marque,r.model||r.modele,r.subject||r.titre||r.title].filter(Boolean).join(" ");if(t)INDEX.push({g:"veille",id:"recall"+i,title:t,sub:"🚨 Rappel / veille",body:String(r.description||r.detail||""),keys:"rappel",ref:r});});}).catch(function(){});
+function loadBase(){
+  SYSTEMS=FALLBACK_SYSTEMS.slice();EXPAND=FALLBACK_EXPAND;
+  var cachedKB=read("eik-kb",null);baseKB=(cachedKB&&cachedKB.length)?cachedKB:FALLBACK_KB.slice();
+  var cachedKW=read("eik-keywords",null);if(cachedKW&&cachedKW.expand){EXPAND=cachedKW.expand;if(cachedKW.themes)SYSTEMS=cachedKW.themes;}
+  refreshKB();
+  fetch("data/pannes-connues.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(Array.isArray(j)&&j.length){baseKB=j;store("eik-kb",j);refreshKB();runAnalysis("courroie humide",false);}}).catch(function(){});
+  fetch("data/keywords.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.expand){EXPAND=j.expand;if(j.themes)SYSTEMS=j.themes;store("eik-keywords",j);refreshKB();renderSearch();}}).catch(function(){});
 }
 function boot(){
-  renderStatic();rebuildIndex();fillFilters();renderCards();renderRefs();renderAdmin();applyWp();route();netBadge();syncBadge(false);
-  $("#gateName").value=localStorage.getItem("eik-name")||"";$("#aInput").value="courroie humide";runAnalysis("courroie humide",false);renderSearch();
+  renderStatic();loadBase();renderRefs();renderAdmin();applyWp();route();netBadge();syncBadge(false);
+  $("#gateName").value=localStorage.getItem("eik-name")||"";
+  $("#aInput").value="courroie humide";runAnalysis("courroie humide",false);renderSearch();
   $("#topicInfo").textContent="Canal : "+CFG.TOPIC+" · SSE + historique 12 h + file hors ligne.";
   bind();reveals();embers();
   if(W.BroadcastChannel){var bc=new BroadcastChannel("eik-sync");bc.onmessage=function(e){deliver(e.data,false);};}
   connect();replay();flush();setInterval(function(){if(es&&es.readyState===2)connect();},30000);
   if(isAdmin)armLock();else publish({t:"hello",id:myId});
-  loadLocalBase();
   if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js").catch(function(){});
+  var sp=new URLSearchParams(location.search);var qa=sp.get("analyse")||sp.get("q");if(qa)setTimeout(function(){runAnalysis(qa);},500);
 }
 boot();
 })();
