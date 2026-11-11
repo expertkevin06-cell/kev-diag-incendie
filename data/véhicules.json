@@ -1,0 +1,105 @@
+{
+  "brands": [
+    {"name": "Peugeot", "aliases": ["Peugeot", "PSA"], "country": "France"},
+    {"name": "Citroën", "aliases": ["Citroen", "Citroën", "PSA"], "country": "France"},
+    {"name": "DS", "aliases": ["DS Automobiles", "PSA"], "country": "France"},
+    {"name": "Opel", "aliases": ["Opel", "Stellantis"], "country": "Germany"},
+    {"name": "Renault", "aliases": ["Renault", "Renault Group"], "country": "France"},
+    {"name": "Dacia", "aliases": ["Dacia", "Renault"], "country": "Romania"},
+    {"name": "Volkswagen", "aliases": ["VW", "Volkswagen", "VAG"], "country": "Germany"},
+    {"name": "Audi", "aliases": ["Audi", "VAG"], "country": "Germany"},
+    {"name": "SEAT", "aliases": ["SEAT", "VAG"], "country": "Spain"},
+    {"name": "Škoda", "aliases": ["Skoda", "VAG"], "country": "Czech Republic"},
+    {"name": "Ford", "aliases": ["Ford"], "country": "USA"},
+    {"name": "BMW", "aliases": ["BMW", "BMW Group"], "country": "Germany"},
+    {"name": "Mercedes-Benz", "aliases": ["Mercedes", "Mercedes-Benz", "Daimler"], "country": "Germany"},
+    {"name": "Toyota", "aliases": ["Toyota"], "country": "Japan"},
+    {"name": "Lexus", "aliases": ["Lexus", "Toyota"], "country": "Japan"},
+    {"name": "Honda", "aliases": ["Honda"], "country": "Japan"},
+    {"name": "Nissan", "aliases": ["Nissan"], "country": "Japan"},
+    {"name": "Mazda", "aliases": ["Mazda"], "country": "Japan"},
+    {"name": "Hyundai", "aliases": ["Hyundai"], "country": "South Korea"},
+    {"name": "Kia", "aliases": ["Kia", "Hyundai-Kia"], "country": "South Korea"},
+    {"name": "Tesla", "aliases": ["Tesla"], "country": "USA"},
+    {"name": "Volvo", "aliases": ["Volvo"], "country": "Sweden"},
+    {"name": "Fiat", "aliases": ["Fiat", "Stellantis"], "country": "Italy"},
+    {"name": "Alfa Romeo", "aliases": ["Alfa Romeo", "Stellantis"], "country": "Italy"},
+    {"name": "Jeep", "aliases": ["Jeep", "Stellantis"], "country": "USA"},
+    {"name": "Porsche", "aliases": ["Porsche", "VAG"], "country": "Germany"}
+  ],
+  "models": [
+    {"brand": "Peugeot", "name": "208", "aliases": ["Peugeot 208", "208"], "years": "2012-2026", "variants": [
+      {"engine": "1.2 PureTech", "power": "82", "years": "2012-2026"},
+      {"engine": "1.2 PureTech", "power": "110", "years": "2012-2026"},
+      {"engine": "1.2 PureTech", "power": "130", "years": "2015-2026"},
+      {"engine": "1.6 BlueHDi", "power": "100", "years": "2015-2023"},
+      {"engine": "e-208", "power": "136", "years": "2020-2026", "type": "VE"}
+    ]},
+    {"brand": "Peugeot", "name": "308", "aliases": ["Peugeot 308", "308"], "years": "2007-2026", "variants": [
+      {"engine": "1.2 PureTech", "power": "110", "years": "2013-2026"},
+      {"engine": "1.2 PureTech", "power": "130", "years": "2015-2026"},
+      {"engine": "1.6 BlueHDi", "power": "120", "years": "2014-2023"},
+      {"engine": "2.0 BlueHDi", "power": "150", "years": "2014-2023"},
+      {"engine": "1.6 Hybrid", "power": "180", "years": "2021-2026", "type": "Hybride"}
+    ]},
+    {"brand": "Peugeot", "name": "3008", "aliases": ["Peugeot 3008", "3008"], "years": "2009-2026", "variants": [
+      {"engine": "1.2 PureTech", "power": "130", "years": "2016-2026"},
+      {"engine": "1.5 BlueHDi", "power": "130", "years": "2018-2026"},
+      {"engine": "2.0 BlueHDi", "power": "180", "years": "2016-2023"},
+      {"engine": "Hybrid4", "power": "300", "years": "2019-2026", "type": "Hybride"}
+    ]},
+    {"brand": "Citroën", "name": "C3", "aliases": ["Citroën C3", "C3"], "years": "2002-2026", "variants": [
+      {"engine": "1.2 PureTech", "power": "82", "years": "2016-2026"},
+      {"engine": "1.2 PureTech", "power": "110", "years": "2016-2026"}
+    ]},
+    {"brand": "Citroën", "name": "C4 Cactus", "aliases": ["C4 Cactus", "Citroën C4 Cactus"], "years": "2014-2020", "variants": [
+      {"engine": "1.2 PureTech", "power": "110", "years": "2014-2020"},
+      {"engine": "1.6 BlueHDi", "power": "100", "years": "2014-2020"}
+    ]},
+    {"brand": "Volkswagen", "name": "Golf", "aliases": ["VW Golf", "Golf", "Golf 7", "Golf 8"], "years": "1974-2026", "variants": [
+      {"engine": "1.0 TSI", "power": "110", "years": "2012-2026"},
+      {"engine": "1.5 TSI", "power": "150", "years": "2017-2026"},
+      {"engine": "2.0 TDI", "power": "150", "years": "2012-2026"},
+      {"engine": "e-Golf", "power": "136", "years": "2014-2020", "type": "VE"}
+    ]},
+    {"brand": "Volkswagen", "name": "Tiguan", "aliases": ["VW Tiguan", "Tiguan"], "years": "2007-2026", "variants": [
+      {"engine": "1.5 TSI", "power": "150", "years": "2016-2026"},
+      {"engine": "2.0 TDI", "power": "150", "years": "2016-2026"},
+      {"engine": "2.0 TDI", "power": "190", "years": "2016-2026"}
+    ]},
+    {"brand": "Ford", "name": "Focus", "aliases": ["Ford Focus", "Focus"], "years": "1998-2026", "variants": [
+      {"engine": "1.0 EcoBoost", "power": "125", "years": "2012-2026"},
+      {"engine": "1.5 EcoBlue", "power": "120", "years": "2018-2026"},
+      {"engine": "2.0 EcoBlue", "power": "150", "years": "2018-2026"}
+    ]},
+    {"brand": "Ford", "name": "Kuga", "aliases": ["Ford Kuga", "Kuga"], "years": "2008-2026", "variants": [
+      {"engine": "1.5 EcoBlue", "power": "120", "years": "2019-2026"},
+      {"engine": "2.0 EcoBlue", "power": "150", "years": "2019-2026"},
+      {"engine": "2.5 Hybrid", "power": "190", "years": "2020-2026", "type": "Hybride"}
+    ]},
+    {"brand": "Hyundai", "name": "Kona", "aliases": ["Hyundai Kona", "Kona"], "years": "2017-2026", "variants": [
+      {"engine": "1.0 T-GDi", "power": "120", "years": "2017-2026"},
+      {"engine": "Kona Electric", "power": "136", "years": "2018-2026", "type": "VE"},
+      {"engine": "Kona Electric", "power": "204", "years": "2018-2026", "type": "VE"}
+    ]},
+    {"brand": "Tesla", "name": "Model 3", "aliases": ["Tesla Model 3", "Model 3"], "years": "2017-2026", "variants": [
+      {"engine": "Standard Range", "power": "283", "years": "2017-2026", "type": "VE"},
+      {"engine": "Long Range", "power": "346", "years": "2017-2026", "type": "VE"},
+      {"engine": "Performance", "power": "487", "years": "2018-2026", "type": "VE"}
+    ]},
+    {"brand": "Tesla", "name": "Model Y", "aliases": ["Tesla Model Y", "Model Y"], "years": "2020-2026", "variants": [
+      {"engine": "Standard Range", "power": "283", "years": "2020-2026", "type": "VE"},
+      {"engine": "Long Range", "power": "346", "years": "2020-2026", "type": "VE"}
+    ]},
+    {"brand": "Renault", "name": "Clio", "aliases": ["Renault Clio", "Clio"], "years": "1990-2026", "variants": [
+      {"engine": "1.0 TCe", "power": "100", "years": "2019-2026"},
+      {"engine": "1.5 Blue dCi", "power": "115", "years": "2019-2026"},
+      {"engine": "E-Tech Hybrid", "power": "140", "years": "2020-2026", "type": "Hybride"}
+    ]},
+    {"brand": "Renault", "name": "Megane", "aliases": ["Renault Megane", "Megane", "Mégane"], "years": "1995-2026", "variants": [
+      {"engine": "1.3 TCe", "power": "140", "years": "2018-2026"},
+      {"engine": "1.5 Blue dCi", "power": "115", "years": "2018-2026"},
+      {"engine": "E-Tech Electric", "power": "220", "years": "2022-2026", "type": "VE"}
+    ]}
+  ]
+}
