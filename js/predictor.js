@@ -1,7 +1,7 @@
-/* PRÉDICTEUR — inférence véhicule + corrélations, adossé au catalogue massif. */
+/* PRÉDICTEUR v48 — inférence véhicule + corrélations adossées au catalogue massif. */
 window.EIK_PREDICTOR = (function () {
   "use strict";
-  var VERSION = "47.0.0", EIK = window.EIK, CAT = window.EIK_CATALOG, W = window;
+  var VERSION = "48.0.0", EIK = window.EIK, CAT = window.EIK_CATALOG, W = window;
   function stats() { return CAT ? CAT.stats() : { brands: 0, models: 0, engines: 0, powers: 0, variants: 0, correlations: 0 }; }
   function publish() { var s = stats(); if (EIK) { EIK.predictorVersion = VERSION; EIK.vehicleCount = s.models; EIK.engineCount = s.engines; EIK.powerCount = s.powers; EIK.corrCount = s.correlations; EIK.setCheck("pred", "Moteur prédictif", "ok", VERSION + " · " + s.models + " modèles · " + s.powers + " puissances"); } }
   var ready = (async function () { if (CAT && CAT.ready) await CAT.ready; publish(); return stats(); })();
