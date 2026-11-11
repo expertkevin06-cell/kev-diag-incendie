@@ -1,18 +1,4 @@
 [
-  {
-    "id": "techkevin2026-veh",
-    "name": "TechKevin 2026 — Véhicules",
-    "url": "https://expertkevin06-cell.github.io/techkevin2026/#/veh",
-    "enabled": true,
-    "kind": "spa",
-    "probes": ["data/veh.json", "data/vehicles.json", "data/pannes.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json"]
-  },
-  {
-    "id": "auto-diagnostic",
-    "name": "Auto-Diagnostic",
-    "url": "https://expertkevin06-cell.github.io/auto-diagnostic/",
-    "enabled": true,
-    "kind": "spa",
-    "probes": ["data/pannes.json", "data/diagnostics.json", "data/dtc.json", "data/vehicles.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json"]
-  }
+  { "id": "techkevin2026-veh", "name": "TechKevin 2026 — Véhicules", "url": "https://expertkevin06-cell.github.io/techkevin2026/#/veh", "enabled": true, "probes": ["data/veh.json", "data/vehicles.json", "data/pannes.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json"] },
+  { "id": "auto-diagnostic", "name": "Auto-Diagnostic", "url": "https://expertkevin06-cell.github.io/auto-diagnostic/", "enabled": true, "probes": ["data/pannes.json", "data/diagnostics.json", "data/dtc.json", "data/vehicles.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json"] }
 ]
