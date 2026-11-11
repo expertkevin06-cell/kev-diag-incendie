@@ -1,11 +1,11 @@
 {
-  "id": "/etude-incendie-technique-by-kevin/",
+  "id": "./",
   "name": "Étude incendie technique by Kevin — Prédictif multi-marques",
   "short_name": "ÉtudeFeu",
   "description": "Recherche prédictive par marques, modèles, motorisations, puissances avec corrélations de pannes connues. Analyse causale prédictive origine/mécanisme/conséquences, mise à jour manuelle multi-sources, base massive hors ligne.",
   "lang": "fr-FR",
   "dir": "ltr",
-  "start_url": "./?source=pwa",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
