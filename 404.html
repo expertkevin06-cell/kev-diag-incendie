@@ -1,37 +1,323 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#120507">
-<title>404 — Étude incendie prédictive</title>
-<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Page 404 — Étude incendie technique by Kevin. Redirection intelligente, réparation du cache APK et diagnostic.">
+<title>404 — Étude incendie technique by Kevin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120507'/%3E%3Cpath fill='%23ff6b35' d='M34 8c2 10-5 14-8 20-4 7-3 14 2 18-1-6 2-9 6-12 1 7 8 10 8 18 0 7-5 12-12 13 10 1 19-7 19-18C49 33 39 28 34 8z'/%3E%3C/svg%3E">
 <style>
-:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--text:#fff4ef;--muted:#c9a9a4}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(900px 600px at 50% -10%,#3a0d18,#120507 65%);color:var(--text);font-family:Inter,system-ui,sans-serif;text-align:center;padding:1.2rem}
-.card{max-width:560px;background:linear-gradient(160deg,var(--surface),#1d080d);border:1px solid var(--line);border-radius:22px;padding:2rem;box-shadow:0 24px 70px rgba(0,0,0,.5)}
-.flame{font-size:3.4rem}h1{margin:.6rem 0;font-size:1.7rem}p{color:var(--muted)}code{display:block;margin:.6rem 0;font-size:.75rem;word-break:break-all;color:var(--fire2)}
-button,a.btn{display:inline-block;cursor:pointer;border:1px solid var(--line);background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:900;border-radius:12px;padding:.75rem 1.1rem;text-decoration:none;margin:.3rem}
+:root{
+  --bg:#120507;--bg2:#1d080d;--surface:#260d14;--surface2:#33121c;--overlay:rgba(12,3,6,.86);
+  --line:#4a1a26;--line2:#6b2333;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--blue:#2f9bff;
+  --green:#39d98a;--amber:#ffb020;--violet:#b16dff;--text:#fff4ef;--muted:#c9a9a4;--dim:#8f6f6b;
+  --r:18px;--shadow:0 22px 60px rgba(0,0,0,.5);--ease:cubic-bezier(.22,.9,.25,1)
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5;overflow-x:hidden}
+::selection{background:var(--fire);color:#1a0609}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:#1c070c}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--fire),var(--red));border-radius:99px;border:2px solid #1c070c}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--fire2),var(--fire))}
+*{scrollbar-width:thin;scrollbar-color:var(--fire) #1c070c}
+a{color:var(--fire2)}
+button,input{font:inherit}
+button{cursor:pointer;border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:12px;padding:.65rem .95rem;font-weight:700;transition:transform .18s var(--ease),border-color .18s,box-shadow .18s,background .18s}
+button:hover{transform:translateY(-2px);border-color:var(--fire);box-shadow:0 10px 26px rgba(255,107,53,.2)}
+button:active{transform:none}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--fire2);outline-offset:2px}
+[hidden]{display:none!important}
+#embers{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.75}
+.glow{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:-3}
+.g1{width:560px;height:560px;background:var(--red);opacity:.24;left:-180px;bottom:-200px;animation:drift 18s ease-in-out infinite alternate}
+.g2{width:480px;height:480px;background:var(--blue);opacity:.12;right:-160px;top:-140px;animation:drift 22s ease-in-out infinite alternate-reverse}
+.g3{width:380px;height:380px;background:var(--violet);opacity:.1;left:42%;top:32%;animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(50px,-40px) scale(1.1)}}
+.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.85rem clamp(1rem,4vw,2.6rem);background:rgba(18,5,7,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:.7rem;font-weight:900}
+.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--fire),var(--red));box-shadow:0 8px 24px rgba(230,57,70,.4)}
+.mark svg{width:24px;height:24px}
+.brand small{display:block;color:var(--fire2);font-size:.68rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.pills{display:flex;gap:.4rem;flex-wrap:wrap}
+.pill{font-size:.72rem;padding:.3rem .65rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:.35rem}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.pill.ok{color:var(--green);border-color:rgba(57,217,138,.5)}
+.pill.warn{color:var(--amber);border-color:rgba(255,176,32,.5)}
+.pill.fail{color:#ff9aa2;border-color:rgba(230,57,70,.55)}
+.pill.info{color:var(--blue);border-color:rgba(47,155,255,.5)}
+.shell{width:min(1140px,100%);margin:0 auto;padding:clamp(1.4rem,4vw,3rem) clamp(1rem,4vw,2.6rem) 3rem;display:grid;gap:1.2rem}
+.card{background:linear-gradient(160deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:clamp(1.1rem,3vw,1.8rem);box-shadow:var(--shadow);animation:rise .7s var(--ease) both}
+.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.16s}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:1.6rem;align-items:start}
+.eyebrow{color:var(--fire2);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:900;margin-bottom:.5rem}
+.big404{font-size:clamp(4.5rem,14vw,9rem);line-height:.9;font-weight:900;letter-spacing:-.06em;background:linear-gradient(120deg,var(--fire2),var(--fire) 45%,var(--red));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 10px 30px rgba(255,107,53,.25));margin:.2rem 0 .4rem}
+h1{margin:.2rem 0 .8rem;font-size:clamp(1.5rem,3.4vw,2.3rem);line-height:1.12;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--fire2),var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:0 0 .8rem;font-size:1.15rem}
+.lead{color:var(--muted);max-width:620px;margin:0 0 1.2rem}
+.readout{display:grid;gap:.5rem;padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#1d080d;margin-bottom:1rem}
+.readout div{display:grid;gap:.2rem}
+.readout span{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:800}
+.readout .arrow{text-align:center;color:var(--fire);font-size:1.1rem;line-height:1}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;color:var(--text);word-break:break-all;background:#20080d;padding:.4rem .55rem;border-radius:8px;border:1px solid var(--line)}
+.countdown{padding:.9rem;border-radius:14px;border:1px solid rgba(255,176,32,.35);background:rgba(255,176,32,.07);margin-bottom:1rem}
+.cd-head{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.55rem}
+.cd-head b{font-size:.9rem}
+.toggle{display:flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--muted);cursor:pointer}
+.toggle input{width:auto;accent-color:var(--fire)}
+.track{height:7px;border-radius:99px;background:#2a0e15;overflow:hidden;border:1px solid var(--line)}
+#bar{height:100%;width:0;background:linear-gradient(90deg,var(--fire),var(--fire2),var(--amber));transition:width .12s linear}
+.actions{display:flex;gap:.55rem;flex-wrap:wrap}
+.primary{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff}
+.primary:hover{box-shadow:0 12px 30px rgba(255,107,53,.35)}
+.danger{border-color:rgba(230,57,70,.55);color:#ff9aa2;background:rgba(230,57,70,.1)}
+.ghost{background:transparent}
+.side{display:grid;gap:.8rem}
+.stat{padding:1rem;border-radius:15px;border:1px solid var(--line);background:rgba(38,13,20,.7);position:relative;overflow:hidden}
+.stat:before{content:"";position:absolute;inset:auto -30% -60% auto;width:180px;height:180px;background:radial-gradient(circle,rgba(255,107,53,.28),transparent 65%)}
+.stat b{display:block;font-size:1.5rem;color:var(--fire2);font-family:ui-monospace,monospace}
+.stat span{font-size:.8rem;color:var(--muted)}
+.stat p{margin:.45rem 0 0;font-size:.8rem;color:var(--muted)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.65rem;margin:.8rem 0}
+.check{padding:.8rem;border-radius:13px;border:1px solid var(--line);background:#20080d;border-left:4px solid var(--line2)}
+.check.ok{border-left-color:var(--green)}.check.warn{border-left-color:var(--amber)}.check.fail{border-left-color:var(--red)}.check.run{border-left-color:var(--blue)}
+.check b{display:block;font-size:.84rem}
+.check span{display:block;font-size:.76rem;color:var(--muted);margin-top:.2rem;word-break:break-word}
+.hint{font-size:.78rem;color:var(--dim);margin:.6rem 0 0}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem}
+.tip{padding:1rem;border-radius:15px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c)}
+.tip b{display:block;color:var(--fire2);margin-bottom:.35rem}
+.tip p{margin:0;font-size:.84rem;color:var(--muted)}
+footer{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1.2rem clamp(1rem,4vw,2.6rem);border-top:1px solid var(--line);background:rgba(18,5,7,.7);font-size:.8rem;color:var(--dim)}
+#toasts{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%);z-index:60;display:grid;gap:.5rem;width:min(560px,92vw)}
+.toast{padding:.8rem 1rem;border-radius:14px;background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:800;box-shadow:0 16px 44px rgba(0,0,0,.55);animation:toastIn .35s var(--ease),toastOut .35s var(--ease) forwards;animation-delay:0s,4.2s}
+.toast.ok{background:linear-gradient(135deg,var(--green),#1a9e63)}
+.toast.warn{background:linear-gradient(135deg,var(--amber),#c07a1f);color:#1a0609}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(20px)}}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+@media(max-width:640px){.brand small{display:none}.top{padding:.7rem 1rem}.actions button{flex:1;min-width:140px}.cd-head{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#embers{display:none}}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="flame">🔥</div>
-  <h1>Erreur 404</h1>
-  <p>Chemin introuvable. Retour automatique à l'application prédictive.</p>
-  <code id="target">…</code>
-  <a class="btn" id="home" href="./">🏠 Accueil application</a>
-  <button onclick="location.reload()">🔄 Réessayer</button>
+<canvas id="embers" aria-hidden="true"></canvas>
+<div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div><div class="grain"></div>
+
+<div class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2c.6 4-2 5.6-3.3 8-1.4 2.5-1.1 5.4.8 7.2-.3-2.2.8-3.7 2.2-5 .5 2.7 3.3 4 3.3 7.2 0 2.7-1.9 4.9-4.6 5.3 4 .3 7.6-2.8 7.6-7.2C19 12 15 9.8 13 2z" fill="#fff4ef"/><path d="M10.8 14.2c-1.1 1.3-1.6 2.6-1.2 4 .4 1.5 1.8 2.6 3.3 2.6 1.9 0 3.4-1.4 3.4-3.3 0-1.8-1.4-3-2.2-4.5-.5 1.4-1.6 2-3.3 1.2z" fill="#ffd166"/></svg></span>
+    <span>Étude incendie<small>Technique by Kevin · 404 sécurisé</small></span>
+  </div>
+  <div class="pills">
+    <span class="pill info" id="modeBadge"><i></i>Mode…</span>
+    <span class="pill" id="netBadge"><i></i>Réseau…</span>
+    <span class="pill" id="swBadge"><i></i>Cache…</span>
+  </div>
 </div>
+
+<main class="shell">
+  <section class="card hero">
+    <div>
+      <div class="eyebrow">Erreur 404 · chemin introuvable</div>
+      <div class="big404" aria-hidden="true">404</div>
+      <h1>Cette piste n’existe pas.<br><em>Retour au foyer.</em></h1>
+      <p class="lead">L’URL demandée est absente du projet ou provient d’un ancien cache APK. La page vous ramène automatiquement vers l’application, avec réparation possible du cache et du service worker.</p>
+      <div class="readout">
+        <div><span>URL demandée</span><code id="requested">—</code></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div><span>Destination application</span><code id="target">—</code></div>
+      </div>
+      <div class="countdown">
+        <div class="cd-head">
+          <b id="countText" aria-live="polite">Préparation de la redirection…</b>
+          <label class="toggle"><input type="checkbox" id="autoToggle" checked> Redirection automatique</label>
+        </div>
+        <div class="track"><div id="bar"></div></div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="goBtn">🔥 Ouvrir l’application</button>
+        <button id="retryBtn">🔄 Réessayer</button>
+        <button id="backBtn">← Retour</button>
+        <button id="shareBtn">↗ Partager</button>
+        <button class="danger" id="repairBtn">🛠️ Réparer cache APK</button>
+        <button class="ghost" id="diagBtn">🩺 Diagnostic</button>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="stat"><b>404</b><span>Erreur de chemin</span><p>Fréquent après renommage de fichiers ou changement d’URL de lancement dans l’APK.</p></div>
+      <div class="stat"><b>APK</b><span>Cache / service worker</span><p>Un ancien service worker peut conserver une version périmée. La réparation force une version saine.</p></div>
+      <div class="stat"><b>Local</b><span>Données préservées</span><p>La réparation supprime les caches web, pas vos fiches locales, réglages ou accès enregistrés.</p></div>
+    </aside>
+  </section>
+
+  <section class="card" id="diagPanel" hidden>
+    <div class="eyebrow">Auto-vérification intégrée</div>
+    <h2>Diagnostic 404 / APK / cache</h2>
+    <div class="checks" id="checks"></div>
+    <div class="row">
+      <button class="primary" id="runBtn">🩺 Relancer les contrôles</button>
+      <button id="forceBtn">🔄 Forcer la mise à jour</button>
+      <button id="copyBtn">📋 Copier le rapport</button>
+    </div>
+    <p class="hint">La réparation supprime les caches web et désinstalle le service worker, puis recharge l’application. Les données locales sont conservées.</p>
+  </section>
+
+  <section class="card">
+    <div class="eyebrow">Causes fréquentes</div>
+    <div class="tips">
+      <div class="tip"><b>📦 Ancien cache APK</b><p>L’APK charge encore une version précédente. Utilisez « Réparer cache APK » puis rouvrez l’application.</p></div>
+      <div class="tip"><b>🔗 URL de lancement erronée</b><p>Le raccourci pointe vers un fichier supprimé. La redirection renvoie vers la racine stable du projet.</p></div>
+      <div class="tip"><b>🌐 Fichier manquant en ligne</b><p>Si <code>index.html</code> est absent du dépôt, la redirection échouera : vérifiez le déploiement GitHub Pages.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>🔥 Étude incendie technique — by Kevin · Page 404 autonome</span>
+  <span id="version">404-2.0.0</span>
+</footer>
+<div id="toasts" aria-live="polite"></div>
+
 <script>
 (function(){
-  var seg = location.pathname.split("/").filter(Boolean);
-  var root = "/" + (seg[0] || "") + "/";
-  var t = document.getElementById("target");
-  if (t) t.textContent = location.origin + root;
-  var h = document.getElementById("home");
-  if (h) h.href = root;
-  setTimeout(function(){ location.replace(root); }, 2500);
+"use strict";
+var D=document,W=window,VERSION="404-2.0.0";
+function seg(){var p=location.pathname.split("/").filter(Boolean);return (p[0]&&p[0].indexOf(".")<0)?p[0]:"";}
+var ROOT="/"+(seg()?seg()+"/":""),ABS=location.origin+ROOT;
+var TOTAL=5000,remaining=TOTAL,auto=true,redirected=false,busy=false,last=performance.now(),checks=[];
+function $(s){return D.querySelector(s);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function toast(msg,kind){var t=D.createElement("div");t.className="toast"+(kind?" "+kind:"");t.textContent=msg;$("#toasts").appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},4700);}
+function isAPK(){try{return D.referrer.indexOf("android-app://")===0||W.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}}
+function sstore(k,v){try{sessionStorage.setItem(k,v);}catch(e){}}
+function sread(k,d){try{return sessionStorage.getItem(k)||d;}catch(e){return d;}}
+function netBadge(){var b=$("#netBadge");b.innerHTML="<i></i>"+(navigator.onLine?"En ligne":"Hors ligne");b.className="pill "+(navigator.onLine?"ok":"warn");}
+function modeBadge(){var b=$("#modeBadge");b.innerHTML="<i></i>"+(isAPK()?"APK / PWA":"Navigateur");b.className="pill "+(isAPK()?"ok":"info");}
+function setBusy(v){busy=v;["goBtn","retryBtn","repairBtn","forceBtn","runBtn"].forEach(function(id){var b=$("#"+id);if(b)b.disabled=v;});}
+function redirect(reason){
+  if(redirected)return;redirected=true;auto=false;
+  sstore("eik404-last",String(Date.now()));
+  $("#countText").textContent="Redirection vers l’application…";
+  location.replace(ABS+"?from=404&t="+Date.now()+(reason?"&reason="+encodeURIComponent(reason):""));
+}
+function loopGuard(){
+  var now=Date.now(),hits=parseInt(sread("eik404-hits","0"),10)||0,lastHit=parseInt(sread("eik404-hit-time","0"),10)||0;
+  if(now-lastHit>25000)hits=0;
+  hits++;sstore("eik404-hits",String(hits));sstore("eik404-hit-time",String(now));
+  var path=location.pathname,atRoot=(path===ROOT||path===ROOT+"index.html");
+  if(hits>2||atRoot){
+    auto=false;$("#autoToggle").checked=false;
+    $("#countText").textContent="Boucle de redirection détectée — choisissez Réparer ou Ouvrir l’application.";
+    $("#bar").style.width="100%";$("#bar").style.background="linear-gradient(90deg,#e63946,#ffb020)";
+    toast("Boucle détectée : redirection automatique désactivée.","warn");
+    return true;
+  }
+  return false;
+}
+function tick(now){
+  if(!redirected){
+    var dt=now-last;last=now;
+    if(auto&&!busy){remaining=Math.max(0,remaining-dt);$("#bar").style.width=((1-remaining/TOTAL)*100)+"%";$("#countText").textContent="Redirection dans "+(remaining/1000).toFixed(1)+" s";}
+    else if(!auto&&!busy){$("#countText").textContent="Redirection automatique en pause";}
+    if(auto&&remaining<=0)redirect("auto");
+  }
+  requestAnimationFrame(tick);
+}
+async function probe(url){
+  try{var r=await fetch(url,{method:"HEAD",cache:"no-store"});if(r.status===405)throw new Error("HEAD");return r;}
+  catch(e){return fetch(url,{method:"GET",cache:"no-store"});}
+}
+function addCheck(label,status,detail){checks.push({label:label,status:status,detail:detail||"",ts:Date.now()});renderChecks();}
+function renderChecks(){
+  $("#checks").innerHTML=checks.map(function(c){return '<div class="check '+c.status+'"><b>'+esc((c.status==="ok"?"✅ ":c.status==="warn"?"⚠️ ":c.status==="fail"?"❌ ":" ")+c.label)+'</b><span>'+esc(c.detail)+'</span></div>';}).join("");
+}
+async function runChecks(){
+  if(busy)return;checks=[];renderChecks();
+  addCheck("Réseau",navigator.onLine?"ok":"warn",navigator.onLine?"En ligne":"Hors ligne — diagnostic limité");
+  modeBadge();netBadge();
+  try{var st=await navigator.serviceWorker.getRegistration(ROOT);$("#swBadge").innerHTML="<i></i>"+(st?"SW actif":"SW absent");$("#swBadge").className="pill "+(st?"ok":"warn");addCheck("Service worker",st?"ok":"warn",st?(st.active?"actif sur "+st.scope:"installé mais non actif"):"aucun service worker sur ce périmètre");}catch(e){addCheck("Service worker","warn",e.message);}
+  try{var ks=await caches.keys();addCheck("Caches web",ks.length?"ok":"warn",ks.length?ks.join(", "):"aucun cache");}catch(e){addCheck("Caches web","warn","API Cache indisponible");}
+  addCheck("Cible application","run","Test de "+ABS);
+  try{var r=await probe(ABS);checks.pop();renderChecks();addCheck("Cible application",r.ok?"ok":"fail","HTTP "+r.status+" — "+ABS);}catch(e){checks.pop();renderChecks();addCheck("Cible application","fail","Inaccessible : "+e.message);}
+  try{var m=await fetch(ABS+"manifest.json?diag="+Date.now(),{cache:"no-store"});if(!m.ok)throw new Error("HTTP "+m.status);var j=await m.json();addCheck("Manifeste PWA",j.start_url&&j.icons?"ok":"warn",j.name+" · start_url "+j.start_url);}catch(e){addCheck("Manifeste PWA","fail",e.message);}
+  try{localStorage.setItem("eik404-test","ok");localStorage.removeItem("eik404-test");addCheck("Stockage local","ok","Lecture / écriture disponibles");}catch(e){addCheck("Stockage local","fail","localStorage bloqué");}
+  addCheck("Mode d’ouverture",isAPK()?"ok":"warn",isAPK()?"APK / PWA détecté":"navigateur web");
+  toast("🩺 Diagnostic terminé");
+}
+async function repair(){
+  if(busy)return;setBusy(true);auto=false;$("#autoToggle").checked=false;
+  $("#countText").textContent="Réparation du cache et du service worker…";
+  toast("🛠️ Nettoyage des caches web…","warn");
+  var removed=0,unreg=0;
+  try{if(W.caches){var ks=await caches.keys();removed=ks.length;await Promise.all(ks.map(function(k){return caches.delete(k);}));}}catch(e){}
+  try{if("serviceWorker" in navigator){var regs=await navigator.serviceWorker.getRegistrations();unreg=regs.length;await Promise.all(regs.map(function(r){return r.unregister();}));}}catch(e){}
+  toast("✅ "+removed+" cache(s) et "+unreg+" service worker(s) supprimés.","ok");
+  $("#countText").textContent="Rechargement de l’application…";
+  setTimeout(function(){redirect("repaired");},900);
+}
+async function forceUpdate(){
+  if(busy)return;setBusy(true);auto=false;$("#autoToggle").checked=false;
+  $("#countText").textContent="Mise à jour forcée du service worker…";
+  try{if("serviceWorker" in navigator){var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(async function(r){try{await r.update();if(r.waiting)r.waiting.postMessage("SKIP_WAITING");}catch(e){}}));}}catch(e){}
+  toast("🔄 Mise à jour demandée.","ok");
+  setTimeout(function(){redirect("update");},800);
+}
+function report(){return {version:VERSION,requested:location.href,target:ABS,mode:isAPK()?"apk-pwa":"web",online:navigator.onLine,userAgent:navigator.userAgent,checks:checks,timestamp:new Date().toISOString()};}
+function copyReport(){
+  var txt=JSON.stringify(report(),null,2);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast("📋 Rapport copié","ok");}).catch(function(){fallbackCopy(txt);});}
+  else fallbackCopy(txt);
+}
+function fallbackCopy(txt){var ta=D.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;left:-9999px";D.body.appendChild(ta);ta.select();try{D.execCommand("copy");toast("📋 Rapport copié","ok");}catch(e){prompt("Copiez le rapport :",txt);}ta.remove();}
+function share(){
+  var data={title:"Étude incendie technique by Kevin",text:"Application Étude incendie technique by Kevin",url:ABS};
+  if(navigator.share){navigator.share(data).then(function(){toast("↗ Partage effectué","ok");}).catch(function(){toast("Partage annulé","warn");});}
+  else if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ABS).then(function(){toast("🔗 Lien copié","ok");}).catch(function(){prompt("Lien à partager :",ABS);});}
+  else prompt("Lien à partager :",ABS);
+}
+function embers(){
+  var c=$("#embers");if(!c||!c.getContext)return;
+  if(W.matchMedia&&W.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  var x=c.getContext("2d"),ps=[],raf=null,w=0,h=0;
+  function size(){var d=Math.min(W.devicePixelRatio||1,1.5);w=W.innerWidth;h=W.innerHeight;c.width=Math.round(w*d);c.height=Math.round(h*d);x.setTransform(d,0,0,d,0,0);}
+  size();W.addEventListener("resize",size);
+  for(var i=0;i<30;i++)ps.push({x:Math.random()*w,y:Math.random()*h,r:1+Math.random()*2.4,s:.22+Math.random()*.7,a:.12+Math.random()*.45,d:Math.random()*6.28});
+  function loop(){x.clearRect(0,0,w,h);ps.forEach(function(p){p.y-=p.s;p.x+=Math.sin(p.d+p.y*.012)*.32;if(p.y<-12){p.y=h+12;p.x=Math.random()*w;}var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3.4);g.addColorStop(0,"rgba(255,154,61,"+p.a+")");g.addColorStop(1,"rgba(255,107,53,0)");x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,p.r*3.4,0,6.283);x.fill();});raf=requestAnimationFrame(loop);}
+  loop();
+  D.addEventListener("visibilitychange",function(){if(D.hidden){if(raf)cancelAnimationFrame(raf);raf=null;}else if(!raf){last=performance.now();loop();}});
+}
+function bind(){
+  $("#requested").textContent=location.href;$("#target").textContent=ABS;$("#version").textContent=VERSION;
+  $("#goBtn").onclick=function(){redirect("manual");};
+  $("#retryBtn").onclick=function(){auto=false;location.reload();};
+  $("#backBtn").onclick=function(){auto=false;if(history.length>1)history.back();else redirect("back");};
+  $("#shareBtn").onclick=share;
+  $("#repairBtn").onclick=repair;
+  $("#forceBtn").onclick=forceUpdate;
+  $("#runBtn").onclick=runChecks;
+  $("#copyBtn").onclick=copyReport;
+  $("#diagBtn").onclick=function(){var p=$("#diagPanel");p.hidden=!p.hidden;if(!p.hidden){auto=false;$("#autoToggle").checked=false;runChecks();p.scrollIntoView({behavior:"smooth",block:"start"});}};
+  $("#autoToggle").onchange=function(){auto=this.checked&&!busy;if(auto&&remaining<=0)remaining=TOTAL;last=performance.now();};
+  W.addEventListener("online",function(){netBadge();toast("🟢 Réseau revenu","ok");if(!$("#diagPanel").hidden)runChecks();});
+  W.addEventListener("offline",function(){netBadge();toast("🟠 Hors ligne — base locale","warn");});
+  D.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#diagPanel").hidden)$("#diagPanel").hidden=true;if(e.key==="Enter"&&e.target===D.body)redirect("keyboard");});
+}
+function boot(){
+  modeBadge();netBadge();bind();embers();
+  if("serviceWorker" in navigator){navigator.serviceWorker.getRegistration(ROOT).then(function(r){$("#swBadge").innerHTML="<i></i>"+(r?"SW actif":"SW absent");$("#swBadge").className="pill "+(r?"ok":"warn");}).catch(function(){$("#swBadge").innerHTML="<i></i>SW ?";$("#swBadge").className="pill warn";});}
+  loopGuard();last=performance.now();requestAnimationFrame(tick);
+}
+boot();
 })();
 </script>
 </body>
