@@ -1,0 +1,65 @@
+/* KEVIN PRO v1 — recherche, galerie, présentation */
+#kpFilters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:0 0 1rem;padding:.8rem;background:rgba(26,11,16,.85);border:1px solid #4a1a24;border-radius:14px;backdrop-filter:blur(6px)}
+#kpFilters select,#kpFilters input{padding:.5rem .7rem;border-radius:10px;border:1px solid #5a2330;background:#241016;color:#f5e9ea;font-size:.85rem;max-width:230px}
+#kpFilters input{flex:1;min-width:180px}
+#kpFilters button{padding:.5rem .8rem;border-radius:10px;border:1px solid #5a2330;background:#241016;color:#f5e9ea;cursor:pointer;font-size:.85rem}
+#kpFilters button:hover{border-color:#ff6b35}
+.kp-primary{background:linear-gradient(135deg,#8f1d2c,#c0392b)!important;border-color:#c0392b!important;color:#fff!important;font-weight:700}
+.kp-count{font-size:.8rem;color:#ffb59d;font-weight:700;margin-left:auto}
+.kp-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1rem}
+.kp-card{background:linear-gradient(160deg,#241016,#1a0b10);border:1px solid #4a1a24;border-radius:16px;padding:1rem;display:flex;flex-direction:column;gap:.5rem;animation:kpIn .45s both;transition:transform .25s,box-shadow .25s,border-color .25s}
+.kp-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.45);border-color:#8f1d2c}
+@keyframes kpIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.kp-card-top{display:flex;justify-content:space-between;gap:.5rem;font-size:.72rem;font-weight:700;padding:.35rem .6rem;border-radius:8px}
+.kp-th{background:linear-gradient(90deg,rgba(143,29,44,.5),rgba(192,57,43,.25));color:#ffd7dc}
+.kp-ev{background:linear-gradient(90deg,rgba(21,101,192,.45),rgba(21,101,192,.15));color:#cfe3ff}
+.kp-card h4{margin:.2rem 0;font-size:1rem;line-height:1.3;color:#fff}
+.kp-cause{margin:0;font-size:.82rem;color:#d8c2c5;flex:1}
+.kp-tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.kp-tag{font-size:.68rem;padding:.15rem .5rem;border-radius:999px;background:#2c141b;border:1px solid #4a1a24;color:#ffb59d}
+.kp-dtc{border-color:#c07a1f;color:#ffd9a0}
+.kp-actions{display:flex;gap:.4rem}
+.kp-actions button{flex:1;padding:.45rem;border-radius:9px;border:1px solid #5a2330;background:#241016;color:#f5e9ea;cursor:pointer;font-size:.8rem}
+.kp-more{font-size:.8rem;color:#d8c2c5;border-top:1px dashed #4a1a24;padding-top:.5rem}
+.kp-more a{color:#ffb59d}
+.kp-predict{position:absolute;top:100%;left:0;right:0;z-index:900;max-height:60vh;overflow:auto;background:rgba(20,8,12,.97);border:1px solid #8f1d2c;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.6);backdrop-filter:blur(8px);margin-top:.3rem}
+.kp-modal{position:fixed;top:15vh;left:5vw;right:5vw}
+.kp-chips{display:flex;flex-wrap:wrap;gap:.35rem;padding:.6rem;border-bottom:1px solid #4a1a24;align-items:center}
+.kp-chips-lbl{font-size:.72rem;color:#ffb59d;font-weight:700}
+.kp-chip{font-size:.72rem;padding:.2rem .6rem;border-radius:999px;border:1px solid #8f1d2c;background:#2c141b;color:#ffd7dc;cursor:pointer}
+.kp-chip:hover{background:#8f1d2c;color:#fff}
+.kp-group{padding:.45rem .7rem .2rem;font-size:.7rem;font-weight:800;letter-spacing:.05em;color:#ffb59d;text-transform:uppercase}
+.kp-item{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem .8rem;cursor:pointer;border-left:3px solid transparent}
+.kp-item span{font-size:.85rem;color:#f5e9ea}
+.kp-item small{font-size:.7rem;color:#a98a8e;white-space:nowrap}
+.kp-item:hover,.kp-item.active{background:#2c141b;border-left-color:#ff6b35}
+.kp-empty{padding:.9rem;font-size:.85rem;color:#a98a8e}
+#kpDeck{position:fixed;inset:0;z-index:2000;background:radial-gradient(1200px 700px at 50% -10%,#5a1420,#160609 70%);display:flex;flex-direction:column;color:#fff}
+#kpDeck[hidden]{display:none}
+.kp-deck-bar{height:5px;background:#2c141b}
+#kpProgress{height:100%;width:0;background:linear-gradient(90deg,#ff6b35,#ffb59d);transition:width .35s}
+.kp-deck-head{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;font-weight:700;font-size:.9rem;gap:.6rem}
+.kp-deck-btns{display:flex;gap:.4rem}
+.kp-deck-btns button,.kp-deck-nav button,.kp-deck-foot button{padding:.45rem .8rem;border-radius:10px;border:1px solid #5a2330;background:rgba(36,16,22,.8);color:#fff;cursor:pointer;font-size:.85rem}
+.kp-deck-btns button:hover,.kp-deck-nav button:hover,.kp-deck-foot button:hover{border-color:#ff6b35}
+.kp-slide{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:900px;width:92%;margin:0 auto;padding:1rem}
+.kp-anim{animation:kpSlide .4s both}
+@keyframes kpSlide{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.kp-slide h3{font-size:1.1rem;color:#ffb59d;text-transform:uppercase;letter-spacing:.06em}
+.kp-body{font-size:clamp(1.1rem,2.6vw,1.7rem);line-height:1.55;font-weight:600}
+.kp-cover{text-align:center}
+.kp-cover h2{font-size:clamp(1.6rem,4.5vw,2.6rem);margin:.6rem 0}
+.kp-energy-big{display:inline-block;padding:.35rem .9rem;border-radius:999px;font-size:.8rem;font-weight:800;letter-spacing:.08em}
+.kp-hint{font-size:.8rem;color:#a98a8e}
+.kp-src{color:#ffb59d;font-size:1.1rem;font-weight:700}
+.kp-deck-nav{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1rem;gap:.6rem}
+#kpDots{display:flex;gap:.35rem}
+.kp-dot{width:9px;height:9px;border-radius:50%;background:#4a1a24;transition:background .3s,transform .3s}
+.kp-dot.on{background:#ff6b35;transform:scale(1.25)}
+.kp-deck-foot{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem 1rem;font-size:.8rem;color:#d8c2c5;gap:.6rem}
+.kp-overview{position:absolute;inset:60px 0 0;overflow:auto;background:rgba(12,4,7,.96);padding:1rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.7rem;align-content:start}
+.kp-overview[hidden]{display:none}
+.kp-ov{text-align:left;padding:.8rem;border-radius:12px;border:1px solid #4a1a24;background:#241016;color:#fff;cursor:pointer;display:flex;flex-direction:column;gap:.3rem}
+.kp-ov.active{border-color:#ff6b35}
+.kp-ov small{color:#a98a8e}
+@media(max-width:640px){#kpFilters select{max-width:48%;flex:1}.kp-deck-foot{flex-wrap:wrap}.kp-slide{width:96%}}
