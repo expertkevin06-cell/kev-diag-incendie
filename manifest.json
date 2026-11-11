@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Etude incendie by Kevin — Auto-vérification APK",
   "short_name": "EtudeIncendie",
-  "description": "Connexion admin corrigée, auto-vérification APK/web/connexions/partage, analyse causale, base locale hors ligne.",
+  "description": "Connexion admin corrigée, auto-vérification APK/web/connexions/partage, analyse causale des pannes connues, base locale hors ligne.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
@@ -12,11 +12,42 @@
   "theme_color": "#120507",
   "categories": ["education", "reference", "productivity"],
   "icons": [
-    {"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+    {
+      "src": "images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ],
   "shortcuts": [
-    {"name": "Analyser courroie humide", "url": "./?analyse=courroie%20humide"},
-    {"name": "Auto-vérification", "url": "./?action=diag"}
+    {
+      "name": "Analyser courroie humide",
+      "short_name": "Analyse",
+      "url": "./?analyse=courroie%20humide",
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Auto-vérification complète",
+      "short_name": "Vérifier",
+      "url": "./tools/verify.html",
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Icônes APK PNG",
+      "short_name": "Icônes",
+      "url": "./tools/icon-gen.html",
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Liaison APK AssetLinks",
+      "short_name": "AssetLinks",
+      "url": "./tools/assetlinks.html",
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
   ],
-  "share_target": {"action": "./", "method": "GET", "params": {"text": "q"}}
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": { "text": "q" }
+  }
 }
