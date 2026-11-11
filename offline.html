@@ -1,36 +1,339 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#120507">
-<title>Hors ligne — Étude incendie prédictive</title>
-<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Mode hors ligne — Étude incendie technique by Kevin. Base locale, catalogue véhicules et analyse causale restent disponibles.">
+<title>Hors ligne — Étude incendie technique by Kevin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120507'/%3E%3Cpath fill='%232f9bff' d='M34 8c2 10-5 14-8 20-4 7-3 14 2 18-1-6 2-9 6-12 1 7 8 10 8 18 0 7-5 12-12 13 10 1 19-7 19-18C49 33 39 28 34 8z'/%3E%3C/svg%3E">
 <style>
-:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--text:#fff4ef;--muted:#c9a9a4}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(900px 600px at 50% -10%,#3a0d18,#120507 65%);color:var(--text);font-family:Inter,system-ui,sans-serif;text-align:center;padding:1.2rem}
-.card{max-width:560px;background:linear-gradient(160deg,var(--surface),#1d080d);border:1px solid var(--line);border-radius:22px;padding:2rem;box-shadow:0 24px 70px rgba(0,0,0,.5)}
-.flame{font-size:3.4rem}h1{margin:.6rem 0;font-size:1.7rem}p{color:var(--muted)}
-button,a.btn{display:inline-block;cursor:pointer;border:1px solid var(--line);background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:900;border-radius:12px;padding:.75rem 1.1rem;text-decoration:none;margin:.3rem}
-.pill{display:inline-block;font-size:.75rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--line);color:var(--fire2);margin-top:.8rem}
+:root{
+  --bg:#071019;--bg2:#0b1a26;--surface:#0f2233;--surface2:#14304a;--overlay:rgba(4,10,16,.86);
+  --line:#1c3a55;--line2:#2a5278;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--blue:#2f9bff;
+  --green:#39d98a;--amber:#ffb020;--violet:#b16dff;--text:#eef7ff;--muted:#a9c4d8;--dim:#6f8ba0;
+  --r:18px;--shadow:0 22px 60px rgba(0,0,0,.5);--ease:cubic-bezier(.22,.9,.25,1)
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5;overflow-x:hidden}
+::selection{background:var(--blue);color:#04101a}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:#081521}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--violet));border-radius:99px;border:2px solid #081521}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#6fc0ff,var(--blue))}
+*{scrollbar-width:thin;scrollbar-color:var(--blue) #081521}
+a{color:#8fd0ff}
+button,input{font:inherit}
+button{cursor:pointer;border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:12px;padding:.65rem .95rem;font-weight:700;transition:transform .18s var(--ease),border-color .18s,box-shadow .18s,background .18s}
+button:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 10px 26px rgba(47,155,255,.2)}
+button:active{transform:none}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+#particles{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.7}
+.glow{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:-3}
+.g1{width:560px;height:560px;background:var(--blue);opacity:.2;left:-180px;bottom:-200px;animation:drift 18s ease-in-out infinite alternate}
+.g2{width:480px;height:480px;background:var(--violet);opacity:.14;right:-160px;top:-140px;animation:drift 22s ease-in-out infinite alternate-reverse}
+.g3{width:380px;height:380px;background:var(--green);opacity:.08;left:42%;top:32%;animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(50px,-40px) scale(1.1)}}
+.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.85rem clamp(1rem,4vw,2.6rem);background:rgba(7,16,25,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:.7rem;font-weight:900}
+.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--violet));box-shadow:0 8px 24px rgba(47,155,255,.35)}
+.mark svg{width:24px;height:24px}
+.brand small{display:block;color:#8fd0ff;font-size:.68rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.pills{display:flex;gap:.4rem;flex-wrap:wrap}
+.pill{font-size:.72rem;padding:.3rem .65rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:.35rem}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.pill.ok{color:var(--green);border-color:rgba(57,217,138,.5)}
+.pill.warn{color:var(--amber);border-color:rgba(255,176,32,.5)}
+.pill.fail{color:#ff9aa2;border-color:rgba(230,57,70,.55)}
+.pill.info{color:var(--blue);border-color:rgba(47,155,255,.5)}
+.shell{width:min(1140px,100%);margin:0 auto;padding:clamp(1.4rem,4vw,3rem) clamp(1rem,4vw,2.6rem) 3rem;display:grid;gap:1.2rem}
+.card{background:linear-gradient(160deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:clamp(1.1rem,3vw,1.8rem);box-shadow:var(--shadow);animation:rise .7s var(--ease) both}
+.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.16s}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:1.6rem;align-items:start}
+.eyebrow{color:#8fd0ff;text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:900;margin-bottom:.5rem}
+.big{font-size:clamp(2.6rem,8vw,5.4rem);line-height:.95;font-weight:900;letter-spacing:-.05em;background:linear-gradient(120deg,#8fd0ff,var(--blue) 45%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 10px 30px rgba(47,155,255,.25));margin:.2rem 0 .6rem}
+h1{margin:.2rem 0 .8rem;font-size:clamp(1.4rem,3.2vw,2.1rem);line-height:1.12;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:0 0 .8rem;font-size:1.15rem}
+.lead{color:var(--muted);max-width:620px;margin:0 0 1.2rem}
+.probe{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;padding:1rem;border-radius:15px;border:1px solid var(--line);background:#0b1a26;margin-bottom:1rem}
+.radar{position:relative;width:86px;height:86px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;background:radial-gradient(circle,rgba(47,155,255,.18),transparent 70%)}
+.radar:before,.radar:after{content:"";position:absolute;inset:12px;border-radius:50%;border:1px solid rgba(47,155,255,.35);animation:pulse 2.4s ease-out infinite}
+.radar:after{inset:26px;animation-delay:.8s}
+@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+.radar .dot{width:12px;height:12px;border-radius:50%;background:var(--amber);box-shadow:0 0 18px rgba(255,176,32,.7)}
+.radar.online .dot{background:var(--green);box-shadow:0 0 18px rgba(57,217,138,.7)}
+.probe-info b{display:block;font-size:1rem;margin-bottom:.2rem}
+.probe-info span{display:block;font-size:.82rem;color:var(--muted)}
+.probe-info .meta{margin-top:.4rem;font-family:ui-monospace,monospace;font-size:.74rem;color:var(--dim)}
+.track{height:7px;border-radius:99px;background:#0b1a26;overflow:hidden;border:1px solid var(--line);margin-top:.6rem}
+#bar{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .12s linear}
+.actions{display:flex;gap:.55rem;flex-wrap:wrap}
+.primary{background:linear-gradient(135deg,var(--blue),var(--violet));border-color:transparent;color:#fff}
+.primary:hover{box-shadow:0 12px 30px rgba(47,155,255,.35)}
+.success{background:linear-gradient(135deg,var(--green),#1a9e63);border-color:transparent;color:#04101a}
+.danger{border-color:rgba(230,57,70,.55);color:#ff9aa2;background:rgba(230,57,70,.1)}
+.ghost{background:transparent}
+.side{display:grid;gap:.8rem}
+.stat{padding:1rem;border-radius:15px;border:1px solid var(--line);background:rgba(15,34,51,.7);position:relative;overflow:hidden}
+.stat:before{content:"";position:absolute;inset:auto -30% -60% auto;width:180px;height:180px;background:radial-gradient(circle,rgba(47,155,255,.25),transparent 65%)}
+.stat b{display:block;font-size:1.5rem;color:#8fd0ff;font-family:ui-monospace,monospace}
+.stat span{font-size:.8rem;color:var(--muted)}
+.stat p{margin:.45rem 0 0;font-size:.8rem;color:var(--muted)}
+.works{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem}
+.work{padding:1rem;border-radius:15px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#0b1a26)}
+.work b{display:block;color:#8fd0ff;margin-bottom:.35rem}
+.work p{margin:0;font-size:.84rem;color:var(--muted)}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.65rem;margin:.8rem 0}
+.check{padding:.8rem;border-radius:13px;border:1px solid var(--line);background:#0b1a26;border-left:4px solid var(--line2)}
+.check.ok{border-left-color:var(--green)}.check.warn{border-left-color:var(--amber)}.check.fail{border-left-color:var(--red)}.check.run{border-left-color:var(--blue)}
+.check b{display:block;font-size:.84rem}
+.check span{display:block;font-size:.76rem;color:var(--muted);margin-top:.2rem;word-break:break-word}
+.hint{font-size:.78rem;color:var(--dim);margin:.6rem 0 0}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.toggle{display:flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--muted);cursor:pointer}
+.toggle input{width:auto;accent-color:var(--blue)}
+footer{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;padding:1.2rem clamp(1rem,4vw,2.6rem);border-top:1px solid var(--line);background:rgba(7,16,25,.7);font-size:.8rem;color:var(--dim)}
+#toasts{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%);z-index:60;display:grid;gap:.5rem;width:min(560px,92vw)}
+.toast{padding:.8rem 1rem;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-weight:800;box-shadow:0 16px 44px rgba(0,0,0,.55);animation:toastIn .35s var(--ease),toastOut .35s var(--ease) forwards;animation-delay:0s,4.2s}
+.toast.ok{background:linear-gradient(135deg,var(--green),#1a9e63);color:#04101a}
+.toast.warn{background:linear-gradient(135deg,var(--amber),#c07a1f);color:#1a0609}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(20px)}}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+@media(max-width:640px){.brand small{display:none}.top{padding:.7rem 1rem}.actions button{flex:1;min-width:140px}.probe{grid-template-columns:1fr}.radar{margin:0 auto}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#particles{display:none}}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="flame">🔥</div>
-  <h1>Mode hors ligne actif</h1>
-  <p>L'application reste utilisable avec la base massive embarquée et le moteur prédictif complet.</p>
-  <button onclick="location.reload()">🔄 Réessayer</button>
-  <a class="btn" href="./">🏠 Accueil</a>
-  <div class="pill" id="state">Vérification…</div>
+<canvas id="particles" aria-hidden="true"></canvas>
+<div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div><div class="grain"></div>
+
+<div class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2c.6 4-2 5.6-3.3 8-1.4 2.5-1.1 5.4.8 7.2-.3-2.2.8-3.7 2.2-5 .5 2.7 3.3 4 3.3 7.2 0 2.7-1.9 4.9-4.6 5.3 4 .3 7.6-2.8 7.6-7.2C19 12 15 9.8 13 2z" fill="#eef7ff"/><path d="M10.8 14.2c-1.1 1.3-1.6 2.6-1.2 4 .4 1.5 1.8 2.6 3.3 2.6 1.9 0 3.4-1.4 3.4-3.3 0-1.8-1.4-3-2.2-4.5-.5 1.4-1.6 2-3.3 1.2z" fill="#8fd0ff"/></svg></span>
+    <span>Étude incendie<small>Mode hors ligne · by Kevin</small></span>
+  </div>
+  <div class="pills">
+    <span class="pill info" id="modeBadge"><i></i>Mode…</span>
+    <span class="pill warn" id="netBadge"><i></i>Hors ligne</span>
+    <span class="pill" id="cacheBadge"><i></i>Cache…</span>
+  </div>
 </div>
+
+<main class="shell">
+  <section class="card hero">
+    <div>
+      <div class="eyebrow">Connectivité interrompue · base locale active</div>
+      <div class="big" aria-hidden="true">HORS LIGNE</div>
+      <h1>Le réseau est coupé.<br><em>L’expertise continue.</em></h1>
+      <p class="lead">L’application reste utilisable avec la base massive embarquée, le catalogue véhicules et le moteur d’analyse. La reconnexion est surveillée en continu et relance l’application dès que le réseau revient.</p>
+      <div class="probe" id="probeBox">
+        <div class="radar" id="radar"><span class="dot"></span></div>
+        <div class="probe-info">
+          <b id="probeTitle">Recherche du réseau…</b>
+          <span id="probeText">Sonde de connectivité active — test toutes les 5 secondes.</span>
+          <div class="meta" id="probeMeta">Dernier test : —</div>
+          <div class="track"><div id="bar"></div></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="retryBtn">🔄 Réessayer maintenant</button>
+        <button class="success" id="homeBtn">🏠 Ouvrir l’application</button>
+        <button id="shareBtn">↗ Partager le lien</button>
+        <button class="danger" id="repairBtn">🛠️ Réparer le cache</button>
+        <button class="ghost" id="diagBtn">🩺 Diagnostic</button>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="stat"><b id="cacheCount">—</b><span>fichiers en cache</span><p>Inventaire réel des caches du service worker, lu via l’API CacheStorage.</p></div>
+      <div class="stat"><b id="cacheStores">—</b><span>caches actifs</span><p>Le service worker conserve l’application, les fiches et le catalogue pour le mode hors ligne.</p></div>
+      <div class="stat"><b>100%</b><span>données locales préservées</span><p>La réparation supprime les caches web, pas vos fiches, réglages ou accès enregistrés.</p></div>
+    </aside>
+  </section>
+
+  <section class="card">
+    <div class="eyebrow">Ce qui reste disponible</div>
+    <h2>Fonctionnalités hors ligne</h2>
+    <div class="works">
+      <div class="work"><b>📚 Base massive</b><p>Fiches de pannes, origines, mécanismes, conséquences, preuves et actions correctives.</p></div>
+      <div class="work"><b>🚗 Catalogue véhicules</b><p>Marque, modèle, motorisation et puissance avec corrélations exactes par véhicule.</p></div>
+      <div class="work"><b>🧠 Analyse causale</b><p>Origine → mécanisme → causes racines → conséquences → sécurité → juridique.</p></div>
+      <div class="work"><b>📽️ Présentation</b><p>Diaporama plein écran des fiches et analyses, navigable au clavier ou au doigt.</p></div>
+    </div>
+  </section>
+
+  <section class="card" id="diagPanel" hidden>
+    <div class="eyebrow">Auto-vérification intégrée</div>
+    <h2>Diagnostic hors ligne / cache / reconnexion</h2>
+    <div class="checks" id="checks"></div>
+    <div class="row">
+      <button class="primary" id="runBtn">🩺 Relancer les contrôles</button>
+      <button id="probeBtn">📡 Sonder le réseau</button>
+      <button id="copyBtn">📋 Copier le rapport</button>
+      <label class="toggle"><input type="checkbox" id="autoToggle" checked> Reconnexion automatique</label>
+    </div>
+    <p class="hint">La sonde interroge le manifeste de l’application avec un cache désactivé. Dès qu’il répond, l’application est rechargée automatiquement.</p>
+  </section>
+</main>
+
+<footer>
+  <span>🔥 Étude incendie technique — by Kevin · Page hors ligne autonome</span>
+  <span id="version">offline-2.0.0</span>
+</footer>
+<div id="toasts" aria-live="polite"></div>
+
 <script>
 (function(){
-  var s = document.getElementById("state");
-  function update(){ s.textContent = navigator.onLine ? "🟢 Réseau revenu" : "🟠 Hors ligne — base locale active"; }
-  update();
-  window.addEventListener("online", function(){ update(); setTimeout(function(){ location.replace("./"); }, 900); });
-  window.addEventListener("offline", update);
+"use strict";
+var D=document,W=window,VERSION="offline-2.0.0";
+function seg(){var p=location.pathname.split("/").filter(Boolean);return (p[0]&&p[0].indexOf(".")<0)?p[0]:"";}
+var ROOT="/"+(seg()?seg()+"/":""),ABS=location.origin+ROOT;
+var probing=false,online=false,reconnecting=false,auto=true,probeTimer=null,countTimer=null,countRemaining=3000,lastProbe=0,checks=[];
+function $(s){return D.querySelector(s);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function toast(msg,kind){var t=D.createElement("div");t.className="toast"+(kind?" "+kind:"");t.textContent=msg;$("#toasts").appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},4700);}
+function isAPK(){try{return D.referrer.indexOf("android-app://")===0||W.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}}
+function modeBadge(){var b=$("#modeBadge");b.innerHTML="<i></i>"+(isAPK()?"APK / PWA":"Navigateur");b.className="pill "+(isAPK()?"ok":"info");}
+function netBadge(){var b=$("#netBadge");b.innerHTML="<i></i>"+(online?"En ligne":"Hors ligne");b.className="pill "+(online?"ok":"warn");}
+function setBusy(v){["retryBtn","homeBtn","repairBtn","runBtn","probeBtn"].forEach(function(id){var b=$("#"+id);if(b)b.disabled=v;});}
+function goHome(reason){
+  if(reconnecting)return;reconnecting=true;
+  location.replace(ABS+"?from=offline&t="+Date.now()+(reason?"&reason="+encodeURIComponent(reason):""));
+}
+async function fetchProbe(){
+  var ctrl=new AbortController(),to=setTimeout(function(){ctrl.abort();},4000);
+  try{
+    var r=await fetch(ABS+"manifest.json?ping="+Date.now(),{method:"HEAD",cache:"no-store",signal:ctrl.signal});
+    if(r.status===405){r=await fetch(ABS+"manifest.json?ping="+Date.now(),{method:"GET",cache:"no-store",signal:ctrl.signal});}
+    return r.ok;
+  }catch(e){return false;}
+  finally{clearTimeout(to);}
+}
+async function doProbe(manual){
+  if(probing||reconnecting)return;probing=true;lastProbe=Date.now();
+  $("#probeTitle").textContent="Sonde réseau en cours…";
+  $("#probeText").textContent="Interrogation du manifeste de l’application (cache désactivé).";
+  $("#probeMeta").textContent="Dernier test : "+new Date().toLocaleTimeString("fr-FR");
+  var ok=await fetchProbe();probing=false;online=ok;netBadge();
+  if(ok){
+    $("#radar").classList.add("online");
+    $("#probeTitle").textContent="Réseau détecté — reconnexion";
+    $("#probeText").textContent="L’application va être rechargée automatiquement.";
+    toast("🟢 Réseau revenu","ok");
+    if(auto)startReconnect();else{$("#probeTitle").textContent="Réseau détecté — reconnexion en pause";$("#probeText").textContent="Activez la reconnexion automatique ou ouvrez l’application.";}
+  }else{
+    $("#radar").classList.remove("online");
+    $("#probeTitle").textContent="Toujours hors ligne";
+    $("#probeText").textContent="Base locale active. Nouvelle tentative dans 5 secondes.";
+    if(manual)toast("🟠 Réseau indisponible — base locale active","warn");
+  }
+}
+function startReconnect(){
+  if(reconnecting||!auto)return;
+  var start=performance.now(),total=3000;
+  $("#probeTitle").textContent="Reconnexion dans 3,0 s";
+  function step(now){
+    if(reconnecting)return;
+    var left=Math.max(0,total-(now-start));
+    $("#bar").style.width=((1-left/total)*100)+"%";
+    $("#probeTitle").textContent="Reconnexion dans "+(left/1000).toFixed(1)+" s";
+    if(left<=0){goHome("reconnected");return;}
+    countTimer=requestAnimationFrame(step);
+  }
+  countTimer=requestAnimationFrame(step);
+}
+function stopReconnect(){if(countTimer)cancelAnimationFrame(countTimer);countTimer=null;$("#bar").style.width="0";}
+async function cacheInventory(){
+  try{
+    if(!W.caches){$("#cacheCount").textContent="0";$("#cacheStores").textContent="0";$("#cacheBadge").innerHTML="<i></i>Cache indisponible";$("#cacheBadge").className="pill warn";return;}
+    var ks=await caches.keys(),total=0;
+    for(var i=0;i<ks.length;i++){var c=await caches.open(ks[i]);var keys=await c.keys();total+=keys.length;}
+    $("#cacheCount").textContent=String(total);$("#cacheStores").textContent=String(ks.length);
+    $("#cacheBadge").innerHTML="<i></i>"+total+" fichiers";$("#cacheBadge").className="pill "+(total?"ok":"warn");
+  }catch(e){$("#cacheCount").textContent="?";$("#cacheStores").textContent="?";$("#cacheBadge").innerHTML="<i></i>Cache ?";$("#cacheBadge").className="pill warn";}
+}
+async function repair(){
+  setBusy(true);auto=false;$("#autoToggle").checked=false;stopReconnect();
+  toast("🛠️ Nettoyage des caches web…","warn");
+  var removed=0,unreg=0;
+  try{if(W.caches){var ks=await caches.keys();removed=ks.length;await Promise.all(ks.map(function(k){return caches.delete(k);}));}}catch(e){}
+  try{if("serviceWorker" in navigator){var regs=await navigator.serviceWorker.getRegistrations();unreg=regs.length;await Promise.all(regs.map(function(r){return r.unregister();}));}}catch(e){}
+  await cacheInventory();
+  toast("✅ "+removed+" cache(s) et "+unreg+" service worker(s) supprimés.","ok");
+  setBusy(false);
+  if(navigator.onLine)goHome("repaired");else{auto=true;$("#autoToggle").checked=true;doProbe(true);}
+}
+function addCheck(label,status,detail){checks.push({label:label,status:status,detail:detail||"",ts:Date.now()});renderChecks();}
+function renderChecks(){
+  $("#checks").innerHTML=checks.map(function(c){return '<div class="check '+c.status+'"><b>'+esc((c.status==="ok"?"✅ ":c.status==="warn"?"⚠️ ":c.status==="fail"?"❌ ":"🔎 ")+c.label)+'</b><span>'+esc(c.detail)+'</span></div>';}).join("");
+}
+async function runChecks(){
+  checks=[];renderChecks();
+  addCheck("Réseau",online?"ok":"warn",online?"En ligne":"Hors ligne — base locale active");
+  addCheck("Mode d’ouverture",isAPK()?"ok":"warn",isAPK()?"APK / PWA détecté":"navigateur web");
+  try{var st=await navigator.serviceWorker.getRegistration(ROOT);addCheck("Service worker",st?"ok":"warn",st?(st.active?"actif sur "+st.scope:"installé mais non actif"):"aucun service worker sur ce périmètre");}catch(e){addCheck("Service worker","warn",e.message);}
+  try{var ks=await caches.keys(),total=0;for(var i=0;i<ks.length;i++){var c=await caches.open(ks[i]);total+=(await c.keys()).length;}addCheck("Cache hors ligne",total?"ok":"warn",total+" fichiers · "+ks.length+" caches");}catch(e){addCheck("Cache hors ligne","warn","API Cache indisponible");}
+  try{localStorage.setItem("offline-test","ok");localStorage.removeItem("offline-test");addCheck("Stockage local","ok","Lecture / écriture disponibles");}catch(e){addCheck("Stockage local","fail","localStorage bloqué");}
+  addCheck("Manifeste distant","run","Test de "+ABS+"manifest.json");
+  var ok=await fetchProbe();checks.pop();renderChecks();
+  addCheck("Manifeste distant",ok?"ok":"warn",ok?"Répond correctement":"Injoignable pour le moment");
+  online=ok;netBadge();
+  toast("🩺 Diagnostic terminé");
+}
+function report(){return {version:VERSION,target:ABS,mode:isAPK()?"apk-pwa":"web",online:online,cacheFiles:$("#cacheCount").textContent,cacheStores:$("#cacheStores").textContent,userAgent:navigator.userAgent,checks:checks,timestamp:new Date().toISOString()};}
+function copyReport(){
+  var txt=JSON.stringify(report(),null,2);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast("📋 Rapport copié","ok");}).catch(function(){fallbackCopy(txt);});}
+  else fallbackCopy(txt);
+}
+function fallbackCopy(txt){var ta=D.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;left:-9999px";D.body.appendChild(ta);ta.select();try{D.execCommand("copy");toast("📋 Rapport copié","ok");}catch(e){prompt("Copiez le rapport :",txt);}ta.remove();}
+function share(){
+  var data={title:"Étude incendie technique by Kevin",text:"Application Étude incendie technique by Kevin",url:ABS};
+  if(navigator.share){navigator.share(data).then(function(){toast("↗ Partage effectué","ok");}).catch(function(){toast("Partage annulé","warn");});}
+  else if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ABS).then(function(){toast("🔗 Lien copié","ok");}).catch(function(){prompt("Lien à partager :",ABS);});}
+  else prompt("Lien à partager :",ABS);
+}
+function particles(){
+  var c=$("#particles");if(!c||!c.getContext)return;
+  if(W.matchMedia&&W.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  var x=c.getContext("2d"),ps=[],raf=null,w=0,h=0;
+  function size(){var d=Math.min(W.devicePixelRatio||1,1.5);w=W.innerWidth;h=W.innerHeight;c.width=Math.round(w*d);c.height=Math.round(h*d);x.setTransform(d,0,0,d,0,0);}
+  size();W.addEventListener("resize",size);
+  for(var i=0;i<26;i++)ps.push({x:Math.random()*w,y:Math.random()*h,r:1+Math.random()*2.2,s:.18+Math.random()*.5,a:.1+Math.random()*.35,d:Math.random()*6.28,hue:Math.random()<.5?200:265});
+  function loop(){x.clearRect(0,0,w,h);ps.forEach(function(p){p.y-=p.s;p.x+=Math.sin(p.d+p.y*.01)*.28;if(p.y<-12){p.y=h+12;p.x=Math.random()*w;}var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3.2);g.addColorStop(0,"hsla("+p.hue+",90%,70%,"+p.a+")");g.addColorStop(1,"hsla("+p.hue+",90%,60%,0)");x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,p.r*3.2,0,6.283);x.fill();});raf=requestAnimationFrame(loop);}
+  loop();
+  D.addEventListener("visibilitychange",function(){if(D.hidden){if(raf)cancelAnimationFrame(raf);raf=null;}else if(!raf)loop();});
+}
+function bind(){
+  $("#version").textContent=VERSION;
+  $("#retryBtn").onclick=function(){doProbe(true);};
+  $("#homeBtn").onclick=function(){goHome("manual");};
+  $("#shareBtn").onclick=share;
+  $("#repairBtn").onclick=repair;
+  $("#probeBtn").onclick=function(){doProbe(true);};
+  $("#runBtn").onclick=runChecks;
+  $("#copyBtn").onclick=copyReport;
+  $("#diagBtn").onclick=function(){var p=$("#diagPanel");p.hidden=!p.hidden;if(!p.hidden){runChecks();p.scrollIntoView({behavior:"smooth",block:"start"});}};
+  $("#autoToggle").onchange=function(){auto=this.checked;if(auto&&online)startReconnect();else stopReconnect();};
+  W.addEventListener("online",function(){netBadge();doProbe(true);});
+  W.addEventListener("offline",function(){online=false;netBadge();stopReconnect();$("#radar").classList.remove("online");$("#probeTitle").textContent="Réseau coupé";$("#probeText").textContent="Base locale active. Nouvelle tentative dans 5 secondes.";toast("🟠 Réseau coupé","warn");});
+  D.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#diagPanel").hidden)$("#diagPanel").hidden=true;if(e.key==="Enter"&&e.target===D.body)doProbe(true);});
+}
+function boot(){
+  modeBadge();netBadge();bind();particles();cacheInventory();
+  doProbe(false);
+  probeTimer=setInterval(function(){if(!online&&!reconnecting)doProbe(false);},5000);
+  setInterval(cacheInventory,15000);
+}
+boot();
 })();
 </script>
 </body>
