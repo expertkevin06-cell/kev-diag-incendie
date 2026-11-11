@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#120507">
-<title>Hors ligne — Étude incendie by Kevin</title>
+<title>Hors ligne — Étude incendie prédictive</title>
 <link rel="icon" href="images/icon.svg" type="image/svg+xml">
 <style>
 :root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--text:#fff4ef;--muted:#c9a9a4}
@@ -19,15 +19,15 @@ button,a.btn{display:inline-block;cursor:pointer;border:1px solid var(--line);ba
 <div class="card">
   <div class="flame">🔥</div>
   <h1>Mode hors ligne actif</h1>
-  <p>L’application reste utilisable avec la base locale sauvegardée. Les demandes d’accès, décisions admin, fonds d’écran et annonces seront synchronisés dès le retour du réseau.</p>
+  <p>L'application reste utilisable avec la base locale sauvegardée et le moteur prédictif complet.</p>
   <button onclick="location.reload()">🔄 Réessayer</button>
-  <a class="btn" href="./">🏠 Accueil application</a>
-  <div class="pill" id="state">Vérification du réseau…</div>
+  <a class="btn" href="./">🏠 Accueil</a>
+  <div class="pill" id="state">Vérification…</div>
 </div>
 <script>
 (function(){
 var s=document.getElementById("state");
-function update(){s.textContent=navigator.onLine?"🟢 Réseau revenu — rechargement possible":"🟠 Hors ligne — base locale active";}
+function update(){s.textContent=navigator.onLine?"🟢 Réseau revenu":"🟠 Hors ligne — base locale active";}
 update();window.addEventListener("online",function(){update();setTimeout(function(){location.replace("./");},900);});window.addEventListener("offline",update);
 })();
 </script>
