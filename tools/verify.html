@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#120507">
+<title>Auto-vérification APK/Web — Étude incendie by Kevin</title>
+<link rel="icon" href="../images/icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#120507;--surface:#260d14;--surface2:#33121c;--line:#4a1a26;--line2:#6b2333;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--blue:#2f9bff;--green:#39d98a;--amber:#ffb020;--text:#fff4ef;--muted:#c9a9a4;--dim:#8f6f6b;--ease:cubic-bezier(.22,.9,.25,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(1000px 600px at 15% -10%,#3a0d18,#120507 60%);color:var(--text);font-family:Inter,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.5;min-height:100vh}
+::-webkit-scrollbar{width:11px;height:11px}::-webkit-scrollbar-track{background:#1c070c}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--fire),var(--red));border-radius:99px;border:2px solid #1c070c}*{scrollbar-width:thin;scrollbar-color:var(--fire) #1c070c}
+a{color:var(--fire2)}button,input,textarea{font:inherit}button{cursor:pointer;border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:12px;padding:.6rem .9rem;transition:.18s var(--ease)}button:hover{transform:translateY(-2px);border-color:var(--fire);box-shadow:0 8px 22px rgba(255,107,53,.18)}button:active{transform:none}
+input,textarea{width:100%;background:#1d080d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;outline:none}input:focus,textarea:focus{border-color:var(--fire);box-shadow:0 0 0 3px rgba(255,107,53,.16)}textarea{min-height:80px;resize:vertical}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:1rem;justify-content:space-between;padding:.9rem clamp(1rem,4vw,2.4rem);background:rgba(18,5,7,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;gap:.7rem;align-items:center;font-weight:900}.mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--fire),var(--red));box-shadow:0 8px 22px rgba(230,57,70,.35)}.brand small{display:block;color:var(--fire2);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase}
+.pills{display:flex;gap:.4rem;flex-wrap:wrap}.pill{font-size:.72rem;padding:.28rem .6rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--muted)}.pill.ok{color:var(--green);border-color:rgba(57,217,138,.5)}.pill.warn{color:var(--amber);border-color:rgba(255,176,32,.5)}.pill.fail{color:#ff9aa2;border-color:rgba(230,57,70,.55)}
+main{max-width:1240px;margin:0 auto;padding:1.6rem clamp(1rem,4vw,2.4rem) 4rem}
+h1{font-size:clamp(1.6rem,4vw,2.6rem);margin:.2rem 0 .6rem;letter-spacing:-.02em}h1 em{font-style:normal;background:linear-gradient(90deg,var(--fire2),var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);max-width:760px}.eyebrow{color:var(--fire2);text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:900;margin-bottom:.4rem}
+.card{background:linear-gradient(160deg,var(--surface),#1d080d);border:1px solid var(--line);border-radius:18px;padding:1.1rem;box-shadow:0 18px 50px rgba(0,0,0,.4);margin-bottom:1rem}
+.grid{display:grid;gap:.8rem}.controls{display:grid;grid-template-columns:1.4fr .8fr;gap:.8rem}.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}.btn-fire{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff;font-weight:900}.danger{border-color:rgba(230,57,70,.55);color:#ff9aa2}.hint{font-size:.76rem;color:var(--dim)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem;margin:1rem 0}.summary div{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d}.summary b{display:block;font-size:1.6rem;font-family:ui-monospace,monospace;color:var(--fire2)}.summary span{font-size:.76rem;color:var(--muted)}
+.results{display:grid;gap:1rem}.group h3{margin:0 0 .6rem;font-size:.95rem;color:var(--fire2);text-transform:uppercase;letter-spacing:.1em}.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem}
+.item{padding:.8rem;border-radius:14px;border:1px solid var(--line);background:#20080d;border-left:4px solid var(--line2)}.item.ok{border-left-color:var(--green)}.item.warn{border-left-color:var(--amber)}.item.fail{border-left-color:var(--red)}.item b{display:block;font-size:.86rem}.item span{display:block;font-size:.76rem;color:var(--muted);margin-top:.2rem;word-break:break-word}.item small{display:block;font-size:.68rem;color:var(--dim);margin-top:.3rem}
+.journal{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:.7rem;background:#1d080d;font-size:.8rem}.journal div{padding:.3rem 0;border-bottom:1px dashed var(--line)}.journal div:last-child{border:0}
+#toasts{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);z-index:50;display:grid;gap:.5rem;width:min(560px,92vw)}.toast{padding:.8rem 1rem;border-radius:14px;background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:800;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+@media(max-width:760px){.controls{grid-template-columns:1fr}.brand small{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="mark">🩺</span><span>Auto-vérification<small>Étude incendie · APK / Web</small></span></div>
+  <div class="pills"><span class="pill" id="netBadge">…</span><span class="pill" id="apkBadge">…</span><a href="../" style="text-decoration:none"><button>🔥 Ouvrir l’application</button></a></div>
+</header>
+<main>
+  <div class="eyebrow">Diagnostic autonome · aucune dépendance au module d’analyse</div>
+  <h1>Vérifier <em>chaque étape</em> avant livraison APK.</h1>
+  <p class="lead">Fichiers, versions, base locale, stockage, service worker, connexion admin réelle en iframe, canal temps réel, partage, Bluetooth, installation et mode APK. Rapport exportable pour validation.</p>
+
+  <div class="card">
+    <div class="controls">
+      <div><label class="hint">URL racine de l’application</label><input id="baseUrl" placeholder="https://expertkevin06-cell.github.io/etude-incendie-technique-by-kevin/"></div>
+      <div><label class="hint">Mot de passe admin pour test E2E (masqué)</label><input id="pass" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" value="Kevin83600"></div>
+    </div>
+    <div class="row" style="margin-top:.8rem">
+      <button class="btn-fire" id="runAll">▶️ Lancer tous les tests</button>
+      <button id="testAdmin">🔑 Test connexion admin</button>
+      <button id="testChannel">📡 Test canal temps réel</button>
+      <button id="repair" class="danger">🛠️ Réparer cache / SW</button>
+      <button id="copyReport">📋 Copier rapport</button>
+      <button id="downloadReport">⬇️ Rapport JSON</button>
+    </div>
+    <div class="row" style="margin-top:.6rem">
+      <button id="shareTest">↗ Tester partage</button>
+      <button id="btTest">🔵 Tester Bluetooth</button>
+      <button id="installTest">⬇️ Tester installation</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div><b id="sumOk">0</b><span>réussis</span></div>
+    <div><b id="sumWarn">0</b><span>avertissements</span></div>
+    <div><b id="sumFail">0</b><span>échecs</span></div>
+    <div><b id="sumTotal">0</b><span>contrôles</span></div>
+  </div>
+
+  <div class="card"><div class="results" id="results"></div></div>
+  <div class="card"><div class="eyebrow">Journal horodaté</div><div class="journal" id="journal"></div></div>
+</main>
+<div id="toasts"></div>
+
+<script>
+(function(){
+"use strict";
+var D=document,W=window,results=[],journal=[],deferredPrompt=null;
+function $(s){return D.querySelector(s);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function uid(){return (crypto&&crypto.randomUUID)?crypto.randomUUID():"v-"+Date.now()+"-"+Math.random().toString(16).slice(2);}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function toast(m){var t=D.createElement("div");t.className="toast";t.textContent=m;$("#toasts").appendChild(t);setTimeout(function(){t.remove();},4200);}
+function base(){var v=$("#baseUrl").value.trim();if(!v)v=new URL("../",location.href).href;if(!/\/$/.test(v))v+="/";return v;}
+function isAPK(){return D.referrer.indexOf("android-app://")===0||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}
+function log(m,ok){journal.unshift({t:new Date().toLocaleTimeString("fr-FR"),msg:m,ok:!!ok});render();}
+function add(cat,label,status,detail){var id=cat+"|"+label,i=results.findIndex(function(r){return r.id===id;});var r={id:id,cat:cat,label:label,status:status,detail:detail||"",ts:Date.now()};if(i>=0)results[i]=r;else results.push(r);render();}
+function render(){
+  var ok=results.filter(function(r){return r.status==="ok";}).length,warn=results.filter(function(r){return r.status==="warn";}).length,fail=results.filter(function(r){return r.status==="fail";}).length;
+  $("#sumOk").textContent=ok;$("#sumWarn").textContent=warn;$("#sumFail").textContent=fail;$("#sumTotal").textContent=results.length;
+  var cats=[];results.forEach(function(r){if(cats.indexOf(r.cat)<0)cats.push(r.cat);});
+  $("#results").innerHTML=cats.map(function(c){
+    var list=results.filter(function(r){return r.cat===c;});
+    return '<div class="group"><h3>'+esc(c)+' · '+list.filter(function(r){return r.status==="ok";}).length+'/'+list.length+'</h3><div class="items">'+list.map(function(r){return '<div class="item '+r.status+'"><b>'+esc((r.status==="ok"?"✅ ":r.status==="warn"?"⚠️ ":"❌ ")+r.label)+'</b><span>'+esc(r.detail)+'</span><small>'+new Date(r.ts).toLocaleTimeString("fr-FR")+'</small></div>';}).join("")+'</div></div>';
+  }).join("");
+  $("#journal").innerHTML=journal.map(function(j){return '<div>'+esc(j.t)+' — '+(j.ok?"✅":"❌")+' '+esc(j.msg)+'</div>';}).join("");
+  $("#netBadge").textContent=navigator.onLine?"🟢 En ligne":"🟠 Hors ligne";$("#netBadge").className="pill "+(navigator.onLine?"ok":"warn");
+  $("#apkBadge").textContent=isAPK()?"📱 APK/PWA":"🌐 Navigateur";$("#apkBadge").className="pill "+(isAPK()?"ok":"warn");
+}
+async function text(path){var r=await fetch(base()+path+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);return await r.text();}
+async function json(path){return JSON.parse(await text(path));}
+function report(){return {app:"Etude incendie by Kevin — Auto-vérification",version:"41.1.0",baseUrl:base(),timestamp:new Date().toISOString(),userAgent:navigator.userAgent,apkMode:isAPK(),online:navigator.onLine,summary:{ok:results.filter(function(r){return r.status==="ok";}).length,warn:results.filter(function(r){return r.status==="warn";}).length,fail:results.filter(function(r){return r.status==="fail";}).length,total:results.length},results:results,journal:journal};}
+function download(name,data,type){var b=new Blob([data],{type:type||"application/json"});var a=D.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1200);}
+
+async function testFiles(){
+  var files=["index.html","js/app.js","data/pannes-connues.json","data/keywords.json","manifest.json","service-worker.js","images/icon.svg","404.html","offline.html","tools/verify.html"];
+  var texts={};
+  for(var i=0;i<files.length;i++){var f=files[i];try{var t=await text(f);texts[f]=t;add("Fichiers",f,"ok",t.length+" caractères");}catch(e){add("Fichiers",f,"fail",e.message);}}
+  return texts;
+}
+async function testVersions(t){
+  var core=(t["index.html"]||"").match(/var V="([^"]+)"/),app=(t["js/app.js"]||"").match(/EIK\.appVersion="([^"]+)"/),sw=(t["service-worker.js"]||"").match(/const VERSION\s*=\s*"([^"]+)"/);
+  add("Versions","Noyau ↔ module applicatif",core&&app&&core[1]===app[1]?"ok":"fail",(core?core[1]:"?")+" / "+(app?app[1]:"?"));
+  add("Versions","Service worker",sw?"ok":"warn",sw?sw[1]:"version non détectée");
+}
+async function testData(t){
+  try{
+    var kb=JSON.parse(t["data/pannes-connues.json"]);
+    var valid=Array.isArray(kb)&&kb.length>=10&&kb.every(function(e){return e.id&&e.title&&e.origin&&e.mechanism&&Array.isArray(e.consequences);});
+    add("Données","Base pannes connues",valid?"ok":"fail",Array.isArray(kb)?kb.length+" fiches":"format invalide");
+    var wet=kb.find(function(e){return e.id==="wet-belt-puretech";});
+    var wok=wet&&wet.keywords.some(function(k){return /courroie humide/i.test(k);})&&wet.consequences.some(function(c){return /crepine|crépine/i.test(c);});
+    add("Données","courroie humide → PureTech → crépine",wok?"ok":"fail",wok?"chaîne causale complète présente":"chaîne attendue manquante");
+  }catch(e){add("Données","Base pannes connues","fail",e.message);}
+  try{
+    var kw=JSON.parse(t["data/keywords.json"]),ex=(kw.expand&&kw.expand.courroie)||[];
+    var s=ex.join(" "),kok=/puretech/i.test(s)&&/ecoblue/i.test(s)&&/crepine|crépine/i.test(s);
+    add("Données","Expansion mot-clé courroie",kok?"ok":"fail",ex.length+" termes : "+s.slice(0,120));
+  }catch(e){add("Données","Mots-clés","fail",e.message);}
+}
+async function testManifest(t){
+  try{var m=JSON.parse(t["manifest.json"]);add("APK","Manifeste",m.start_url&&m.icons&&m.icons.length?"ok":"fail",m.name+" · start_url "+m.start_url);}catch(e){add("APK","Manifeste","fail",e.message);}
+}
+async function testStorage(){
+  try{localStorage.setItem("eik-vtest","ok");sessionStorage.setItem("eik-vtest","ok");var a=localStorage.getItem("eik-vtest"),b=sessionStorage.getItem("eik-vtest");localStorage.removeItem("eik-vtest");sessionStorage.removeItem("eik-vtest");add("Stockage","localStorage / sessionStorage",a==="ok"&&b==="ok"?"ok":"fail","lecture / écriture / suppression");}catch(e){add("Stockage","localStorage / sessionStorage","fail",e.message);}
+}
+async function testSW(){
+  if(!("serviceWorker" in navigator)){add("Service worker","Support","warn","non supporté");return;}
+  try{var reg=await navigator.serviceWorker.getRegistration(base());add("Service worker","Enregistrement",reg&&reg.active?"ok":"warn",reg?(reg.active?"actif":"installé mais non actif"):"non enregistré — ouvrir l’application une fois");}catch(e){add("Service worker","Enregistrement","fail",e.message);}
+  if(W.caches){try{var ks=await caches.keys(),found=false;for(var i=0;i<ks.length;i++){var c=await caches.open(ks[i]);var m=await c.match(base()+"index.html")||await c.match(base());if(m){found=true;break;}}add("Service worker","Cache hors ligne",found?"ok":"warn",ks.join(", ")||"aucun cache");}catch(e){add("Service worker","Cache hors ligne","fail",e.message);}}
+}
+async function testAdmin(){
+  var pass=$("#pass").value.trim();
+  if(!pass){add("Admin","Connexion E2E","warn","mot de passe non renseigné");return;}
+  add("Admin","Connexion E2E","warn","test en cours…");
+  var f=D.createElement("iframe");
+  f.style.cssText="position:fixed;left:-9999px;top:0;width:1280px;height:900px;border:0";
+  f.src=base()+"?verify=admin&t="+Date.now();
+  D.body.appendChild(f);
+  try{
+    await new Promise(function(res,rej){var to=setTimeout(function(){rej(new Error("timeout chargement iframe"));},18000);f.onload=function(){clearTimeout(to);res();};f.onerror=function(){clearTimeout(to);rej(new Error("iframe bloquée"));};});
+    await sleep(2200);
+    var w=f.contentWindow,d=f.contentDocument;
+    if(!w.EIK)throw new Error("noyau EIK absent");
+    if(!d.querySelector("#tabAdmin")||!d.querySelector("#loginForm")||!d.querySelector("#adminPass"))throw new Error("DOM connexion absent");
+    d.querySelector("#tabAdmin").click();
+    d.querySelector("#adminPass").value=pass;
+    d.querySelector("#loginForm").dispatchEvent(new w.Event("submit",{bubbles:true,cancelable:true}));
+    await sleep(700);
+    var ok=w.EIK.admin===true&&d.querySelector("#gate").hidden===true;
+    add("Admin","Connexion E2E",ok?"ok":"fail",ok?"session admin ouverte puis refermée":"échec ouverture session — vérifier cache/version");
+    log("Test connexion admin",ok);
+    if(ok)w.EIK.setAdmin(false);
+  }catch(e){add("Admin","Connexion E2E","fail",e.message);log("Test connexion admin",false);}
+  finally{f.remove();}
+}
+async function testChannel(t){
+  var src=t&&t["index.html"];
+  if(!src){try{src=await text("index.html");}catch(e){add("Canal","Temps réel","fail","index.html illisible");return;}}
+  var topic=(src.match(/TOPIC:"([^"]+)"/)||[])[1],server=(src.match(/NTFY:"([^"]+)"/)||[])[1];
+  if(!topic||!server){add("Canal","Temps réel","fail","canal non détecté dans le noyau");return;}
+  if(!navigator.onLine){add("Canal","Temps réel","warn","hors ligne — file d’attente active");return;}
+  add("Canal","Temps réel","warn","publication ping + attente écho SSE…");
+  var mid=uid(),es=new EventSource(server+"/"+topic+"/sse");
+  var ok=await new Promise(function(res){
+    var to=setTimeout(function(){res(false);},10000);
+    es.onmessage=function(ev){try{var m=JSON.parse(ev.data);if(m.event==="message"&&m.message){var p=JSON.parse(m.message);if(p.t==="verify-ping"&&p.mid===mid){clearTimeout(to);res(true);}}}catch(e){}};
+    es.onerror=function(){};
+    fetch(server+"/"+topic,{method:"POST",body:JSON.stringify({t:"verify-ping",mid:mid,ts:Date.now()})}).catch(function(){clearTimeout(to);res(false);});
+  });
+  es.close();
+  add("Canal","Temps réel",ok?"ok":"fail",ok?"écho SSE reçu — canal bidirectionnel OK":"pas d’écho SSE en 10 s");
+  log("Test canal temps réel",ok);
+}
+async function runAll(){
+  results=[];journal=[];render();
+  add("Réseau","État",navigator.onLine?"ok":"warn",navigator.onLine?"en ligne":"hors ligne — mode local");
+  var c=navigator.connection||{};add("Réseau","Type", "ok",(c.type||c.effectiveType||"inconnu")+" · "+(c.downlink?c.downlink+" Mb/s":"débit inconnu"));
+  await testStorage();
+  var t=await testFiles();
+  await testVersions(t);
+  await testData(t);
+  await testManifest(t);
+  await testSW();
+  add("Partage","API",navigator.share?"ok":navigator.clipboard?"warn":"fail",navigator.share?"partage natif":navigator.clipboard?"copie du lien disponible":"indisponible");
+  add("Connexion","Bluetooth",navigator.bluetooth?"ok":"warn",navigator.bluetooth?"Web Bluetooth disponible":"non supporté sur cet appareil");
+  add("APK","Mode application",isAPK()?"ok":"warn",isAPK()?"APK / PWA détecté":"navigateur web");
+  add("APK","Installation",deferredPrompt?"ok":"warn",deferredPrompt?"invite prête":"menu navigateur → Ajouter à l’écran d’accueil");
+  await testAdmin();
+  await testChannel(t);
+  log("Auto-vérification complète terminée",true);
+  toast("🩺 Vérification terminée");
+}
+async function repair(){
+  log("Réparation cache / SW",true);
+  try{if(W.caches){var ks=await caches.keys();await Promise.all(ks.map(function(k){return caches.delete(k);}));}}catch(e){}
+  try{if("serviceWorker" in navigator){var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.unregister();}));}}catch(e){}
+  toast("🛠️ Cache vidé, service worker désinstallé — rechargement");
+  setTimeout(function(){location.reload();},700);
+}
+function copyReport(){var r=JSON.stringify(report(),null,2);if(navigator.clipboard)navigator.clipboard.writeText(r).then(function(){toast("📋 Rapport copié");});else{download("rapport.json",r);toast("Rapport téléchargé");}}
+function shareTest(){var r=report();var data={title:"Rapport Étude incendie",text:"Auto-vérification : "+r.summary.ok+"/"+r.summary.total+" contrôles réussis",url:base()};if(navigator.share)navigator.share(data).then(function(){add("Partage","Test réel","ok","partage natif réussi");}).catch(function(){add("Partage","Test réel","warn","annulé");});else if(navigator.clipboard)navigator.clipboard.writeText(base()).then(function(){add("Partage","Test réel","ok","lien copié");toast("🔗 Lien copié");});else add("Partage","Test réel","fail","aucune API de partage");}
+function btTest(){if(!navigator.bluetooth){add("Connexion","Bluetooth réel","warn","indisponible");return;}navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:["battery_service"]}).then(function(d){return d.gatt.connect().then(function(){add("Connexion","Bluetooth réel","ok",d.name||"appareil connecté");});}).catch(function(e){add("Connexion","Bluetooth réel","warn",e.message);});}
+function installTest(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;add("APK","Installation réelle","ok","invite déclenchée");}else add("APK","Installation réelle","warn","invite non disponible — menu navigateur");}
+W.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredPrompt=e;add("APK","Installation","ok","invite prête");});
+$("#baseUrl").value=new URL("../",location.href).href;
+$("#runAll").onclick=runAll;$("#testAdmin").onclick=function(){testAdmin();};$("#testChannel").onclick=function(){testChannel();};$("#repair").onclick=repair;
+$("#copyReport").onclick=copyReport;$("#downloadReport").onclick=function(){download("rapport-verifications.json",JSON.stringify(report(),null,2));toast("⬇️ Rapport téléchargé");};
+$("#shareTest").onclick=shareTest;$("#btTest").onclick=btTest;$("#installTest").onclick=installTest;
+W.addEventListener("online",render);W.addEventListener("offline",render);
+render();
+setTimeout(runAll,600);
+})();
+</script>
+</body>
+</html>
