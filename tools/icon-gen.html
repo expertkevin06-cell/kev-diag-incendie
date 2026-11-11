@@ -1,0 +1,20 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><title>Icônes Étude Incendie</title>
+<body style="font-family:sans-serif;background:#3a0710;color:#fff;text-align:center;padding:2rem">
+<h1>🔥 Icônes de l'APK</h1>
+<canvas id="c" width="512" height="512" style="width:256px;height:256px"></canvas>
+<p>
+<button onclick="dl(512,'icon-512x512.png')">⬇️ icon-512x512.png</button>
+<button onclick="dl(192,'icon-192x192.png')">⬇️ icon-192x192.png</button>
+</p>
+<p>Téléversez ces 2 fichiers dans le dossier <code>images/</code> du dépôt GitHub.</p>
+<script>
+const c=document.getElementById("c"),x=c.getContext("2d");
+x.fillStyle="#3a0710";x.fillRect(0,0,512,512);
+const g=x.createRadialGradient(256,300,40,256,300,260);
+g.addColorStop(0,"#8f1d2c");g.addColorStop(1,"rgba(143,29,44,0)");
+x.fillStyle=g;x.fillRect(0,0,512,512);
+x.font="280px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("🔥",256,240);
+x.fillStyle="#fff";x.font="bold 44px sans-serif";x.fillText("ÉTUDE INCENDIE",256,448);
+x.font="28px sans-serif";x.fillStyle="#ffb59d";x.fillText("by Kevin",256,486);
+function dl(size,name){const o=document.createElement("canvas");o.width=o.height=size;o.getContext("2d").drawImage(c,0,0,size,size);const a=document.createElement("a");a.download=name;a.href=o.toDataURL("image/png");a.click();}
+</script></body></html>
