@@ -1,8 +1,8 @@
 {
   "id": "/etude-incendie-technique-by-kevin/",
-  "name": "Étude incendie technique by Kevin — Base massive",
+  "name": "Étude incendie technique by Kevin — Prédictif multi-marques",
   "short_name": "ÉtudeFeu",
-  "description": "Recherche par mots-clés, analyse causale des pannes connues, mise à jour manuelle multi-sources TechKevin 2026 et Auto-Diagnostic, fiches origine de feu, NFPA 921, preuves, présentation interactive, accès admin, auto-vérification APK et base locale hors ligne.",
+  "description": "Recherche prédictive par marques, modèles, motorisations, puissances avec corrélations de pannes connues. Analyse causale prédictive avec origine, mécanisme, conséquences.",
   "lang": "fr-FR",
   "dir": "ltr",
   "start_url": "./?source=pwa",
@@ -14,58 +14,15 @@
   "background_color": "#120507",
   "categories": ["education", "reference", "productivity", "utilities"],
   "prefer_related_applications": false,
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
+  "launch_handler": {"client_mode": "navigate-existing"},
   "icons": [
-    {
-      "src": "images/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "images/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    }
+    {"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}
   ],
   "shortcuts": [
-    {
-      "name": "Mettre à jour les pannes",
-      "short_name": "MAJ pannes",
-      "description": "Actualise et renouvelle la base depuis TechKevin 2026 et Auto-Diagnostic.",
-      "url": "./?action=update",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "Analyser courroie humide",
-      "short_name": "Analyse",
-      "description": "Chaîne causale courroie humide → PureTech / EcoBlue → crépine → lubrification.",
-      "url": "./?analyse=courroie%20humide",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "Recherche unifiée",
-      "short_name": "Recherche",
-      "description": "Recherche prédictive pannes, DTC, méthode et veille.",
-      "url": "./?action=search",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "Auto-vérification APK",
-      "short_name": "Vérifier",
-      "description": "Contrôle fichiers, versions, admin, cache, canal, sources et partage.",
-      "url": "./tools/verify.html",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    }
+    {"name": "Analyser 308 PureTech", "short_name": "308", "description": "Analyse prédictive Peugeot 308 1.2 PureTech.", "url": "./?analyse=Peugeot%20308%201.2%20PureTech", "icons": [{"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml"}]},
+    {"name": "Mettre à jour", "short_name": "MAJ", "description": "Actualise la base depuis sources distantes.", "url": "./?action=update", "icons": [{"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml"}]},
+    {"name": "Auto-vérification", "short_name": "Vérifier", "description": "Contrôle fichiers, versions, admin, cache.", "url": "./tools/verify.html", "icons": [{"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml"}]}
   ],
-  "share_target": {
-    "action": "./",
-    "method": "GET",
-    "params": {
-      "text": "q"
-    }
-  }
+  "share_target": {"action": "./", "method": "GET", "params": {"text": "q"}}
 }
