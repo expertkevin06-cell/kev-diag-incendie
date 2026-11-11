@@ -35,21 +35,20 @@
     "boite": ["boîte de vitesses", "DSG", "EAT", "BVA", "mécatronic", "huile ATF", "volant moteur"]
   },
   "themes": [
-    {"id": "distribution", "label": "⛓️ Distribution / courroie", "kw": ["courroie", "distribution", "puretech", "ecoblue", "calage", "tendeur", "chaine", "galet", "crepine", "pompe a vide"]},
-    {"id": "lubrification", "label": "🛢️ Lubrification / huile", "kw": ["huile", "lubrification", "crepine", "pression huile", "pompe a huile", "coussinet", "dilution"]},
-    {"id": "injection", "label": "⛽ Injection / carburant", "kw": ["injecteur", "rampe", "carburant", "gdi", "common rail", "pompe hp", "essence", "diesel"]},
-    {"id": "echappement", "label": "🌫️ Échappement / FAP / cata", "kw": ["fap", "dpf", "catalyseur", "cata", "collecteur", "echappement", "regen", "vegetation"]},
-    {"id": "egr", "label": "♻️ EGR / dépollution", "kw": ["egr", "vanne egr", "refroidisseur egr", "calamine"]},
-    {"id": "adblue", "label": "💧 AdBlue / SCR", "kw": ["adblue", "scr", "nox", "uree", "p20ee"]},
-    {"id": "turbo", "label": "🌀 Turbo / suralimentation", "kw": ["turbo", "suralimentation", "wastegate", "reniflard"]},
-    {"id": "refroidissement", "label": "🌡️ Refroidissement / surchauffe", "kw": ["surchauffe", "ldr", "glycol", "pompe a eau", "thermostat", "grippage", "radiateur"]},
-    {"id": "basse12", "label": "🔋 12V / DC-DC / USB", "kw": ["12v", "cosse", "dc-dc", "usb", "chargeur", "h2", "alternateur"]},
-    {"id": "ht", "label": "🔌 Pack HT / cellules", "kw": ["pack", "cellule", "runaway", "nmc", "lfp", "bms", "busbar", "immersion", "isolation"]},
-    {"id": "charge", "label": "🔌 Charge AC/DC / OBC", "kw": ["charge", "obc", "contacteur", "broches", "wallbox", "onduleur", "trappe"]},
-    {"id": "freins", "label": "🛑 Freins / roues", "kw": ["frein", "etrier", "disque", "plaquette", "pneu", "roulement"]},
-    {"id": "faisceau", "label": "⚡ Faisceau / courts-circuits", "kw": ["faisceau", "court", "arc", "gaine", "rongeur", "pcb", "connectique"]},
-    {"id": "habitacle", "label": "🚬 Habitacle / usager", "kw": ["megot", "habitacle", "siege", "mousse", "chargeur"]},
-    {"id": "gpl", "label": "⛽ GPL / gaz", "kw": ["gpl", "multivalve", "reservoir", "gaz"]},
-    {"id": "transmission", "label": "⚙️ Boîte / embrayage", "kw": ["boite", "bva", "dsg", "eat", "mecatronic", "embrayage", "volant moteur", "atf"]}
+    {"id": "distribution", "label": "⛓️ Distribution", "kw": ["courroie", "distribution", "puretech", "ecoblue", "calage", "tendeur", "crepine"]},
+    {"id": "lubrification", "label": "🛢️ Lubrification", "kw": ["huile", "lubrification", "crepine", "pression huile", "coussinet", "dilution"]},
+    {"id": "injection", "label": "⛽ Injection", "kw": ["injecteur", "rampe", "carburant", "gdi", "common rail"]},
+    {"id": "echappement", "label": "🌫️ FAP / cata", "kw": ["fap", "dpf", "catalyseur", "collecteur", "regen"]},
+    {"id": "egr", "label": "♻️ EGR", "kw": ["egr", "calamine", "refroidisseur egr"]},
+    {"id": "adblue", "label": "💧 AdBlue", "kw": ["adblue", "scr", "nox", "uree"]},
+    {"id": "turbo", "label": "🌀 Turbo", "kw": ["turbo", "suralimentation", "reniflard"]},
+    {"id": "refroidissement", "label": "🌡️ Refroidissement", "kw": ["surchauffe", "ldr", "glycol", "pompe a eau", "thermostat"]},
+    {"id": "basse12", "label": "🔋 12V", "kw": ["12v", "cosse", "dc-dc", "alternateur", "h2"]},
+    {"id": "ht", "label": "🔌 Pack HT", "kw": ["pack", "cellule", "runaway", "nmc", "lfp", "bms"]},
+    {"id": "charge", "label": "🔌 Charge", "kw": ["charge", "obc", "contacteur", "broches", "wallbox"]},
+    {"id": "freins", "label": "🛑 Freins", "kw": ["frein", "etrier", "disque", "pneu"]},
+    {"id": "faisceau", "label": "⚡ Faisceau", "kw": ["faisceau", "court", "arc", "gaine", "rongeur"]},
+    {"id": "gpl", "label": "⛽ GPL", "kw": ["gpl", "multivalve", "reservoir"]},
+    {"id": "transmission", "label": "⚙️ Boîte", "kw": ["boite", "dsg", "eat", "mecatronic", "atf"]}
   ]
 }
