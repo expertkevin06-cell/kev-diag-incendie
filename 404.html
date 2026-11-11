@@ -7,10 +7,10 @@
 <title>404 — Étude incendie prédictive</title>
 <link rel="icon" href="images/icon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--text:#fff4ef;--muted:#c9a9a4}
+:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--text:#fff4ef;--muted:#c9a9a4}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(900px 600px at 50% -10%,#3a0d18,#120507 65%);color:var(--text);font-family:Inter,system-ui,sans-serif;text-align:center;padding:1.2rem}
 .card{max-width:560px;background:linear-gradient(160deg,var(--surface),#1d080d);border:1px solid var(--line);border-radius:22px;padding:2rem;box-shadow:0 24px 70px rgba(0,0,0,.5)}
-.flame{font-size:3.4rem}h1{margin:.6rem 0;font-size:1.7rem}p{color:var(--muted)}
+.flame{font-size:3.4rem}h1{margin:.6rem 0;font-size:1.7rem}p{color:var(--muted)}code{display:block;margin:.6rem 0;font-size:.75rem;word-break:break-all;color:var(--fire2)}
 button,a.btn{display:inline-block;cursor:pointer;border:1px solid var(--line);background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:900;border-radius:12px;padding:.75rem 1.1rem;text-decoration:none;margin:.3rem}
 </style>
 </head>
@@ -18,9 +18,21 @@ button,a.btn{display:inline-block;cursor:pointer;border:1px solid var(--line);ba
 <div class="card">
   <div class="flame">🔥</div>
   <h1>Erreur 404</h1>
-  <p>Page introuvable. Retour à l'application prédictive.</p>
-  <a class="btn" href="./">🏠 Accueil</a>
+  <p>Chemin introuvable. Retour automatique à l'application prédictive.</p>
+  <code id="target">…</code>
+  <a class="btn" id="home" href="./">🏠 Accueil application</a>
+  <button onclick="location.reload()">🔄 Réessayer</button>
 </div>
-<script>setTimeout(function(){location.replace("./");},3000);</script>
+<script>
+(function(){
+  var seg = location.pathname.split("/").filter(Boolean);
+  var root = "/" + (seg[0] || "") + "/";
+  var t = document.getElementById("target");
+  if (t) t.textContent = location.origin + root;
+  var h = document.getElementById("home");
+  if (h) h.href = root;
+  setTimeout(function(){ location.replace(root); }, 2500);
+})();
+</script>
 </body>
 </html>
