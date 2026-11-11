@@ -1,53 +1,95 @@
 {
-  "id": "./",
-  "name": "Etude incendie by Kevin — Auto-vérification APK",
-  "short_name": "EtudeIncendie",
-  "description": "Connexion admin corrigée, auto-vérification APK/web/connexions/partage, analyse causale des pannes connues, base locale hors ligne.",
-  "lang": "fr",
-  "start_url": "./",
+  "id": "/etude-incendie-technique-by-kevin/",
+  "name": "Étude incendie technique by Kevin — Analyse scientifique",
+  "short_name": "ÉtudeFeu",
+  "description": "Recherche par mots-clés, analyse causale des pannes connues, fiches origine de feu, méthodologie NFPA 921, preuves et plan de vérification, présentation interactive, accès administrateur, auto-vérification APK et base technique locale hors ligne.",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#120507",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
   "theme_color": "#120507",
-  "categories": ["education", "reference", "productivity"],
+  "background_color": "#120507",
+  "categories": ["education", "reference", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
       "src": "images/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Analyser courroie humide",
       "short_name": "Analyse",
+      "description": "Ouvre directement la chaîne causale courroie humide → PureTech / EcoBlue → crépine → lubrification.",
       "url": "./?analyse=courroie%20humide",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "images/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     },
     {
-      "name": "Auto-vérification complète",
+      "name": "Recherche unifiée",
+      "short_name": "Recherche",
+      "description": "Recherche prédictive : pannes connues, DTC, méthode scientifique et veille technique.",
+      "url": "./?action=search",
+      "icons": [
+        {
+          "src": "images/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Auto-vérification APK",
       "short_name": "Vérifier",
+      "description": "Contrôle les fichiers, versions, connexion admin, cache, service worker, canal temps réel et partage.",
       "url": "./tools/verify.html",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "images/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     },
     {
       "name": "Icônes APK PNG",
       "short_name": "Icônes",
+      "description": "Génère les icônes PNG 192, 512, maskable et 1024 px pour PWABuilder.",
       "url": "./tools/icon-gen.html",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "Liaison APK AssetLinks",
-      "short_name": "AssetLinks",
-      "url": "./tools/assetlinks.html",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "images/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     }
   ],
   "share_target": {
     "action": "./",
     "method": "GET",
-    "params": { "text": "q" }
+    "params": {
+      "text": "q"
+    }
   }
 }
