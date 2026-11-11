@@ -7,11 +7,11 @@
 <title>AssetLinks APK — Étude incendie</title>
 <link rel="icon" href="../images/icon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--line2:#6b2333;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--green:#39d98a;--text:#fff4ef;--muted:#c9a9a4}
+:root{--bg:#120507;--surface:#260d14;--line:#4a1a26;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--green:#39d98a;--text:#fff4ef;--muted:#c9a9a4}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 600px at 20% -10%,#3a0d18,#120507 60%);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh}
 ::-webkit-scrollbar{width:11px}::-webkit-scrollbar-track{background:#1c070c}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--fire),var(--red));border-radius:99px;border:2px solid #1c070c}
 header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.4rem;background:rgba(18,5,7,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);flex-wrap:wrap;gap:.6rem}
-.brand{font-weight:900}.brand span{color:var(--fire2)}button{cursor:pointer;border:1px solid var(--line2);background:#33121c;color:var(--text);border-radius:12px;padding:.6rem .9rem;font-weight:700}button:hover{border-color:var(--fire);transform:translateY(-2px)}.btn-fire{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff}
+.brand{font-weight:900}.brand span{color:var(--fire2)}button{cursor:pointer;border:1px solid var(--line);background:#33121c;color:var(--text);border-radius:12px;padding:.6rem .9rem;font-weight:700}button:hover{border-color:var(--fire);transform:translateY(-2px)}.btn-fire{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff}
 main{max-width:1000px;margin:0 auto;padding:1.6rem 1.2rem 4rem}h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:.2rem 0 .6rem}h1 em{font-style:normal;color:var(--fire2)}.lead{color:var(--muted)}
 .card{background:linear-gradient(160deg,var(--surface),#1d080d);border:1px solid var(--line);border-radius:18px;padding:1.1rem;margin-bottom:1rem;box-shadow:0 18px 50px rgba(0,0,0,.4)}
 label{display:block;font-size:.75rem;color:var(--fire2);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin:.7rem 0 .3rem}input,textarea{width:100%;background:#1d080d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;outline:none;font-family:ui-monospace,monospace}input:focus,textarea:focus{border-color:var(--fire);box-shadow:0 0 0 3px rgba(255,107,53,.16)}textarea{min-height:110px;resize:vertical}
@@ -22,18 +22,18 @@ pre{background:#1d080d;border:1px solid var(--line);border-radius:12px;padding:1
 <body>
 <header><div class="brand">🔗 AssetLinks <span>APK → domaine</span></div><a href="../"><button>🔥 Application</button></a></header>
 <main>
-  <h1>Lier l’APK au domaine pour <em>supprimer la barre d’URL</em>.</h1>
-  <p class="lead">Génère le fichier <code>assetlinks.json</code> à placer à la racine du domaine <code>expertkevin06-cell.github.io</code>, dans <code>.well-known/</code>, avec un fichier vide <code>.nojekyll</code>.</p>
+  <h1>Lier l'APK au domaine pour <em>supprimer la barre d'URL</em>.</h1>
+  <p class="lead">Génère le fichier <code>assetlinks.json</code> à placer à la racine du domaine dans <code>.well-known/</code>.</p>
   <div class="card">
     <label>Domaine racine</label><input id="domain" value="expertkevin06-cell.github.io">
     <label>Package Android</label><input id="pkg" value="com.expertkevin.etudeincendie">
-    <label>Empreintes SHA-256 (une par ligne, avec ou sans deux-points)</label>
+    <label>Empreintes SHA-256 (une par ligne)</label>
     <textarea id="fps" placeholder="AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99"></textarea>
-    <div class="row"><button class="btn-fire" id="gen">⚙️ Générer</button><button id="copy">📋 Copier</button><button id="dl">⬇️ assetlinks.json</button><button id="check">🌐 Tester le domaine</button></div>
-    <div class="status" id="status">En attente de génération.</div>
+    <div class="row"><button class="btn-fire" id="gen">⚙️ Générer</button><button id="copy">📋 Copier</button><button id="dl">⬇️ assetlinks.json</button><button id="check">🌐 Tester</button></div>
+    <div class="status" id="status">En attente.</div>
   </div>
-  <div class="card"><div class="eyebrow" style="color:var(--fire2);font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Aperçu JSON</div><pre id="out">[]</pre></div>
-  <div class="card"><div class="eyebrow" style="color:var(--fire2);font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">URL finale attendue</div><pre id="url">https://expertkevin06-cell.github.io/.well-known/assetlinks.json</pre></div>
+  <div class="card"><pre id="out">[]</pre></div>
+  <div class="card"><pre id="url">https://expertkevin06-cell.github.io/.well-known/assetlinks.json</pre></div>
 </main>
 <script>
 (function(){
@@ -43,27 +43,11 @@ function $(s){return D.querySelector(s);}
 function status(m,ok){var s=$("#status");s.textContent=m;s.className="status "+(ok?"ok":"fail");}
 function normFp(s){return String(s||"").replace(/[^0-9a-fA-F]/g,"").toUpperCase();}
 function validPkg(p){return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(p);}
-function build(){
-  var pkg=$("#pkg").value.trim(),dom=$("#domain").value.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"");
-  var fps=$("#fps").value.split(/\n+/).map(normFp).filter(Boolean);
-  if(!validPkg(pkg)){status("Package Android invalide (ex. com.expertkevin.etudeincendie)",false);return null;}
-  if(!fps.length){status("Aucune empreinte SHA-256 fournie.",false);return null;}
-  for(var i=0;i<fps.length;i++){if(!/^[0-9A-F]{64}$/.test(fps[i])){status("Empreinte n°"+(i+1)+" invalide : 64 caractères hexadécimaux attendus.",false);return null;}}
-  var json=[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":pkg,"sha256_cert_fingerprints":fps.map(function(f){return f.replace(/(..)(?=.)/g,"$1:");})}}];
-  $("#out").textContent=JSON.stringify(json,null,2);
-  $("#url").textContent="https://"+dom+"/.well-known/assetlinks.json";
-  status("Fichier valide : "+fps.length+" empreinte(s), package "+pkg,true);
-  return json;
-}
+function build(){var pkg=$("#pkg").value.trim(),dom=$("#domain").value.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"");var fps=$("#fps").value.split(/\n+/).map(normFp).filter(Boolean);if(!validPkg(pkg)){status("Package invalide",false);return null;}if(!fps.length){status("Aucune empreinte",false);return null;}for(var i=0;i<fps.length;i++){if(!/^[0-9A-F]{64}$/.test(fps[i])){status("Empreinte n°"+(i+1)+" invalide",false);return null;}}var json=[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":pkg,"sha256_cert_fingerprints":fps.map(function(f){return f.replace(/(..)(?=.)/g,"$1:");})}}];$("#out").textContent=JSON.stringify(json,null,2);$("#url").textContent="https://"+dom+"/.well-known/assetlinks.json";status("Valide : "+fps.length+" empreintes",true);return json;}
 $("#gen").onclick=build;
-$("#copy").onclick=function(){var j=build();if(!j)return;if(navigator.clipboard)navigator.clipboard.writeText(JSON.stringify(j,null,2)).then(function(){status("JSON copié dans le presse-papiers.",true);});};
-$("#dl").onclick=function(){var j=build();if(!j)return;var b=new Blob([JSON.stringify(j,null,2)],{type:"application/json"});var a=D.createElement("a");a.href=URL.createObjectURL(b);a.download="assetlinks.json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1200);status("assetlinks.json téléchargé.",true);};
-$("#check").onclick=async function(){
-  var dom=$("#domain").value.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"");
-  var url="https://"+dom+"/.well-known/assetlinks.json";
-  status("Test de "+url+"…",true);
-  try{var r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();var ok=Array.isArray(j)&&j[0]&&j[0].target&&j[0].target.package_name;$("#out").textContent=JSON.stringify(j,null,2);status(ok?"AssetLinks en ligne et valide.":"Réponse reçue mais format inattendu.",!!ok);}catch(e){status("Inaccessible : "+e.message+" — vérifier dépôt racine + .nojekyll.",false);}
-};
+$("#copy").onclick=function(){var j=build();if(!j)return;if(navigator.clipboard)navigator.clipboard.writeText(JSON.stringify(j,null,2)).then(function(){status("Copié",true);});};
+$("#dl").onclick=function(){var j=build();if(!j)return;var b=new Blob([JSON.stringify(j,null,2)],{type:"application/json"});var a=D.createElement("a");a.href=URL.createObjectURL(b);a.download="assetlinks.json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1200);status("Téléchargé",true);};
+$("#check").onclick=async function(){var dom=$("#domain").value.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"");var url="https://"+dom+"/.well-known/assetlinks.json";status("Test "+url+"…",true);try{var r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();var ok=Array.isArray(j)&&j[0]&&j[0].target&&j[0].target.package_name;$("#out").textContent=JSON.stringify(j,null,2);status(ok?"En ligne et valide.":"Format inattendu.",!!ok);}catch(e){status("Inaccessible : "+e.message,false);}};
 $("#pkg").oninput=$("#fps").oninput=$("#domain").oninput=function(){$("#url").textContent="https://"+$("#domain").value.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"")+"/.well-known/assetlinks.json";};
 })();
 </script>
