@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Étude incendie technique by Kevin — expertise véhicule, contrôle d'accès temps réel.">
+<title>🔥 Étude Incendie Technique by Kevin</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="bg" aria-hidden="true"></div>
+<header>
+  <div class="brand">🔥 Étude Incendie <span>by Kevin</span></div>
+  <div class="pills"><span id="netBadge" class="pill">…</span><span id="syncBadge" class="pill">…</span></div>
+  <nav>
+    <button id="btnBt">🔵 Bluetooth</button>
+    <button id="btnInstall" hidden>⬇️ Installer</button>
+    <button id="btnUpdate">🔄 MAJ app</button>
+    <button id="btnAdmin">🛡️ Admin</button>
+  </nav>
+</header>
+<main>
+  <section id="scrGate" class="screen card center">
+    <h2>🔐 Accès protégé</h2>
+    <p>Tiers : entrez votre prénom, l'admin valide en temps réel.</p>
+    <form id="gateForm">
+      <input id="gateName" maxlength="40" placeholder="Votre prénom" autocomplete="given-name" required>
+      <button type="submit">📨 Demander l'accès</button>
+    </form>
+    <a class="apkLink" hidden download>📲 Télécharger l'APK Android</a>
+  </section>
+  <section id="scrWait" class="screen card center" hidden>
+    <h2>⏳ Demande envoyée</h2>
+    <p>En attente de validation. L'accès s'ouvrira automatiquement, sans rien toucher.</p>
+    <button class="reask">🔁 Renvoyer une demande</button>
+  </section>
+  <section id="scrDenied" class="screen card center" hidden>
+    <h2>⛔ Accès refusé</h2><p>L'admin a refusé cette demande.</p>
+    <button class="reask">🔁 Nouvelle demande</button>
+  </section>
+  <section id="scrRevoked" class="screen card center" hidden>
+    <h2>🔄 Accès révoqué</h2><p>Votre accès a été révoqué en temps réel par l'admin.</p>
+    <button class="reask">🔁 Demander à nouveau</button>
+  </section>
+  <section id="scrLogin" class="screen card center" hidden>
+    <h2>🛡️ Mode admin</h2>
+    <form id="loginForm">
+      <input id="adminPass" type="password" maxlength="64" autocomplete="new-password" spellcheck="false"
+             placeholder="Mot de passe (saisie masquée ••••)" required>
+      <button type="submit">🔑 Entrer en admin</button>
+    </form>
+    <p class="hint">Saisie invisible, aucun point résiduel : champ vidé à chaque ouverture et après chaque tentative.</p>
+  </section>
+  <section id="scrAdmin" class="screen" hidden>
+    <div class="card">
+      <h3>📬 Demandes & appareils (<span id="reqCount">0</span>) — temps réel</h3>
+      <ul id="reqList" class="list"></ul>
+      <div class="row"><button id="btnOpenApp">🔥 Ouvrir l'application</button><button id="btnLock" class="danger">🔒 Verrouiller</button></div>
+    </div>
+    <div class="card">
+      <h3>🖼️ Fond d'écran — diffusion temps réel aux tiers</h3>
+      <input id="wpFile" type="file" accept="image/*">
+      <label>Opacité <input id="wpOpacity" type="range" min="0.05" max="0.8" step="0.05" value="0.25"></label>
+      <button id="wpClear" class="danger">Retirer le fond</button>
+    </div>
+    <div class="card">
+      <h3>📚 Mise à jour manuelle — publier une référence</h3>
+      <input id="refTitle" placeholder="Titre (ex. Rappel Clio 5 — courroie)">
+      <input id="refUrl" placeholder="Source https:// (Légifrance, RappelConso, NHTSA…)">
+      <select id="refCat"><option value="technique">🔧 Technique</option><option value="juridique">⚖️ Juridique</option></select>
+      <input id="refNote" maxlength="200" placeholder="Note courte (200 car. max)">
+      <button id="pubRef">📡 Publier en temps réel</button>
+    </div>
+    <div class="card">
+      <h3>📢 Annonce instantanée</h3>
+      <input id="noticeTxt" maxlength="300" placeholder="Message diffusé à tous les écrans">
+      <button id="sendNotice">Diffuser</button>
+      <a class="apkLink" hidden download>📲 Lien APK à partager</a>
+    </div>
+  </section>
+  <section id="scrApp" class="screen" hidden>
+    <div class="card search">
+      <input id="q" list="suggest" placeholder="🔎 Recherche / MAJ manuelle — « FAP herbe », « L421-3 », « runaway LFP »…">
+      <datalist id="suggest"></datalist>
+      <select id="qType"><option value="tous">Tous</option><option value="technique">🔧 Technique</option><option value="juridique">⚖️ Juridique</option></select>
+      <button id="btnSearch">Rechercher ↗</button>
+    </div>
+    <iframe id="frame" title="Étude incendie technique"></iframe>
+    <div class="card">
+      <h3>📚 Références croisées (<span id="refCount">0</span>) — <small id="refUpdated"></small></h3>
+      <ul id="refList" class="list refs"></ul>
+    </div>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+<script src="js/config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
