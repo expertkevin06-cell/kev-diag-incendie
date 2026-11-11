@@ -1,59 +1,120 @@
-const CACHE = "eik-scientific-v41";
+const CACHE = "eik-scientific-v41-2";
 const DYN = "eik-dyn-v1";
 const VERSION = "41.0.0";
-const CORE = ["./","./index.html","./manifest.json","./js/app.js","./data/pannes-connues.json","./data/keywords.json","./images/icon.svg","./404.html"];
-const BYPASS = ["ntfy.sh","ntfy.zoey.dev","ntfy.tiepolog.ovh","api.nhtsa.gov","data.gouv.fr","generativelanguage.googleapis.com","auto-legal-by-kevin.lovable.app","images.unsplash.com","upload.wikimedia.org","images.pexels.com"];
+const CORE = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./js/app.js",
+  "./data/pannes-connues.json",
+  "./data/keywords.json",
+  "./images/icon.svg",
+  "./404.html",
+  "./offline.html",
+  "./tools/verify.html",
+  "./tools/icon-gen.html",
+  "./tools/assetlinks.html"
+];
+const BYPASS = [
+  "ntfy.sh",
+  "ntfy.zoey.dev",
+  "ntfy.tiepolog.ovh",
+  "api.nhtsa.gov",
+  "data.gouv.fr",
+  "generativelanguage.googleapis.com",
+  "auto-legal-by-kevin.lovable.app",
+  "images.unsplash.com",
+  "upload.wikimedia.org",
+  "images.pexels.com"
+];
 
-self.addEventListener("install", e => {
-  e.waitUntil((async () => {
-    const c = await caches.open(CACHE);
-    await Promise.allSettled(CORE.map(async u => {
-      try { const r = await fetch(new Request(u, { cache: "reload" })); if (r.ok) await c.put(u, r); } catch (e) {}
+self.addEventListener("install", event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    await Promise.allSettled(CORE.map(async url => {
+      try {
+        const response = await fetch(new Request(url, { cache: "reload" }));
+        if (response.ok) await cache.put(url, response);
+      } catch (error) {}
     }));
     await self.skipWaiting();
   })());
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil((async () => {
-    const ks = await caches.keys();
-    await Promise.all(ks.filter(k => k !== CACHE && k !== DYN).map(k => caches.delete(k)));
+self.addEventListener("activate", event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key !== CACHE && key !== DYN).map(key => caches.delete(key)));
     await self.clients.claim();
-    const cs = await self.clients.matchAll({ type: "window" });
-    cs.forEach(c => c.postMessage({ type: "sw-activated", version: VERSION }));
+    const clients = await self.clients.matchAll({ type: "window" });
+    clients.forEach(client => client.postMessage({ type: "sw-activated", version: VERSION, cache: CACHE }));
   })());
 });
 
-self.addEventListener("message", e => {
-  if (e.data === "SKIP_WAITING") self.skipWaiting();
+self.addEventListener("message", event => {
+  if (event.data === "SKIP_WAITING") self.skipWaiting();
+  if (event.data && event.data.type === "notify") {
+    event.waitUntil(self.registration.showNotification(event.data.title || "Étude incendie", {
+      body: event.data.body || "",
+      icon: "images/icon.svg",
+      badge: "images/icon.svg",
+      tag: event.data.tag || ("eik-" + Date.now())
+    }));
+  }
 });
 
-self.addEventListener("fetch", e => {
-  const u = new URL(e.request.url);
-  if (e.request.method !== "GET" || !u.protocol.startsWith("http")) return;
-  if (BYPASS.some(h => u.hostname.includes(h))) return;
-  if (u.origin !== location.origin) return;
-  if (e.request.mode === "navigate") { e.respondWith(networkFirst(e.request, true)); return; }
-  if (u.pathname.endsWith(".json") || u.pathname.endsWith(".js") || u.pathname.endsWith(".html")) { e.respondWith(networkFirst(e.request, false)); return; }
-  e.respondWith(cacheFirst(e.request));
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  event.waitUntil(clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
+    if (list.length) return list[0].focus();
+    return clients.openWindow("./");
+  }));
 });
 
-async function networkFirst(r, nav) {
-  const c = await caches.open(CACHE);
+self.addEventListener("fetch", event => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== "GET" || !url.protocol.startsWith("http")) return;
+  if (BYPASS.some(host => url.hostname.includes(host))) return;
+  if (url.origin !== location.origin) return;
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(networkFirst(event.request, true));
+    return;
+  }
+  if (url.pathname.endsWith(".json") || url.pathname.endsWith(".js") || url.pathname.endsWith(".html")) {
+    event.respondWith(networkFirst(event.request, false));
+    return;
+  }
+  event.respondWith(cacheFirst(event.request));
+});
+
+async function networkFirst(request, isNavigation) {
+  const cache = await caches.open(CACHE);
   try {
-    const s = await fetch(r);
-    if (s.ok) await c.put(r, s.clone());
-    return s;
-  } catch (e) {
-    const hit = await c.match(r, { ignoreSearch: true }) || await c.match("./index.html") || await c.match("./");
-    return hit || new Response(nav ? "Hors ligne" : "[]", { status: nav ? 503 : 200, headers: { "Content-Type": nav ? "text/plain;charset=utf-8" : "application/json" } });
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const direct = await cache.match(request, { ignoreSearch: true });
+    if (direct) return direct;
+    if (isNavigation) {
+      const offline = await cache.match("./offline.html");
+      const home = await cache.match("./index.html") || await cache.match("./");
+      return offline || home || new Response("Hors ligne", { status: 503, headers: { "Content-Type": "text/plain;charset=utf-8" } });
+    }
+    return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
   }
 }
 
-async function cacheFirst(r) {
-  const hit = await caches.match(r, { ignoreSearch: true });
+async function cacheFirst(request) {
+  const hit = await caches.match(request, { ignoreSearch: true });
   if (hit) return hit;
-  const c = await caches.open(CACHE);
-  try { const s = await fetch(r); if (s.ok) await c.put(r, s.clone()); return s; }
-  catch (e) { return new Response("", { status: 503 }); }
+  const cache = await caches.open(CACHE);
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    return new Response("", { status: 503 });
+  }
 }
