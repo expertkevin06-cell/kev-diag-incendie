@@ -1,4 +1,4 @@
-const CACHE="eik-massive-v47",DYN="eik-dyn-v1",VERSION="47.0.0";
+const CACHE="eik-massive-v48",DYN="eik-dyn-v1",VERSION="48.0.0";
 const CORE=["./","./index.html","./manifest.json","./js/core.js","./js/catalog.js","./js/import-massif.js","./js/predictor.js","./js/app.js","./data/catalog-massif.json","./data/pannes-connues.json","./data/keywords.json","./data/vehicles.json","./data/engines.json","./data/correlations.json","./data/sources.json","./images/icon.svg","./404.html","./offline.html","./tools/verify.html","./tools/icon-gen.html","./tools/assetlinks.html"];
 const BYPASS=["ntfy.sh","ntfy.zoey.dev","ntfy.tiepolog.ovh","api.nhtsa.gov","data.gouv.fr","generativelanguage.googleapis.com","auto-legal-by-kevin.lovable.app","images.unsplash.com","upload.wikimedia.org","images.pexels.com"];
 const REMOTE=["/techkevin2026/","/auto-diagnostic/"];
