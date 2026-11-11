@@ -1,0 +1,19 @@
+{
+  "engines": [
+    {"code": "EB2", "names": ["1.2 PureTech", "PureTech", "EB2", "EB2DT", "EB2DTS"], "type": "Essence", "displacement": "1.2L", "knownIssues": ["Courroie humide", "Délamination", "Crépine colmatée"], "brands": ["Peugeot", "Citroën", "DS", "Opel"]},
+    {"code": "1.5 EcoBlue", "names": ["1.5 EcoBlue", "EcoBlue", "Ford 1.5"], "type": "Diesel", "displacement": "1.5L", "knownIssues": ["Courroie humide", "EGR", "FAP"], "brands": ["Ford"]},
+    {"code": "2.0 EcoBlue", "names": ["2.0 EcoBlue", "Ford 2.0"], "type": "Diesel", "displacement": "2.0L", "knownIssues": ["Courroie humide", "EGR", "FAP"], "brands": ["Ford"]},
+    {"code": "1.0 TSI", "names": ["1.0 TSI", "TSI", "VW 1.0"], "type": "Essence", "displacement": "1.0L", "knownIssues": ["Chaîne distribution", "Turbo", "Injection"], "brands": ["Volkswagen", "SEAT", "Škoda", "Audi"]},
+    {"code": "1.5 TSI", "names": ["1.5 TSI", "VW 1.5"], "type": "Essence", "displacement": "1.5L", "knownIssues": ["Injection", "Turbo", "Allumage"], "brands": ["Volkswagen", "SEAT", "Škoda", "Audi"]},
+    {"code": "2.0 TDI", "names": ["2.0 TDI", "TDI", "VW 2.0"], "type": "Diesel", "displacement": "2.0L", "knownIssues": ["EGR", "FAP", "Injecteurs", "Turbo"], "brands": ["Volkswagen", "SEAT", "Škoda", "Audi"]},
+    {"code": "1.5 BlueHDi", "names": ["1.5 BlueHDi", "BlueHDi", "PSA 1.5"], "type": "Diesel", "displacement": "1.5L", "knownIssues": ["EGR", "FAP", "AdBlue"], "brands": ["Peugeot", "Citroën", "DS", "Opel"]},
+    {"code": "2.0 BlueHDi", "names": ["2.0 BlueHDi", "PSA 2.0"], "type": "Diesel", "displacement": "2.0L", "knownIssues": ["EGR", "FAP", "AdBlue", "Turbo"], "brands": ["Peugeot", "Citroën", "DS", "Opel"]},
+    {"code": "1.0 EcoBoost", "names": ["1.0 EcoBoost", "EcoBoost", "Ford 1.0"], "type": "Essence", "displacement": "1.0L", "knownIssues": ["Refroidissement", "Turbo", "Injection"], "brands": ["Ford"]},
+    {"code": "1.6 Blue dCi", "names": ["1.6 dCi", "Blue dCi", "Renault 1.6"], "type": "Diesel", "displacement": "1.6L", "knownIssues": ["EGR", "FAP", "Injecteurs"], "brands": ["Renault", "Dacia"]},
+    {"code": "1.5 Blue dCi", "names": ["1.5 dCi", "Blue dCi", "Renault 1.5"], "type": "Diesel", "displacement": "1.5L", "knownIssues": ["EGR", "FAP", "Injecteurs"], "brands": ["Renault", "Dacia"]},
+    {"code": "1.3 TCe", "names": ["1.3 TCe", "TCe", "Renault 1.3"], "type": "Essence", "displacement": "1.3L", "knownIssues": ["Injection", "Turbo"], "brands": ["Renault", "Dacia"]},
+    {"code": "Kona EV", "names": ["Kona Electric", "Kona EV", "Hyundai EV"], "type": "Électrique", "displacement": "64 kWh", "knownIssues": ["Batterie", "OBC", "Charge"], "brands": ["Hyundai"]},
+    {"code": "Tesla Model 3", "names": ["Model 3", "Tesla"], "type": "Électrique", "displacement": "50-82 kWh", "knownIssues": ["Batterie", "Charge", "Autopilot"], "brands": ["Tesla"]},
+    {"code": "Tesla Model Y", "names": ["Model Y", "Tesla Y"], "type": "Électrique", "displacement": "60-82 kWh", "knownIssues": ["Batterie", "Charge", "Autopilot"], "brands": ["Tesla"]}
+  ]
+}
