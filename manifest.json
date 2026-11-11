@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Etude incendie by Kevin — Ingénieur scientifique",
+  "name": "Etude incendie by Kevin — Auto-vérification APK",
   "short_name": "EtudeIncendie",
-  "description": "Recherche par mots-clés, analyse causale des pannes connues, preuves, plan de vérification, présentation interactive, base locale hors ligne.",
+  "description": "Connexion admin corrigée, auto-vérification APK/web/connexions/partage, analyse causale, base locale hors ligne.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
@@ -12,28 +12,11 @@
   "theme_color": "#120507",
   "categories": ["education", "reference", "productivity"],
   "icons": [
-    {
-      "src": "images/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    {"src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
   ],
   "shortcuts": [
-    {
-      "name": "Analyser courroie humide",
-      "url": "./?analyse=courroie%20humide",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "Rechercher",
-      "url": "./?action=search",
-      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    }
+    {"name": "Analyser courroie humide", "url": "./?analyse=courroie%20humide"},
+    {"name": "Auto-vérification", "url": "./?action=diag"}
   ],
-  "share_target": {
-    "action": "./",
-    "method": "GET",
-    "params": { "text": "q" }
-  }
+  "share_target": {"action": "./", "method": "GET", "params": {"text": "q"}}
 }
