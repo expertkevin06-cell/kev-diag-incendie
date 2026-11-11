@@ -1,6 +1,6 @@
 /* service-worker.js — v32 : anti-404, purge des anciens caches, fonctions v31 conservées */
-const CACHE = 'etude-v32', DYN = 'etude-dyn-v31';
-const CORE = ['./','./index.html','./manifest.json','./css/styles.css','./js/data.js','./js/engine.js','./js/search-v25.js','./js/mega-pannes.js','./js/legal-auto.js','./js/app.js','./js/fiches-techniques.js','./images/icon.svg','./data/recalls-feed.json'];
+const CACHE = 'etude-v33', DYN = 'etude-dyn-v31';
+const CORE = ['./','./index.html','./manifest.json','./css/styles.css','./js/data.js','./js/engine.js','./js/search-v25.js','./js/mega-pannes.js','./js/legal-auto.js','./js/app.js','./js/fiches-techniques.js','./images/icon.svg','./data/recalls-feed.json','./js/kevin-pro.js','./css/kevin-pro.css','./data/keywords.json'];
 const BYPASS = ['generativelanguage.googleapis.com','ntfy.sh','ntfy.zoey.dev','ntfy.tiepolog.ovh','api.nhtsa.gov','data.gouv.fr','auto-legal-by-kevin.lovable.app','images.unsplash.com','upload.wikimedia.org','images.pexels.com','image.qwenlm.ai'];
 
 self.addEventListener('install', e => {
