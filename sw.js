@@ -1,13 +1,15 @@
-const CACHE = "eik-scientific-v41-2";
+const CACHE = "eik-scientific-v42";
 const DYN = "eik-dyn-v1";
-const VERSION = "41.0.0";
+const VERSION = "42.0.0";
 const CORE = [
   "./",
   "./index.html",
   "./manifest.json",
   "./js/app.js",
+  "./js/update-engine.js",
   "./data/pannes-connues.json",
   "./data/keywords.json",
+  "./data/sources.json",
   "./images/icon.svg",
   "./404.html",
   "./offline.html",
@@ -15,7 +17,7 @@ const CORE = [
   "./tools/icon-gen.html",
   "./tools/assetlinks.html"
 ];
-const BYPASS = [
+const BYPASS_HOSTS = [
   "ntfy.sh",
   "ntfy.zoey.dev",
   "ntfy.tiepolog.ovh",
@@ -27,6 +29,7 @@ const BYPASS = [
   "upload.wikimedia.org",
   "images.pexels.com"
 ];
+const BYPASS_PATHS = ["/techkevin2026/", "/auto-diagnostic/"];
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
@@ -74,8 +77,9 @@ self.addEventListener("notificationclick", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || !url.protocol.startsWith("http")) return;
-  if (BYPASS.some(host => url.hostname.includes(host))) return;
+  if (BYPASS_HOSTS.some(host => url.hostname.includes(host))) return;
   if (url.origin !== location.origin) return;
+  if (BYPASS_PATHS.some(path => url.pathname.startsWith(path))) return;
 
   if (event.request.mode === "navigate") {
     event.respondWith(networkFirst(event.request, true));
