@@ -5,17 +5,7 @@
     "url": "https://expertkevin06-cell.github.io/techkevin2026/#/veh",
     "enabled": true,
     "kind": "spa",
-    "probes": [
-      "data/veh.json",
-      "data/vehicles.json",
-      "data/pannes.json",
-      "data/pannes-connues.json",
-      "data/db.json",
-      "data/data.json",
-      "assets/data.json",
-      "asset-manifest.json",
-      "manifest.json"
-    ]
+    "probes": ["data/veh.json", "data/vehicles.json", "data/pannes.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json"]
   },
   {
     "id": "auto-diagnostic",
@@ -23,16 +13,6 @@
     "url": "https://expertkevin06-cell.github.io/auto-diagnostic/",
     "enabled": true,
     "kind": "spa",
-    "probes": [
-      "data/pannes.json",
-      "data/diagnostics.json",
-      "data/dtc.json",
-      "data/vehicles.json",
-      "data/db.json",
-      "data/data.json",
-      "assets/data.json",
-      "asset-manifest.json",
-      "manifest.json"
-    ]
+    "probes": ["data/pannes.json", "data/diagnostics.json", "data/dtc.json", "data/vehicles.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json"]
   }
 ]
