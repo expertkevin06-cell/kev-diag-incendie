@@ -1,14 +1,42 @@
-const CACHE = "eik-predictive-v43";
+const CACHE = "eik-predictive-v44";
 const DYN = "eik-dyn-v1";
-const VERSION = "43.0.0";
-const CORE = ["./","./index.html","./manifest.json","./js/app.js","./js/predictor.js","./js/update-engine.js","./data/pannes-connues.json","./data/keywords.json","./data/vehicles.json","./data/engines.json","./data/correlations.json","./data/sources.json","./images/icon.svg","./404.html","./offline.html","./tools/verify.html","./tools/icon-gen.html","./tools/assetlinks.html"];
-const BYPASS_HOSTS = ["ntfy.sh","ntfy.zoey.dev","ntfy.tiepolog.ovh","api.nhtsa.gov","data.gouv.fr","generativelanguage.googleapis.com","auto-legal-by-kevin.lovable.app","images.unsplash.com","upload.wikimedia.org","images.pexels.com"];
+const VERSION = "44.0.0";
+const CORE = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./js/app.js",
+  "./js/predictor.js",
+  "./js/update-engine.js",
+  "./data/pannes-connues.json",
+  "./data/keywords.json",
+  "./data/vehicles.json",
+  "./data/engines.json",
+  "./data/correlations.json",
+  "./data/sources.json",
+  "./images/icon.svg",
+  "./404.html",
+  "./offline.html",
+  "./tools/verify.html",
+  "./tools/icon-gen.html",
+  "./tools/assetlinks.html"
+];
+const BYPASS_HOSTS = [
+  "ntfy.sh", "ntfy.zoey.dev", "ntfy.tiepolog.ovh",
+  "api.nhtsa.gov", "data.gouv.fr",
+  "generativelanguage.googleapis.com",
+  "auto-legal-by-kevin.lovable.app",
+  "images.unsplash.com", "upload.wikimedia.org", "images.pexels.com"
+];
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await Promise.allSettled(CORE.map(async url => {
-      try { const response = await fetch(new Request(url, { cache: "reload" })); if (response.ok) await cache.put(url, response); } catch (error) {}
+      try {
+        const response = await fetch(new Request(url, { cache: "reload" }));
+        if (response.ok) await cache.put(url, response);
+      } catch (error) {}
     }));
     await self.skipWaiting();
   })());
@@ -40,11 +68,18 @@ self.addEventListener("fetch", event => {
 
 async function networkFirst(request, isNavigation) {
   const cache = await caches.open(CACHE);
-  try { const response = await fetch(request); if (response.ok) await cache.put(request, response.clone()); return response; }
-  catch (error) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
     const direct = await cache.match(request, { ignoreSearch: true });
     if (direct) return direct;
-    if (isNavigation) { const offline = await cache.match("./offline.html"); const home = await cache.match("./index.html") || await cache.match("./"); return offline || home || new Response("Hors ligne", { status: 503, headers: { "Content-Type": "text/plain;charset=utf-8" } }); }
+    if (isNavigation) {
+      const offline = await cache.match("./offline.html");
+      const home = await cache.match("./index.html") || await cache.match("./");
+      return offline || home || new Response("Hors ligne", { status: 503, headers: { "Content-Type": "text/plain;charset=utf-8" } });
+    }
     return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
   }
 }
@@ -53,6 +88,11 @@ async function cacheFirst(request) {
   const hit = await caches.match(request, { ignoreSearch: true });
   if (hit) return hit;
   const cache = await caches.open(CACHE);
-  try { const response = await fetch(request); if (response.ok) await cache.put(request, response.clone()); return response; }
-  catch (error) { return new Response("", { status: 503 }); }
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    return new Response("", { status: 503 });
+  }
 }
