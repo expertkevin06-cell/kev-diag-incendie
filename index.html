@@ -1,300 +1,83 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#160609">
-<meta name="description" content="Étude incendie technique by Kevin — expertise origine de feu véhicules : fiches croisées, recherche prédictive, présentation interactive, contrôle d’accès temps réel.">
+<meta name="description" content="Étude incendie technique by Kevin — recherche par mots-clés, analyse causale des pannes connues, fiches origine de feu, présentation interactive.">
 <title>Étude incendie technique — by Kevin</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="images/icon.svg" type="image/svg+xml">
 <style>
-:root{
-  --bg:#160609;--bg2:#24090f;--surface:#2a0e15;--surface2:#35121c;--overlay:rgba(22,6,9,.9);
-  --line:#4a1a26;--line2:#6b2333;
-  --fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--blue:#2f9bff;--green:#39d98a;--amber:#ffb020;--violet:#b16dff;
-  --text:#fff4ef;--muted:#c9a9a4;--dim:#8f6f6b;
-  --r:16px;--shadow:0 18px 50px rgba(0,0,0,.45);--head:72px;
-  --ease:cubic-bezier(.22,.9,.25,1);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:calc(var(--head) + 18px)}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;overflow-x:hidden}
-body.locked{overflow:hidden}
-::selection{background:var(--fire);color:#1a0609}
-::-webkit-scrollbar{width:11px;height:11px}
-::-webkit-scrollbar-track{background:#1c070c}
-::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--fire),var(--red));border-radius:99px;border:2px solid #1c070c}
-::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--fire2),var(--fire))}
-*{scrollbar-width:thin;scrollbar-color:var(--fire) #1c070c}
-a{color:var(--fire2)}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer;border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:12px;padding:.6rem .9rem;transition:transform .18s var(--ease),background .18s,border-color .18s,box-shadow .18s}
-button:hover{transform:translateY(-2px);border-color:var(--fire);box-shadow:0 8px 22px rgba(255,107,53,.18)}
-button:active{transform:translateY(0)}
-button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
-input,select,textarea{width:100%;background:#1d080d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;outline:none;transition:border-color .18s,box-shadow .18s}
-input:focus,select:focus,textarea:focus{border-color:var(--fire);box-shadow:0 0 0 3px rgba(255,107,53,.16)}
-input::placeholder,textarea::placeholder{color:var(--dim)}
-select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--fire2) 50%),linear-gradient(135deg,var(--fire2) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:2.2rem}
-[hidden]{display:none!important}
-.bg-glow{position:fixed;border-radius:50%;filter:blur(90px);opacity:.22;z-index:-3;pointer-events:none}
-.g1{width:520px;height:520px;background:var(--red);left:-160px;bottom:-180px;animation:drift 16s ease-in-out infinite alternate}
-.g2{width:460px;height:460px;background:var(--blue);right:-140px;top:-120px;opacity:.13;animation:drift 20s ease-in-out infinite alternate-reverse}
-@keyframes drift{to{transform:translate(40px,-30px) scale(1.08)}}
-#embers{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.7}
-#wpLayer{position:fixed;inset:0;z-index:-4;background:center/cover no-repeat;transition:opacity .5s}
-.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
-header{position:fixed;top:0;left:0;right:0;height:var(--head);z-index:100;display:flex;align-items:center;gap:1rem;padding:0 clamp(.8rem,3vw,2rem);background:rgba(22,6,9,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);animation:slideDown .6s var(--ease) both}
-@keyframes slideDown{from{transform:translateY(-100%)}to{transform:none}}
-.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
-.brand .mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--fire),var(--red));box-shadow:0 6px 18px rgba(230,57,70,.4)}
-.brand small{display:block;color:var(--fire2);font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
-nav{display:flex;gap:.2rem;margin-left:auto}
-nav a{color:var(--muted);text-decoration:none;font-size:.85rem;padding:.45rem .7rem;border-radius:10px;border:1px solid transparent;transition:.18s}
-nav a:hover,nav a.active{color:var(--text);background:var(--surface2);border-color:var(--line2)}
-.pills{display:flex;gap:.4rem;align-items:center}
-.pill{font-size:.72rem;padding:.28rem .6rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);white-space:nowrap}
-.pill.ok{border-color:rgba(57,217,138,.5);color:var(--green)}
-.pill.warn{border-color:rgba(255,176,32,.5);color:var(--amber)}
-.pill.info{border-color:rgba(47,155,255,.5);color:var(--blue)}
-.head-actions{display:flex;gap:.4rem}
-.head-actions button{padding:.5rem .7rem;font-size:.8rem}
-#menuBtn{display:none}
-main{max-width:1240px;margin:0 auto;padding:calc(var(--head) + 26px) clamp(.8rem,3vw,2rem) 4rem}
-section{margin-bottom:3.2rem;opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
-section.in{opacity:1;transform:none}
-.section-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap}
-h1,h2,h3{line-height:1.15;margin:0}
-h2{font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.01em}
-h2 .idx{color:var(--fire);font-family:ui-monospace,monospace;font-size:.8em;margin-right:.5rem}
-.eyebrow{color:var(--fire2);text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:800;margin-bottom:.4rem}
-.lead{color:var(--muted);max-width:640px}
-.card{background:linear-gradient(160deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:1.1rem;box-shadow:var(--shadow)}
-.grid{display:grid;gap:1rem}
-.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:1.4rem;align-items:stretch;padding-top:.6rem}
-.hero h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-.03em;margin:.4rem 0 .8rem}
-.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--fire2),var(--fire),var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem}
-.btn-fire{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff;font-weight:800}
-.btn-fire:hover{box-shadow:0 10px 28px rgba(255,107,53,.35)}
-.btn-ghost{background:transparent}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
-.stat{padding:1rem;border-radius:14px;border:1px solid var(--line);background:rgba(42,14,21,.7)}
-.stat b{display:block;font-size:1.7rem;color:var(--fire2);font-family:ui-monospace,monospace}
-.stat span{font-size:.78rem;color:var(--muted)}
-.hero-panel{position:relative;overflow:hidden}
-.hero-panel:before{content:"";position:absolute;inset:-40% -20% auto auto;width:260px;height:260px;background:radial-gradient(circle,rgba(255,107,53,.35),transparent 65%);animation:pulse 4s ease-in-out infinite}
-@keyframes pulse{50%{transform:scale(1.15);opacity:.7}}
-.mini-step{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px dashed var(--line)}
-.mini-step:last-child{border:0}
-.mini-step b{color:var(--fire2);font-family:ui-monospace,monospace;font-size:.8rem}
-.mini-step span{font-size:.85rem;color:var(--muted)}
-.search-wrap{position:relative}
-.search-box{display:flex;gap:.6rem;align-items:center;background:linear-gradient(160deg,#2d0f17,#1d080d);border:1px solid var(--line2);border-radius:18px;padding:.8rem;box-shadow:var(--shadow)}
-.search-box .ico{font-size:1.3rem;padding:0 .3rem}
-.search-box input{flex:1;border:0;background:transparent;font-size:1.05rem;padding:.4rem;box-shadow:none}
-.search-box select{width:auto;min-width:150px}
-.search-box button{white-space:nowrap}
-.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0}
-.chip{font-size:.75rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--fire2);cursor:pointer;transition:.15s}
-.chip:hover{background:var(--fire);color:#1a0609;border-color:var(--fire)}
-.chip.muted{color:var(--muted);cursor:default}
-.results{margin-top:.8rem;display:grid;gap:.5rem}
-.result-group{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--fire2);font-weight:800;margin:.7rem 0 .2rem}
-.result{display:flex;justify-content:space-between;gap:.8rem;align-items:center;padding:.75rem .9rem;border-radius:12px;border:1px solid var(--line);background:rgba(42,14,21,.6);cursor:pointer;transition:.15s;border-left:3px solid transparent}
-.result:hover,.result.active{background:var(--surface2);border-left-color:var(--fire);transform:translateX(3px)}
-.result b{font-size:.92rem}
-.result small{display:block;color:var(--muted);font-size:.75rem;margin-top:.15rem}
-.result .tag{font-size:.68rem;color:var(--dim);white-space:nowrap}
-.empty{padding:1.4rem;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:14px}
-.filters{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;padding:.9rem;border-radius:16px;border:1px solid var(--line);background:rgba(42,14,21,.75);margin-bottom:1rem}
-.filters select{width:auto;min-width:150px;flex:1}
-.filters input{flex:2;min-width:200px}
-.filters button{white-space:nowrap}
-.count{margin-left:auto;color:var(--fire2);font-weight:800;font-size:.85rem;white-space:nowrap}
-.fiches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
-.fiche{position:relative;overflow:hidden;background:linear-gradient(165deg,var(--surface),#1c070c);border:1px solid var(--line);border-radius:18px;padding:1rem;display:flex;flex-direction:column;gap:.6rem;animation:cardIn .5s var(--ease) both;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
-.fiche:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.5);border-color:var(--line2)}
-@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
-.fiche-top{display:flex;justify-content:space-between;gap:.5rem;font-size:.7rem;font-weight:800;padding:.35rem .6rem;border-radius:9px;letter-spacing:.04em}
-.fiche-top.th{background:linear-gradient(90deg,rgba(255,107,53,.3),rgba(230,57,70,.15));color:var(--fire2)}
-.fiche-top.ev{background:linear-gradient(90deg,rgba(47,155,255,.3),rgba(177,109,255,.15));color:#9fd0ff}
-.fiche h3{font-size:1.02rem}
-.fiche .cause{color:var(--muted);font-size:.85rem;flex:1}
-.tags{display:flex;flex-wrap:wrap;gap:.3rem}
-.tag{font-size:.68rem;padding:.18rem .55rem;border-radius:99px;background:#20080d;border:1px solid var(--line);color:var(--muted)}
-.tag.dtc{border-color:rgba(255,176,32,.5);color:var(--amber)}
-.fiche-actions{display:flex;gap:.4rem}
-.fiche-actions button{flex:1;padding:.5rem;font-size:.8rem}
-.fiche-more{font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:.6rem}
-.fiche-more p{margin:.35rem 0}
-.fiche-more b{color:var(--text)}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem}
-.step{padding:1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c);position:relative;overflow:hidden}
-.step:before{content:attr(data-n);position:absolute;right:.6rem;top:.2rem;font-size:2.6rem;font-weight:900;color:rgba(255,107,53,.12);font-family:ui-monospace,monospace}
-.step b{color:var(--fire2);display:block;margin-bottom:.3rem}
-.step span{font-size:.85rem;color:var(--muted)}
-.patterns{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-top:1rem}
-.pattern{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d}
-.pattern b{color:var(--text)}
-.pattern span{display:block;font-size:.8rem;color:var(--muted);margin-top:.2rem}
-.phenom{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem}
-.phenom .card{border-left:3px solid var(--fire)}
-.phenom .card:nth-child(2){border-left-color:var(--red)}
-.phenom .card:nth-child(3){border-left-color:var(--amber)}
-.phenom .card:nth-child(4){border-left-color:var(--violet)}
-.phenom b{display:block;margin-bottom:.3rem}
-.phenom span{font-size:.85rem;color:var(--muted)}
-table{width:100%;border-collapse:collapse;font-size:.88rem}
-th,td{padding:.65rem .7rem;text-align:left;border-bottom:1px solid var(--line)}
-th{color:var(--fire2);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
-tr:hover td{background:rgba(255,107,53,.05)}
-.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
-.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.9rem}
-.zone{padding:1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c);cursor:pointer;transition:.2s}
-.zone:hover{border-color:var(--fire);transform:translateY(-3px)}
-.zone b{display:block;margin-bottom:.4rem}
-.zone span{font-size:.83rem;color:var(--muted);display:block}
-.dtc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem}
-.dtc{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d;cursor:pointer;transition:.18s;border-left:3px solid var(--amber)}
-.dtc:hover{background:var(--surface2);transform:translateX(3px)}
-.dtc b{font-family:ui-monospace,monospace;color:var(--amber)}
-.dtc span{display:block;font-size:.82rem;color:var(--muted);margin-top:.25rem}
-.legal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}
-.legal{padding:1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c);border-top:3px solid var(--blue)}
-.legal b{display:block;margin-bottom:.35rem}
-.legal span{font-size:.84rem;color:var(--muted)}
-.legal a{display:inline-block;margin-top:.6rem;font-size:.82rem}
-.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-bottom:1rem}
-.portal{display:block;padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d;text-decoration:none;color:var(--text);transition:.18s}
-.portal:hover{border-color:var(--fire);transform:translateY(-3px)}
-.portal b{display:block;color:var(--fire2)}
-.portal span{font-size:.8rem;color:var(--muted)}
-.ref-list{display:grid;gap:.5rem}
-.ref{display:flex;justify-content:space-between;gap:.8rem;align-items:center;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--line);background:rgba(42,14,21,.6)}
-.ref a{font-weight:700;font-size:.9rem}
-.ref small{display:block;color:var(--muted);font-size:.75rem}
-.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
-.admin-grid .card h3{font-size:1rem;margin-bottom:.7rem;color:var(--fire2)}
-.req{padding:.7rem;border-radius:12px;border:1px solid var(--line);background:#20080d;margin-bottom:.6rem}
-.req-head{display:flex;justify-content:space-between;gap:.5rem;align-items:center;flex-wrap:wrap}
-.req-head b{font-size:.92rem}
-.req-head small{color:var(--dim);font-size:.72rem}
-.badge{font-size:.68rem;padding:.18rem .55rem;border-radius:99px;border:1px solid var(--line2);color:var(--muted)}
-.badge.granted{border-color:rgba(57,217,138,.5);color:var(--green)}
-.badge.denied,.badge.revoked{border-color:rgba(230,57,70,.5);color:var(--red)}
-.badge.pending{border-color:rgba(255,176,32,.5);color:var(--amber)}
-.req-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
-.req-actions button{padding:.35rem .55rem;font-size:.75rem}
-.danger{border-color:rgba(230,57,70,.5);color:#ff9aa2}
-.wp-preview{width:100%;height:120px;border-radius:12px;border:1px solid var(--line);background:#1d080d center/cover no-repeat;margin:.6rem 0;display:grid;place-items:center;color:var(--dim);font-size:.8rem}
-.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.row input[type=range]{width:150px;padding:0}
-.hint{font-size:.75rem;color:var(--dim)}
-footer{border-top:1px solid var(--line);padding:2rem clamp(.8rem,3vw,2rem);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;background:rgba(22,6,9,.7)}
-footer .row{justify-content:flex-end}
-#gate{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:1rem;background:rgba(12,3,6,.72);backdrop-filter:blur(16px);animation:fadeIn .5s var(--ease)}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.gate-card{width:min(960px,100%);display:grid;grid-template-columns:1fr 1fr;border-radius:24px;overflow:hidden;border:1px solid var(--line2);box-shadow:0 30px 90px rgba(0,0,0,.6);animation:gateIn .7s var(--ease) both}
-@keyframes gateIn{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:none}}
-.gate-visual{padding:2.2rem;background:linear-gradient(160deg,#3d0d16,#1a0609);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:480px}
-.gate-visual:before{content:"";position:absolute;inset:auto -20% -30% auto;width:340px;height:340px;background:radial-gradient(circle,rgba(255,107,53,.4),transparent 65%);animation:pulse 5s ease-in-out infinite}
-.gate-visual h2{font-size:1.9rem;margin:.8rem 0}
-.gate-visual .lead{font-size:.9rem}
-.gate-flame{font-size:3rem;filter:drop-shadow(0 8px 20px rgba(255,107,53,.5))}
-.gate-stats{display:flex;gap:1.4rem;margin-top:1.4rem}
-.gate-stats b{display:block;color:var(--fire2);font-size:1.3rem;font-family:ui-monospace,monospace}
-.gate-stats span{font-size:.72rem;color:var(--muted)}
-.gate-form{padding:2.2rem;background:linear-gradient(160deg,#2a0e15,#1d080d)}
-.tabs{display:flex;gap:.4rem;margin-bottom:1.4rem}
-.tabs button{flex:1;font-size:.85rem}
-.tabs button.active{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff;font-weight:800}
-.gate-form h3{font-size:1.3rem;margin-bottom:.4rem}
-.gate-form .lead{font-size:.88rem;margin-bottom:1.2rem}
-.gate-form form{display:grid;gap:.7rem}
-.gate-status{margin-top:1rem;padding:.9rem;border-radius:12px;border:1px solid var(--line);background:#20080d;font-size:.85rem}
-.gate-status.pending{border-color:rgba(255,176,32,.4)}
-.gate-status.denied,.gate-status.revoked{border-color:rgba(230,57,70,.4)}
-.gate-status b{display:block;margin-bottom:.2rem}
-.pulse-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:.4rem;animation:blink 1.2s infinite}
-@keyframes blink{50%{opacity:.25}}
-.shake{animation:shake .4s}
-@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
-#deck{position:fixed;inset:0;z-index:600;background:radial-gradient(1100px 700px at 50% -10%,#4a1020,#120407 70%);display:flex;flex-direction:column;animation:fadeIn .3s}
-.deck-bar{height:5px;background:#2a0e15}
-#deckProgress{height:100%;width:0;background:linear-gradient(90deg,var(--fire),var(--fire2));transition:width .35s var(--ease)}
-.deck-head{display:flex;justify-content:space-between;align-items:center;gap:.8rem;padding:.8rem 1.2rem;font-weight:800}
-.deck-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.deck-btns{display:flex;gap:.4rem}
-.deck-btns button{padding:.45rem .65rem;font-size:.85rem}
-.deck-slide{flex:1;display:flex;flex-direction:column;justify-content:center;width:min(920px,92%);margin:0 auto;padding:1rem;overflow:auto}
-.deck-slide.anim{animation:slideIn .4s var(--ease)}
-@keyframes slideIn{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
-.deck-slide h3{color:var(--fire2);text-transform:uppercase;letter-spacing:.1em;font-size:1rem;margin-bottom:1rem}
-.deck-slide .big{font-size:clamp(1.15rem,2.8vw,1.8rem);font-weight:700;line-height:1.5}
-.deck-cover{text-align:center}
-.deck-cover h2{font-size:clamp(1.7rem,4.6vw,2.8rem);margin:.8rem 0}
-.energy-big{display:inline-block;padding:.4rem 1rem;border-radius:99px;font-size:.78rem;font-weight:900;letter-spacing:.1em}
-.energy-big.th{background:rgba(255,107,53,.2);color:var(--fire2)}
-.energy-big.ev{background:rgba(47,155,255,.2);color:#9fd0ff}
-.deck-nav{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1.2rem;gap:.8rem}
-.deck-nav .dots{display:flex;gap:.35rem}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--line2);transition:.25s}
-.dot.on{background:var(--fire);transform:scale(1.3)}
-.deck-foot{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1.2rem 1rem;font-size:.8rem;color:var(--muted);gap:.8rem;flex-wrap:wrap}
-.deck-overview{position:absolute;inset:64px 0 0;overflow:auto;background:rgba(12,3,6,.97);padding:1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.8rem;align-content:start}
-.ov{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--text);text-align:left;display:flex;flex-direction:column;gap:.3rem}
-.ov.active{border-color:var(--fire);box-shadow:0 0 0 2px rgba(255,107,53,.2)}
-.ov small{color:var(--muted)}
-#drawer{position:fixed;inset:0;z-index:550;background:rgba(12,3,6,.6);backdrop-filter:blur(6px);display:flex;justify-content:flex-end;animation:fadeIn .25s}
-.drawer-card{width:min(460px,100%);height:100%;overflow:auto;background:linear-gradient(180deg,#2a0e15,#160609);border-left:1px solid var(--line2);padding:1.4rem;animation:drawerIn .35s var(--ease)}
-@keyframes drawerIn{from{transform:translateX(100%)}to{transform:none}}
-.drawer-card h3{margin-bottom:.6rem}
-.drawer-card .body{color:var(--muted);font-size:.92rem;margin:1rem 0}
-.drawer-close{float:right;padding:.4rem .6rem}
-#toasts{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);z-index:700;display:grid;gap:.5rem;width:min(560px,92vw)}
-.toast{padding:.8rem 1rem;border-radius:14px;background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:700;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:toastIn .35s var(--ease),toastOut .35s var(--ease) forwards;animation-delay:0s,4.2s}
-@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-@keyframes toastOut{to{opacity:0;transform:translateY(20px)}}
-#legacySink{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-@media(max-width:1020px){
-  nav{display:none}#menuBtn{display:block}
-  nav.open{display:flex;position:absolute;top:var(--head);left:0;right:0;flex-direction:column;background:rgba(22,6,9,.97);padding:.8rem;border-bottom:1px solid var(--line)}
-  .hero{grid-template-columns:1fr}
-}
-@media(max-width:760px){
-  :root{--head:64px}
-  .brand small{display:none}.head-actions .optional{display:none}
-  .gate-card{grid-template-columns:1fr}.gate-visual{min-height:auto;padding:1.6rem}.gate-form{padding:1.6rem}
-  .search-box{flex-wrap:wrap}.search-box select{flex:1}.search-box input{min-width:100%;order:-1}
-  .filters select,.filters input{min-width:46%;flex:1}
-  .deck-foot{justify-content:center}.deck-nav{padding:.5rem .8rem}
-}
+:root{--bg:#160609;--bg2:#24090f;--surface:#2a0e15;--surface2:#35121c;--line:#4a1a26;--line2:#6b2333;--fire:#ff6b35;--fire2:#ff9a3d;--red:#e63946;--blue:#2f9bff;--green:#39d98a;--amber:#ffb020;--violet:#b16dff;--text:#fff4ef;--muted:#c9a9a4;--dim:#8f6f6b;--r:16px;--shadow:0 18px 50px rgba(0,0,0,.45);--head:72px;--ease:cubic-bezier(.22,.9,.25,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:calc(var(--head) + 18px)}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;overflow-x:hidden}body.locked{overflow:hidden}
+::selection{background:var(--fire);color:#1a0609}::-webkit-scrollbar{width:11px;height:11px}::-webkit-scrollbar-track{background:#1c070c}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--fire),var(--red));border-radius:99px;border:2px solid #1c070c}::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--fire2),var(--fire))}*{scrollbar-width:thin;scrollbar-color:var(--fire) #1c070c}
+a{color:var(--fire2)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:12px;padding:.6rem .9rem;transition:transform .18s var(--ease),background .18s,border-color .18s,box-shadow .18s}button:hover{transform:translateY(-2px);border-color:var(--fire);box-shadow:0 8px 22px rgba(255,107,53,.18)}button:active{transform:translateY(0)}button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+input,select,textarea{width:100%;background:#1d080d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;outline:none;transition:border-color .18s,box-shadow .18s}input:focus,select:focus,textarea:focus{border-color:var(--fire);box-shadow:0 0 0 3px rgba(255,107,53,.16)}input::placeholder,textarea::placeholder{color:var(--dim)}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--fire2) 50%),linear-gradient(135deg,var(--fire2) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:2.2rem}[hidden]{display:none!important}
+.bg-glow{position:fixed;border-radius:50%;filter:blur(90px);opacity:.22;z-index:-3;pointer-events:none}.g1{width:520px;height:520px;background:var(--red);left:-160px;bottom:-180px;animation:drift 16s ease-in-out infinite alternate}.g2{width:460px;height:460px;background:var(--blue);right:-140px;top:-120px;opacity:.13;animation:drift 20s ease-in-out infinite alternate-reverse}@keyframes drift{to{transform:translate(40px,-30px) scale(1.08)}}
+#embers{position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.7}#wpLayer{position:fixed;inset:0;z-index:-4;background:center/cover no-repeat;transition:opacity .5s}.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
+header{position:fixed;top:0;left:0;right:0;height:var(--head);z-index:100;display:flex;align-items:center;gap:1rem;padding:0 clamp(.8rem,3vw,2rem);background:rgba(22,6,9,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);animation:slideDown .6s var(--ease) both}@keyframes slideDown{from{transform:translateY(-100%)}to{transform:none}}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}.brand .mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--fire),var(--red));box-shadow:0 6px 18px rgba(230,57,70,.4)}.brand small{display:block;color:var(--fire2);font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+nav{display:flex;gap:.2rem;margin-left:auto}nav a{color:var(--muted);text-decoration:none;font-size:.85rem;padding:.45rem .7rem;border-radius:10px;border:1px solid transparent;transition:.18s}nav a:hover,nav a.active{color:var(--text);background:var(--surface2);border-color:var(--line2)}
+.pills{display:flex;gap:.4rem;align-items:center}.pill{font-size:.72rem;padding:.28rem .6rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);white-space:nowrap}.pill.ok{border-color:rgba(57,217,138,.5);color:var(--green)}.pill.warn{border-color:rgba(255,176,32,.5);color:var(--amber)}.pill.info{border-color:rgba(47,155,255,.5);color:var(--blue)}
+.head-actions{display:flex;gap:.4rem}.head-actions button{padding:.5rem .7rem;font-size:.8rem}#menuBtn{display:none}
+main{max-width:1240px;margin:0 auto;padding:calc(var(--head) + 26px) clamp(.8rem,3vw,2rem) 4rem}section{margin-bottom:3.2rem;opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}section.in{opacity:1;transform:none}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap}h1,h2,h3{line-height:1.15;margin:0}h2{font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.01em}h2 .idx{color:var(--fire);font-family:ui-monospace,monospace;font-size:.8em;margin-right:.5rem}.eyebrow{color:var(--fire2);text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:800;margin-bottom:.4rem}.lead{color:var(--muted);max-width:640px}
+.card{background:linear-gradient(160deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:1.1rem;box-shadow:var(--shadow)}.grid{display:grid;gap:1rem}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:1.4rem;align-items:stretch;padding-top:.6rem}.hero h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-.03em;margin:.4rem 0 .8rem}.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--fire2),var(--fire),var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}.hero-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem}
+.btn-fire{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff;font-weight:800}.btn-fire:hover{box-shadow:0 10px 28px rgba(255,107,53,.35)}.btn-ghost{background:transparent}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}.stat{padding:1rem;border-radius:14px;border:1px solid var(--line);background:rgba(42,14,21,.7)}.stat b{display:block;font-size:1.7rem;color:var(--fire2);font-family:ui-monospace,monospace}.stat span{font-size:.78rem;color:var(--muted)}
+.hero-panel{position:relative;overflow:hidden}.hero-panel:before{content:"";position:absolute;inset:-40% -20% auto auto;width:260px;height:260px;background:radial-gradient(circle,rgba(255,107,53,.35),transparent 65%);animation:pulse 4s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.15);opacity:.7}}
+.mini-step{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px dashed var(--line)}.mini-step:last-child{border:0}.mini-step b{color:var(--fire2);font-family:ui-monospace,monospace;font-size:.8rem}.mini-step span{font-size:.85rem;color:var(--muted)}
+.search-wrap{position:relative}.search-box{display:flex;gap:.6rem;align-items:center;background:linear-gradient(160deg,#2d0f17,#1d080d);border:1px solid var(--line2);border-radius:18px;padding:.8rem;box-shadow:var(--shadow)}.search-box .ico{font-size:1.3rem;padding:0 .3rem}.search-box input{flex:1;border:0;background:transparent;font-size:1.05rem;padding:.4rem;box-shadow:none}.search-box select{width:auto;min-width:150px}.search-box button{white-space:nowrap}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0}.chip{font-size:.75rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--line2);background:var(--surface);color:var(--fire2);cursor:pointer;transition:.15s}.chip:hover{background:var(--fire);color:#1a0609;border-color:var(--fire)}.chip.muted{color:var(--muted);cursor:default}
+.results{margin-top:.8rem;display:grid;gap:.5rem}.result-group{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--fire2);font-weight:800;margin:.7rem 0 .2rem}.result{display:flex;justify-content:space-between;gap:.8rem;align-items:center;padding:.75rem .9rem;border-radius:12px;border:1px solid var(--line);background:rgba(42,14,21,.6);cursor:pointer;transition:.15s;border-left:3px solid transparent}.result:hover,.result.active{background:var(--surface2);border-left-color:var(--fire);transform:translateX(3px)}.result b{font-size:.92rem}.result small{display:block;color:var(--muted);font-size:.75rem;margin-top:.15rem}.result .tag{font-size:.68rem;color:var(--dim);white-space:nowrap}.empty{padding:1.4rem;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:14px}
+.filters{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;padding:.9rem;border-radius:16px;border:1px solid var(--line);background:rgba(42,14,21,.75);margin-bottom:1rem}.filters select{width:auto;min-width:150px;flex:1}.filters input{flex:2;min-width:200px}.filters button{white-space:nowrap}.count{margin-left:auto;color:var(--fire2);font-weight:800;font-size:.85rem;white-space:nowrap}
+.fiches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}.fiche{position:relative;overflow:hidden;background:linear-gradient(165deg,var(--surface),#1c070c);border:1px solid var(--line);border-radius:18px;padding:1rem;display:flex;flex-direction:column;gap:.6rem;animation:cardIn .5s var(--ease) both;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}.fiche:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.5);border-color:var(--line2)}@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.fiche-top{display:flex;justify-content:space-between;gap:.5rem;font-size:.7rem;font-weight:800;padding:.35rem .6rem;border-radius:9px;letter-spacing:.04em}.fiche-top.th{background:linear-gradient(90deg,rgba(255,107,53,.3),rgba(230,57,70,.15));color:var(--fire2)}.fiche-top.ev{background:linear-gradient(90deg,rgba(47,155,255,.3),rgba(177,109,255,.15));color:#9fd0ff}.fiche h3{font-size:1.02rem}.fiche .cause{color:var(--muted);font-size:.85rem;flex:1}.tags{display:flex;flex-wrap:wrap;gap:.3rem}.tag{font-size:.68rem;padding:.18rem .55rem;border-radius:99px;background:#20080d;border:1px solid var(--line);color:var(--muted)}.tag.dtc{border-color:rgba(255,176,32,.5);color:var(--amber)}.tag.sev{border-color:rgba(230,57,70,.5);color:#ff9aa2}.fiche-actions{display:flex;gap:.4rem}.fiche-actions button{flex:1;padding:.5rem;font-size:.8rem}.fiche-more{font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:.6rem}.fiche-more p{margin:.35rem 0}.fiche-more b{color:var(--text)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem}.step{padding:1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c);position:relative;overflow:hidden}.step:before{content:attr(data-n);position:absolute;right:.6rem;top:.2rem;font-size:2.6rem;font-weight:900;color:rgba(255,107,53,.12);font-family:ui-monospace,monospace}.step b{color:var(--fire2);display:block;margin-bottom:.3rem}.step span{font-size:.85rem;color:var(--muted)}
+.patterns{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-top:1rem}.pattern{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d}.pattern b{color:var(--text)}.pattern span{display:block;font-size:.8rem;color:var(--muted);margin-top:.2rem}
+.phenom{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem}.phenom .card{border-left:3px solid var(--fire)}.phenom .card:nth-child(2){border-left-color:var(--red)}.phenom .card:nth-child(3){border-left-color:var(--amber)}.phenom .card:nth-child(4){border-left-color:var(--violet)}.phenom b{display:block;margin-bottom:.3rem}.phenom span{font-size:.85rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:.65rem .7rem;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--fire2);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}tr:hover td{background:rgba(255,107,53,.05)}.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.9rem}.zone{padding:1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c);cursor:pointer;transition:.2s}.zone:hover{border-color:var(--fire);transform:translateY(-3px)}.zone b{display:block;margin-bottom:.4rem}.zone span{font-size:.83rem;color:var(--muted);display:block}
+.dtc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem}.dtc{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d;cursor:pointer;transition:.18s;border-left:3px solid var(--amber)}.dtc:hover{background:var(--surface2);transform:translateX(3px)}.dtc b{font-family:ui-monospace,monospace;color:var(--amber)}.dtc span{display:block;font-size:.82rem;color:var(--muted);margin-top:.25rem}
+.legal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}.legal{padding:1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface),#1c070c);border-top:3px solid var(--blue)}.legal b{display:block;margin-bottom:.35rem}.legal span{font-size:.84rem;color:var(--muted)}.legal a{display:inline-block;margin-top:.6rem;font-size:.82rem}
+.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-bottom:1rem}.portal{display:block;padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d;text-decoration:none;color:var(--text);transition:.18s}.portal:hover{border-color:var(--fire);transform:translateY(-3px)}.portal b{display:block;color:var(--fire2)}.portal span{font-size:.8rem;color:var(--muted)}
+.ref-list{display:grid;gap:.5rem}.ref{display:flex;justify-content:space-between;gap:.8rem;align-items:center;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--line);background:rgba(42,14,21,.6)}.ref a{font-weight:700;font-size:.9rem}.ref small{display:block;color:var(--muted);font-size:.75rem}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}.admin-grid .card h3{font-size:1rem;margin-bottom:.7rem;color:var(--fire2)}.req{padding:.7rem;border-radius:12px;border:1px solid var(--line);background:#20080d;margin-bottom:.6rem}.req-head{display:flex;justify-content:space-between;gap:.5rem;align-items:center;flex-wrap:wrap}.req-head b{font-size:.92rem}.req-head small{color:var(--dim);font-size:.72rem}.badge{font-size:.68rem;padding:.18rem .55rem;border-radius:99px;border:1px solid var(--line2);color:var(--muted)}.badge.granted{border-color:rgba(57,217,138,.5);color:var(--green)}.badge.denied,.badge.revoked{border-color:rgba(230,57,70,.5);color:var(--red)}.badge.pending{border-color:rgba(255,176,32,.5);color:var(--amber)}.req-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}.req-actions button{padding:.35rem .55rem;font-size:.75rem}.danger{border-color:rgba(230,57,70,.5);color:#ff9aa2}
+.wp-preview{width:100%;height:120px;border-radius:12px;border:1px solid var(--line);background:#1d080d center/cover no-repeat;margin:.6rem 0;display:grid;place-items:center;color:var(--dim);font-size:.8rem}.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.row input[type=range]{width:150px;padding:0}.hint{font-size:.75rem;color:var(--dim)}
+footer{border-top:1px solid var(--line);padding:2rem clamp(.8rem,3vw,2rem);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;background:rgba(22,6,9,.7)}footer .row{justify-content:flex-end}
+#gate{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:1rem;background:rgba(12,3,6,.72);backdrop-filter:blur(16px);animation:fadeIn .5s var(--ease)}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.gate-card{width:min(960px,100%);display:grid;grid-template-columns:1fr 1fr;border-radius:24px;overflow:hidden;border:1px solid var(--line2);box-shadow:0 30px 90px rgba(0,0,0,.6);animation:gateIn .7s var(--ease) both}@keyframes gateIn{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:none}}
+.gate-visual{padding:2.2rem;background:linear-gradient(160deg,#3d0d16,#1a0609);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:480px}.gate-visual:before{content:"";position:absolute;inset:auto -20% -30% auto;width:340px;height:340px;background:radial-gradient(circle,rgba(255,107,53,.4),transparent 65%);animation:pulse 5s ease-in-out infinite}.gate-visual h2{font-size:1.9rem;margin:.8rem 0}.gate-visual .lead{font-size:.9rem}.gate-flame{font-size:3rem;filter:drop-shadow(0 8px 20px rgba(255,107,53,.5))}.gate-stats{display:flex;gap:1.4rem;margin-top:1.4rem}.gate-stats b{display:block;color:var(--fire2);font-size:1.3rem;font-family:ui-monospace,monospace}.gate-stats span{font-size:.72rem;color:var(--muted)}
+.gate-form{padding:2.2rem;background:linear-gradient(160deg,#2a0e15,#1d080d)}.tabs{display:flex;gap:.4rem;margin-bottom:1.4rem}.tabs button{flex:1;font-size:.85rem}.tabs button.active{background:linear-gradient(135deg,var(--fire),var(--red));border-color:transparent;color:#fff;font-weight:800}.gate-form h3{font-size:1.3rem;margin-bottom:.4rem}.gate-form .lead{font-size:.88rem;margin-bottom:1.2rem}.gate-form form{display:grid;gap:.7rem}.gate-status{margin-top:1rem;padding:.9rem;border-radius:12px;border:1px solid var(--line);background:#20080d;font-size:.85rem}.gate-status.pending{border-color:rgba(255,176,32,.4)}.gate-status.denied,.gate-status.revoked{border-color:rgba(230,57,70,.4)}.gate-status b{display:block;margin-bottom:.2rem}.pulse-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:.4rem;animation:blink 1.2s infinite}@keyframes blink{50%{opacity:.25}}.shake{animation:shake .4s}@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+#deck{position:fixed;inset:0;z-index:600;background:radial-gradient(1100px 700px at 50% -10%,#4a1020,#120407 70%);display:flex;flex-direction:column;animation:fadeIn .3s}.deck-bar{height:5px;background:#2a0e15}#deckProgress{height:100%;width:0;background:linear-gradient(90deg,var(--fire),var(--fire2));transition:width .35s var(--ease)}.deck-head{display:flex;justify-content:space-between;align-items:center;gap:.8rem;padding:.8rem 1.2rem;font-weight:800}.deck-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.deck-btns{display:flex;gap:.4rem}.deck-btns button{padding:.45rem .65rem;font-size:.85rem}.deck-slide{flex:1;display:flex;flex-direction:column;justify-content:center;width:min(920px,92%);margin:0 auto;padding:1rem;overflow:auto}.deck-slide.anim{animation:slideIn .4s var(--ease)}@keyframes slideIn{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}.deck-slide h3{color:var(--fire2);text-transform:uppercase;letter-spacing:.1em;font-size:1rem;margin-bottom:1rem}.deck-slide .big{font-size:clamp(1.15rem,2.8vw,1.8rem);font-weight:700;line-height:1.5}.deck-slide ul{font-size:clamp(1rem,2.2vw,1.35rem);line-height:1.7;padding-left:1.3rem}.deck-slide li{margin:.4rem 0}.deck-cover{text-align:center}.deck-cover h2{font-size:clamp(1.7rem,4.6vw,2.8rem);margin:.8rem 0}.energy-big{display:inline-block;padding:.4rem 1rem;border-radius:99px;font-size:.78rem;font-weight:900;letter-spacing:.1em}.energy-big.th{background:rgba(255,107,53,.2);color:var(--fire2)}.energy-big.ev{background:rgba(47,155,255,.2);color:#9fd0ff}.deck-nav{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1.2rem;gap:.8rem}.deck-nav .dots{display:flex;gap:.35rem}.dot{width:9px;height:9px;border-radius:50%;background:var(--line2);transition:.25s}.dot.on{background:var(--fire);transform:scale(1.3)}.deck-foot{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1.2rem 1rem;font-size:.8rem;color:var(--muted);gap:.8rem;flex-wrap:wrap}.deck-overview{position:absolute;inset:64px 0 0;overflow:auto;background:rgba(12,3,6,.97);padding:1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.8rem;align-content:start}.ov{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--text);text-align:left;display:flex;flex-direction:column;gap:.3rem}.ov.active{border-color:var(--fire);box-shadow:0 0 0 2px rgba(255,107,53,.2)}.ov small{color:var(--muted)}
+#drawer{position:fixed;inset:0;z-index:550;background:rgba(12,3,6,.6);backdrop-filter:blur(6px);display:flex;justify-content:flex-end;animation:fadeIn .25s}.drawer-card{width:min(460px,100%);height:100%;overflow:auto;background:linear-gradient(180deg,#2a0e15,#160609);border-left:1px solid var(--line2);padding:1.4rem;animation:drawerIn .35s var(--ease)}@keyframes drawerIn{from{transform:translateX(100%)}to{transform:none}}.drawer-card h3{margin-bottom:.6rem}.drawer-card .body{color:var(--muted);font-size:.92rem;margin:1rem 0}.drawer-close{float:right;padding:.4rem .6rem}
+#toasts{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);z-index:700;display:grid;gap:.5rem;width:min(560px,92vw)}.toast{padding:.8rem 1rem;border-radius:14px;background:linear-gradient(135deg,var(--fire),var(--red));color:#fff;font-weight:700;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:toastIn .35s var(--ease),toastOut .35s var(--ease) forwards;animation-delay:0s,4.2s}@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}@keyframes toastOut{to{opacity:0;transform:translateY(20px)}}
+/* Analyse causale */
+.analysis-box{background:linear-gradient(160deg,#2d0f17,#1d080d);border:1px solid var(--line2);border-radius:20px;padding:1.1rem;box-shadow:var(--shadow)}.analysis-input{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}.analysis-input input{flex:1;min-width:240px;font-size:1.05rem}.analysis-input button{white-space:nowrap}.analysis-quick{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0 1rem}.analysis-result{margin-top:1rem}.analysis-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1rem}.analysis-head h3{font-size:clamp(1.1rem,2.4vw,1.5rem);margin:.3rem 0 .5rem}.analysis-actions{display:flex;gap:.4rem;flex-wrap:wrap}.analysis-actions button{padding:.5rem .7rem;font-size:.85rem}
+.chain{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin:1rem 0}.node{position:relative;padding:.9rem;border-radius:14px;border:1px solid var(--line);background:#20080d;min-height:150px}.node h4{margin:0 0 .5rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.1em}.node p{margin:0;font-size:.84rem;color:var(--muted)}.node ul{margin:.2rem 0 0;padding-left:1.1rem;font-size:.82rem;color:var(--muted)}.node li{margin:.25rem 0}.node.o{border-top:3px solid var(--fire)}.node.o h4{color:var(--fire2)}.node.m{border-top:3px solid var(--amber)}.node.m h4{color:var(--amber)}.node.r{border-top:3px solid var(--blue)}.node.r h4{color:#9fd0ff}.node.c{border-top:3px solid var(--red)}.node.c h4{color:#ff9aa2}.node.a{border-top:3px solid var(--green)}.node.a h4{color:var(--green)}
+.analysis-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem;margin:1rem 0}.detail{padding:.9rem;border-radius:14px;border:1px solid var(--line);background:rgba(42,14,21,.6)}.detail h4{margin:0 0 .5rem;font-size:.85rem;color:var(--fire2)}.detail ul{margin:0;padding-left:1.1rem;font-size:.84rem;color:var(--muted)}.detail li{margin:.3rem 0}.detail .chips{margin:0}.analysis-legal{padding:.9rem;border-radius:14px;border:1px solid rgba(47,155,255,.3);background:rgba(47,155,255,.07);font-size:.86rem;color:var(--muted);margin:.8rem 0}.analysis-legal b{color:#9fd0ff}.analysis-sources{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0}.analysis-sources a{font-size:.8rem;padding:.35rem .7rem;border-radius:99px;border:1px solid var(--line2);background:#20080d;text-decoration:none}.analysis-sources a:hover{border-color:var(--fire)}.analysis-related{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.8rem}.analysis-related button{font-size:.75rem;padding:.35rem .65rem}
+@media(max-width:1020px){nav{display:none}#menuBtn{display:block}nav.open{display:flex;position:absolute;top:var(--head);left:0;right:0;flex-direction:column;background:rgba(22,6,9,.97);padding:.8rem;border-bottom:1px solid var(--line)}.hero{grid-template-columns:1fr}.chain{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){:root{--head:64px}.brand small{display:none}.head-actions .optional{display:none}.gate-card{grid-template-columns:1fr}.gate-visual{min-height:auto;padding:1.6rem}.gate-form{padding:1.6rem}.search-box{flex-wrap:wrap}.search-box select{flex:1}.search-box input{min-width:100%;order:-1}.filters select,.filters input{min-width:46%;flex:1}.deck-foot{justify-content:center}.deck-nav{padding:.5rem .8rem}.chain{grid-template-columns:1fr}.analysis-input{flex-direction:column;align-items:stretch}.analysis-input input{min-width:0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#embers{display:none}}
+@media print{header,footer,#gate,#deck,#drawer,#toasts,.bg-glow,#embers,.grain,.head-actions,.hero-actions,.analysis-input,.analysis-quick,.analysis-actions,.filters,#recherche,#fiches,#methodo,#chimie,#zones,#dtc,#juridique,#veille,#admin{display:none!important}body{background:#fff;color:#111}.analysis-box{box-shadow:none;border:1px solid #ccc;background:#fff}.node,.detail,.analysis-legal{background:#fff;border:1px solid #ccc;color:#111}.node p,.node ul,.detail ul,.analysis-legal{color:#333}main{padding:0}section{opacity:1;transform:none;margin:0}#analyse{display:block!important}}
 </style>
 </head>
 <body class="locked">
-<div id="wpLayer"></div>
-<div class="bg-glow g1"></div><div class="bg-glow g2"></div>
-<canvas id="embers"></canvas>
-<div class="grain"></div>
+<div id="wpLayer"></div><div class="bg-glow g1"></div><div class="bg-glow g2"></div><canvas id="embers"></canvas><div class="grain"></div>
 
 <header>
   <div class="brand"><span class="mark">🔥</span><span>Étude incendie<small>Technique by Kevin</small></span></div>
   <button id="menuBtn" aria-label="Menu">☰</button>
   <nav id="nav">
-    <a href="#recherche">Recherche</a><a href="#fiches">Fiches</a><a href="#methodo">NFPA 921</a>
-    <a href="#chimie">Chimie</a><a href="#zones">Zones</a><a href="#dtc">DTC</a>
-    <a href="#juridique">Juridique</a><a href="#veille">Veille</a><a href="#admin" id="navAdmin">Admin</a>
+    <a href="#recherche">Recherche</a><a href="#analyse">Analyse</a><a href="#fiches">Fiches</a><a href="#methodo">NFPA 921</a><a href="#chimie">Chimie</a><a href="#zones">Zones</a><a href="#dtc">DTC</a><a href="#juridique">Juridique</a><a href="#veille">Veille</a><a href="#admin" id="navAdmin">Admin</a>
   </nav>
-  <div class="pills">
-    <span class="pill" id="netBadge">…</span>
-    <span class="pill" id="syncBadge">…</span>
-    <span class="pill info" id="btBadge" hidden>🔵</span>
-  </div>
+  <div class="pills"><span class="pill" id="netBadge">…</span><span class="pill" id="syncBadge">…</span><span class="pill info" id="btBadge" hidden>🔵</span></div>
   <div class="head-actions">
-    <button id="btBtn" class="optional" title="Connecter un appareil Bluetooth">🔵 Bluetooth</button>
+    <button id="btBtn" class="optional">🔵 Bluetooth</button>
     <button id="installBtn" hidden>⬇️ Installer</button>
     <a href="https://github.com/expertkevin06-cell/etude-incendie-technique-by-kevin/releases" target="_blank" rel="noopener"><button class="optional">📲 APK</button></a>
     <button id="shareBtn" class="optional">↗ Partager</button>
@@ -305,23 +88,25 @@ footer .row{justify-content:flex-end}
 <main>
   <section class="hero in" id="accueil">
     <div>
-      <div class="eyebrow">Investigation incendie · véhicules thermiques & électriques</div>
-      <h1>Origine du feu.<br><em>Preuve technique.</em> Qualification juridique.</h1>
-      <p class="lead">Base experte croisée : 20 fiches origine de feu structurées en 9 rubriques, méthodologie NFPA 921, chimie du feu, cartographie de fusion, codes DTC et doctrines juridiques — avec recherche prédictive à expansion de mots-clés et présentation interactive.</p>
+      <div class="eyebrow">Investigation incendie & pannes connues · véhicules thermiques & électriques</div>
+      <h1>Mot-clé → <em>panne connue.</em><br>Origine → mécanisme → conséquences.</h1>
+      <p class="lead">Recherche prédictive à expansion automatique et analyse causale : chaque mot-clé déclenche une chaîne technique complète (origine, mécanisme, causes racines, conséquences, indices, actions, juridique) à partir d’une base locale sauvegardée dans l’APK.</p>
       <div class="hero-actions">
         <button class="btn-fire" id="heroSearch">🔎 Rechercher un cas</button>
+        <button class="btn-fire" id="heroAnalyse">🧠 Analyser « courroie humide »</button>
         <button id="heroPresent">📽️ Présenter les fiches</button>
         <button class="btn-ghost" id="heroMethodo">🧭 Méthodologie</button>
       </div>
     </div>
     <div class="card hero-panel">
       <div class="stats">
-        <div class="stat"><b id="statFiches">20</b><span>fiches origine de feu</span></div>
-        <div class="stat"><b>9</b><span>rubriques par fiche</span></div>
+        <div class="stat"><b id="statFiches">22</b><span>fiches techniques locales</span></div>
+        <div class="stat"><b id="statKB">22</b><span>chaînes causales</span></div>
         <div class="stat"><b>8</b><span>étapes NFPA 921</span></div>
-        <div class="stat"><b>4</b><span>bases croisées</span></div>
+        <div class="stat"><b>100%</b><span>hors ligne après ouverture</span></div>
       </div>
       <div style="margin-top:1rem">
+        <div class="mini-step"><b>EX</b><span>courroie humide → délamination → huile diluée → crépine → lubrification</span></div>
         <div class="mini-step"><b>01</b><span>Reconnaissance → documentation → patterns</span></div>
         <div class="mini-step"><b>02</b><span>Zone d’origine → point d’origine → causes</span></div>
         <div class="mini-step"><b>03</b><span>Conclusion : certain / probable / indéterminé</span></div>
@@ -330,12 +115,12 @@ footer .row{justify-content:flex-end}
   </section>
 
   <section id="recherche">
-    <div class="section-head"><div><div class="eyebrow">Moteur unifié</div><h2><span class="idx">01</span>Recherche prédictive croisée</h2></div><p class="lead">Tapez « courroie », « FAP », « runaway », « 12V »… le moteur étend automatiquement la requête aux motorisations, codes défaut et doctrines associées.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Moteur unifié</div><h2><span class="idx">01</span>Recherche prédictive croisée</h2></div><p class="lead">Tapez « courroie humide », « FAP », « runaway », « 12V »… le moteur étend la requête aux motorisations, codes défaut et doctrines associées, puis propose l’analyse causale.</p></div>
     <div class="search-wrap">
       <div class="search-box">
         <span class="ico">🔎</span>
-        <input id="q" autocomplete="off" placeholder="Ex. courroie → distribution humide 1.2 PureTech, Ford EcoBlue, P0016…" aria-label="Recherche">
-        <select id="qScope"><option value="all">Tous domaines</option><option value="fiche">Fiches feu</option><option value="dtc">Codes DTC</option><option value="legal">Juridique</option><option value="tech">Technique</option><option value="veille">Veille / rappels</option></select>
+        <input id="q" autocomplete="off" placeholder="Ex. courroie humide → 1.2 PureTech, EcoBlue, délamination, crépine, P0016…">
+        <select id="qScope"><option value="all">Tous domaines</option><option value="kb">Pannes connues</option><option value="dtc">Codes DTC</option><option value="legal">Juridique</option><option value="tech">Technique</option><option value="veille">Veille / rappels</option></select>
         <button class="btn-fire" id="searchBtn">Analyser ↗</button>
       </div>
       <div class="chips" id="chips"></div>
@@ -343,8 +128,20 @@ footer .row{justify-content:flex-end}
     </div>
   </section>
 
+  <section id="analyse">
+    <div class="section-head"><div><div class="eyebrow">Case dédiée</div><h2><span class="idx">02</span>Analyse technique causale</h2></div><p class="lead">Origine de la panne → mécanisme de détérioration → causes racines → conséquences rencontrées → indices à vérifier → actions correctives.</p></div>
+    <div class="analysis-box">
+      <div class="analysis-input">
+        <input id="aInput" autocomplete="off" placeholder="Mot-clé à analyser : courroie humide, FAP, EGR, turbo, 12V, runaway, charge DC…">
+        <button class="btn-fire" id="aBtn">🧠 Analyser techniquement</button>
+      </div>
+      <div class="analysis-quick" id="aQuick"></div>
+      <div class="analysis-result" id="analysisResult"></div>
+    </div>
+  </section>
+
   <section id="fiches">
-    <div class="section-head"><div><div class="eyebrow">Base experte</div><h2><span class="idx">02</span>Fiches origine de feu</h2></div><div class="row"><button id="resetFilters">↺ Réinitialiser</button><button class="btn-fire" id="presentAll">📽️ Tout présenter</button></div></div>
+    <div class="section-head"><div><div class="eyebrow">Base locale</div><h2><span class="idx">03</span>Fiches techniques & pannes connues</h2></div><div class="row"><button id="resetFilters">↺ Réinitialiser</button><button class="btn-fire" id="presentAll">📽️ Tout présenter</button></div></div>
     <div class="filters">
       <select id="fEnergy"><option value="">⚡ Énergie : toutes</option><option value="Thermique">🔥 Thermique</option><option value="VE">🔋 Électrique</option></select>
       <select id="fZone"><option value="">📍 Zone : toutes</option></select>
@@ -352,32 +149,26 @@ footer .row{justify-content:flex-end}
       <select id="fLegal"><option value="">⚖️ Juridique : tous</option><option value="vice-cache">Vice caché</option><option value="rappel">Rappel / L421</option><option value="entretien">Entretien / usage</option><option value="externe">Cause externe</option></select>
       <input id="fText" placeholder="🔎 Filtrer les fiches (ex. courroie, FAP, 12V…)">
       <select id="fSort"><option value="pert">Tri : pertinence</option><option value="az">Titre A→Z</option><option value="zone">Par zone</option></select>
-      <span class="count" id="fCount">20 fiches</span>
+      <span class="count" id="fCount">22 fiches</span>
     </div>
     <div class="fiches-grid" id="proGrid"></div>
     <div class="empty" id="fEmpty" hidden>Aucune fiche ne correspond à ces critères.<br><button style="margin-top:.7rem" id="emptyReset">↺ Réinitialiser les filtres</button></div>
   </section>
 
   <section id="methodo">
-    <div class="section-head"><div><div class="eyebrow">Méthode</div><h2><span class="idx">03</span>Méthodologie NFPA 921</h2></div><p class="lead">Démarche scientifique d’investigation : chaque conclusion doit rester proportionnée au niveau de preuve observé.</p></div>
-    <div class="steps" id="steps"></div>
-    <div class="patterns" id="patterns"></div>
+    <div class="section-head"><div><div class="eyebrow">Méthode</div><h2><span class="idx">04</span>Méthodologie NFPA 921</h2></div><p class="lead">Démarche scientifique d’investigation : chaque conclusion doit rester proportionnée au niveau de preuve observé.</p></div>
+    <div class="steps" id="steps"></div><div class="patterns" id="patterns"></div>
   </section>
 
   <section id="chimie">
-    <div class="section-head"><div><div class="eyebrow">Physique & chimie</div><h2><span class="idx">04</span>Chimie du feu</h2></div></div>
+    <div class="section-head"><div><div class="eyebrow">Physique & chimie</div><h2><span class="idx">05</span>Chimie du feu</h2></div></div>
     <div class="phenom" id="phenom"></div>
     <div class="table-wrap" style="margin-top:1rem"><table><thead><tr><th>Gaz</th><th>Source typique</th><th>Danger</th></tr></thead><tbody id="gazBody"></tbody></table></div>
   </section>
 
   <section id="zones">
-    <div class="section-head"><div><div class="eyebrow">Cartographie</div><h2><span class="idx">05</span>Zones du véhicule</h2></div><p class="lead">Chaque zone concentre des combustibles et des énergies spécifiques. Cliquez pour le détail.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Cartographie</div><h2><span class="idx">06</span>Zones du véhicule</h2></div><p class="lead">Chaque zone concentre des combustibles et des énergies spécifiques. Cliquez pour le détail.</p></div>
     <div class="zones" id="zonesGrid"></div>
-  </section>
-
-  <section id="fusion">
-    <div class="section-head"><div><div class="eyebrow">Lecture des traces</div><h2><span class="idx">06</span>Cartographie de fusion</h2></div><p class="lead">Températures indicatives selon alliage, durée d’exposition et ventilation — à croiser avec les gradients observés.</p></div>
-    <div class="table-wrap"><table><thead><tr><th>Matériau</th><th>°C</th><th>Lecture experte</th></tr></thead><tbody id="fusionBody"></tbody></table></div>
   </section>
 
   <section id="dtc">
@@ -391,7 +182,7 @@ footer .row{justify-content:flex-end}
   </section>
 
   <section id="veille">
-    <div class="section-head"><div><div class="eyebrow">Mise à jour manuelle</div><h2><span class="idx">09</span>Veille & rappels</h2></div><span class="pill" id="refUpdated">Base embarquée</span></div>
+    <div class="section-head"><div><div class="eyebrow">Mise à jour manuelle</div><h2><span class="idx">09</span>Veille & rappels</h2></div><span class="pill" id="refUpdated">Base locale chargée</span></div>
     <div class="portals" id="portals"></div>
     <div class="card"><h3 style="margin-bottom:.7rem">Références publiées par l’admin</h3><div class="ref-list" id="refList"></div><div class="empty" id="refEmpty" style="margin-top:.6rem">Aucune référence publiée pour le moment. Les mises à jour admin apparaissent ici en temps réel.</div></div>
   </section>
@@ -399,83 +190,29 @@ footer .row{justify-content:flex-end}
   <section id="admin" hidden>
     <div class="section-head"><div><div class="eyebrow">Console sécurisée</div><h2><span class="idx">10</span>Administration</h2></div><button class="danger" id="lockBtn">🔒 Verrouiller la session</button></div>
     <div class="admin-grid">
-      <div class="card">
-        <h3>📬 Demandes & appareils (<span id="reqCount">0</span>)</h3>
-        <div id="reqList"></div>
-        <div class="empty" id="reqEmpty">Aucune demande pour le moment.</div>
-      </div>
-      <div class="card">
-        <h3>🖼️ Fond d’écran partagé</h3>
-        <input type="file" id="wpFile" accept="image/*">
-        <div class="wp-preview" id="wpPreview">Aucun fond personnalisé</div>
-        <div class="row"><label class="hint">Opacité</label><input type="range" id="wpOpacity" min="0.05" max="0.7" step="0.05" value="0.25"><button id="wpClear" class="danger">Retirer</button></div>
-        <p class="hint" id="wpStatus">Compression automatique &lt; 1 Mo, puis diffusion temps réel aux tiers.</p>
-      </div>
-      <div class="card">
-        <h3>📚 Publier une référence</h3>
-        <div class="grid" style="gap:.5rem">
-          <input id="pubTitle" placeholder="Titre (ex. Stellantis 1.2 PureTech — courroie humide)">
-          <input id="pubUrl" placeholder="Source https:// (Légifrance, RappelConso, NHTSA…)">
-          <select id="pubCat"><option value="technique">🔧 Technique</option><option value="juridique">⚖️ Juridique</option></select>
-          <input id="pubNote" maxlength="200" placeholder="Note courte (200 caractères)">
-          <button class="btn-fire" id="pubBtn">📡 Publier en temps réel</button>
-        </div>
-      </div>
-      <div class="card">
-        <h3>📢 Annonce instantanée</h3>
-        <div class="grid" style="gap:.5rem">
-          <input id="noteTxt" maxlength="300" placeholder="Message diffusé à tous les appareils connectés">
-          <button id="noteBtn">Diffuser l’annonce</button>
-          <button id="syncTest">🧪 Tester le canal temps réel</button>
-        </div>
-        <p class="hint" id="topicInfo" style="margin-top:.7rem"></p>
-        <p class="hint">Mot de passe et canal côté client : protection dissuasive. Pour un usage sensible, brancher une authentification serveur.</p>
-      </div>
+      <div class="card"><h3>📬 Demandes & appareils (<span id="reqCount">0</span>)</h3><div id="reqList"></div><div class="empty" id="reqEmpty">Aucune demande pour le moment.</div></div>
+      <div class="card"><h3>🖼️ Fond d’écran partagé</h3><input type="file" id="wpFile" accept="image/*"><div class="wp-preview" id="wpPreview">Aucun fond personnalisé</div><div class="row"><label class="hint">Opacité</label><input type="range" id="wpOpacity" min="0.05" max="0.7" step="0.05" value="0.25"><button id="wpClear" class="danger">Retirer</button></div><p class="hint" id="wpStatus">Compression automatique &lt; 1 Mo, puis diffusion temps réel aux tiers.</p></div>
+      <div class="card"><h3>📚 Publier une référence</h3><div class="grid" style="gap:.5rem"><input id="pubTitle" placeholder="Titre (ex. Stellantis 1.2 PureTech — courroie humide)"><input id="pubUrl" placeholder="Source https:// (Légifrance, RappelConso, NHTSA…)"><select id="pubCat"><option value="technique">🔧 Technique</option><option value="juridique">⚖️ Juridique</option></select><input id="pubNote" maxlength="200" placeholder="Note courte (200 caractères)"><button class="btn-fire" id="pubBtn">📡 Publier en temps réel</button></div></div>
+      <div class="card"><h3>📢 Annonce instantanée</h3><div class="grid" style="gap:.5rem"><input id="noteTxt" maxlength="300" placeholder="Message diffusé à tous les appareils connectés"><button id="noteBtn">Diffuser l’annonce</button><button id="syncTest">🧪 Tester le canal temps réel</button></div><p class="hint" id="topicInfo" style="margin-top:.7rem"></p><p class="hint">Mot de passe et canal côté client : protection dissuasive. Pour un usage sensible, brancher une authentification serveur.</p></div>
     </div>
   </section>
 </main>
 
 <footer>
-  <div><b>🔥 Étude incendie technique — by Kevin</b><div class="hint">Fonctionne hors ligne après première ouverture · Données indicatives à croiser avec les sources officielles.</div></div>
-  <div class="row">
-    <button id="installBtn2">⬇️ Installer l’app</button>
-    <a href="https://github.com/expertkevin06-cell/etude-incendie-technique-by-kevin/releases" target="_blank" rel="noopener"><button>📲 Télécharger l’APK</button></a>
-    <button id="shareBtn2">↗ Partager le lien</button>
-  </div>
+  <div><b>🔥 Étude incendie technique — by Kevin</b><div class="hint">Base locale hors ligne · Données indicatives à croiser avec les sources officielles et le diagnostic réel.</div></div>
+  <div class="row"><button id="installBtn2">⬇️ Installer l’app</button><a href="https://github.com/expertkevin06-cell/etude-incendie-technique-by-kevin/releases" target="_blank" rel="noopener"><button>📲 Télécharger l’APK</button></a><button id="shareBtn2">↗ Partager le lien</button></div>
 </footer>
 
 <div id="gate">
   <div class="gate-card">
     <div class="gate-visual">
-      <div>
-        <div class="gate-flame">🔥</div>
-        <div class="eyebrow" style="margin-top:1rem">Accès protégé · temps réel</div>
-        <h2>Étude incendie<br>technique by Kevin</h2>
-        <p class="lead">Expertise origine de feu véhicules : fiches croisées, NFPA 921, chimie, fusion, DTC, juridique. Accès admin par mot de passe ou validation tiers par prénom.</p>
-        <div class="gate-stats"><div><b>20</b><span>fiches</span></div><div><b>9</b><span>rubriques</span></div><div><b>8</b><span>étapes NFPA</span></div></div>
-      </div>
+      <div><div class="gate-flame">🔥</div><div class="eyebrow" style="margin-top:1rem">Accès protégé · temps réel</div><h2>Étude incendie<br>technique by Kevin</h2><p class="lead">Mot-clé → panne connue → origine → mécanisme → conséquences. Accès admin par mot de passe ou validation tiers par prénom.</p><div class="gate-stats"><div><b>22</b><span>fiches</span></div><div><b>5</b><span>chaînes</span></div><div><b>8</b><span>NFPA</span></div></div></div>
       <div class="mini-step" style="border:0"><b>🔒</b><span>Accord, refus et révocation notifiés en temps réel sur chaque appareil.</span></div>
     </div>
     <div class="gate-form">
       <div class="tabs"><button id="tabTiers" class="active">👤 Accès tiers</button><button id="tabAdmin">🛡️ Admin</button></div>
-      <div id="paneTiers">
-        <h3>Demander l’accès</h3>
-        <p class="lead">Entrez votre prénom : l’administrateur valide, refuse ou révoque en direct. L’application s’ouvre automatiquement dès l’accord.</p>
-        <form id="gateForm">
-          <input id="gateName" maxlength="40" autocomplete="given-name" placeholder="Votre prénom" required>
-          <button class="btn-fire" type="submit">📨 Demander l’accès</button>
-        </form>
-        <div class="gate-status" id="gateStatus" hidden></div>
-      </div>
-      <div id="paneAdmin" hidden>
-        <h3>Mode administrateur</h3>
-        <p class="lead">Mot de passe saisi en caractères masqués. Le champ est vidé à chaque ouverture et après chaque tentative : aucun point résiduel visible.</p>
-        <form id="loginForm">
-          <input id="adminPass" type="password" maxlength="64" autocomplete="new-password" spellcheck="false" placeholder="Mot de passe (••••••••)" required>
-          <button class="btn-fire" type="submit">🔑 Entrer en admin</button>
-        </form>
-        <p class="hint" style="margin-top:.8rem">Session verrouillée automatiquement après 15 minutes d’inactivité.</p>
-      </div>
+      <div id="paneTiers"><h3>Demander l’accès</h3><p class="lead">Entrez votre prénom : l’administrateur valide, refuse ou révoque en direct. L’application s’ouvre automatiquement dès l’accord.</p><form id="gateForm"><input id="gateName" maxlength="40" autocomplete="given-name" placeholder="Votre prénom" required><button class="btn-fire" type="submit">📨 Demander l’accès</button></form><div class="gate-status" id="gateStatus" hidden></div></div>
+      <div id="paneAdmin" hidden><h3>Mode administrateur</h3><p class="lead">Mot de passe saisi en caractères masqués. Le champ est vidé à chaque ouverture et après chaque tentative : aucun point résiduel visible.</p><form id="loginForm"><input id="adminPass" type="password" maxlength="64" autocomplete="new-password" spellcheck="false" placeholder="Mot de passe (••••••••)" required><button class="btn-fire" type="submit">🔑 Entrer en admin</button></form><p class="hint" style="margin-top:.8rem">Session verrouillée automatiquement après 15 minutes d’inactivité.</p></div>
     </div>
   </div>
 </div>
@@ -489,653 +226,8 @@ footer .row{justify-content:flex-end}
   <div class="deck-overview" id="deckOverview" hidden></div>
 </div>
 
-<div id="drawer" hidden>
-  <div class="drawer-card">
-    <button class="drawer-close" id="drawerClose">✕</button>
-    <div class="eyebrow" id="drawerKind"></div>
-    <h3 id="drawerTitle"></h3>
-    <div class="body" id="drawerBody"></div>
-    <div class="row" id="drawerActions"></div>
-  </div>
-</div>
-
+<div id="drawer" hidden><div class="drawer-card"><button class="drawer-close" id="drawerClose">✕</button><div class="eyebrow" id="drawerKind"></div><h3 id="drawerTitle"></h3><div class="body" id="drawerBody"></div><div class="row" id="drawerActions"></div></div></div>
 <div id="toasts"></div>
-<div id="legacySink" hidden><div id="section-fiches"><div id="ftChips"></div><div id="ftGrid"></div></div></div>
-
-<script>
-(function(){
-"use strict";
-var D=document,W=window;
-function $(s,r){return (r||D).querySelector(s);}
-function $all(s,r){return Array.prototype.slice.call((r||D).querySelectorAll(s));}
-function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function norm(s){return String(s==null?"":s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
-function safeUrl(u){return /^https?:\/\//i.test(String(u||""))?u:"#";}
-function toast(msg){var t=D.createElement("div");t.className="toast";t.textContent=msg;$("#toasts").appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},4700);}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function read(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-
-/* ---------- Réglages ---------- */
-var CFG={
-  PASSWORD:"Kevin83600",
-  TOPIC:"eik-incendie-x7Q9mW4pL2",
-  NTFY:"https://ntfy.sh",
-  LOCK_MIN:15,
-  APK_URL:"https://github.com/expertkevin06-cell/etude-incendie-technique-by-kevin/releases"
-};
-var LABEL={pending:"⏳ En attente",granted:"✅ Accordé",denied:"⛔ Refusé",revoked:"🔄 Révoqué"};
-var myId=localStorage.getItem("eik-id");
-if(!myId){myId=(W.crypto&&crypto.randomUUID)?crypto.randomUUID():"dev-"+Date.now()+"-"+Math.random().toString(16).slice(2);localStorage.setItem("eik-id",myId);}
-var isAdmin=sessionStorage.getItem("eik-admin")==="1";
-var state=read("eik-state",{devices:{},refs:{},wp:null,stateTs:0});
-var lockTimer=null,lastRebroadcast=0;
-
-/* ---------- Données embarquées (secours hors ligne) ---------- */
-var FICHES=[
-{id:"th1",title:"Huile sur échappement / turbo",zone:"Compartiment moteur",energy:"Thermique",sys:["turbo","fuite"],cause:"Joint cache-culbuteurs, turbo ou reniflard défaillant.",mech:"Huile 300–350 °C sur collecteur 400–800 °C → auto-inflammation → flamme baie moteur → habitacle.",idx:"Vernis brun orienté, départ sous fuite, aluminium fondu localement (660 °C).",dtc:"—",legal:"Vice caché 1641 si antérieur ; rappel L421-3 ; expertise contradictoire.",src:""},
-{id:"th2",title:"Catalyseur / FAP + végétation",zone:"Soubassement",energy:"Thermique",sys:["echappement"],cause:"Régénération FAP 600–1200 °C, véhicule stationné sur herbe ou paille.",mech:"Herbe 250–300 °C → inflammation sous caisse → réservoir / pare-chocs PP.",idx:"Végétation carbonisée alignée sous FAP, boucliers fondus, log ECU de régénération.",dtc:"P2463",legal:"Usage / conseil constructeur L421-2 ; log de régénération = origine externe.",src:"https://www.legifrance.gouv.fr/search/all?query=L421-2"},
-{id:"th3",title:"Faisceau moteur frotté / rongeurs",zone:"Compartiment moteur",energy:"Thermique",sys:["faisceau"],cause:"Gaine sectionnée par frottement ou rongeurs → court à la masse.",mech:"Arc > 2000 °C, perles primaires → flamme faisceau → fluides à proximité.",idx:"Perles brillantes, œillet fondu, marques de dents / nid.",dtc:"—",legal:"Aftermarket / réparation = cause ; vice caché si défaut d’origine.",src:""},
-{id:"th4",title:"Fuite carburant HP (GDI / CR)",zone:"Compartiment moteur",energy:"Thermique",sys:["injection","fuite"],cause:"Rampe ou injecteur haute pression 150–2500 bar.",mech:"Aérosol instantané sur turbo / point chaud → flash.",idx:"Résidus rampe, flaque centrale, analyse GC-MS.",dtc:"P0087",legal:"Défaut fabrication → L421-3 (10 ans) ; rappel constructeur.",src:"https://www.legifrance.gouv.fr/search/all?query=L421-3"},
-{id:"th5",title:"Surchauffe → grippage moteur",zone:"Compartiment moteur",energy:"Thermique",sys:["refroidissement"],cause:"Pompe à eau, thermostat ou perte de liquide de refroidissement.",mech:"Grippage piston / cylindre → projection d’huile sur chaud → feu.",idx:"Cylindre rayé, piston grippé, aluminium fondu, pic thermique.",dtc:"P0217",legal:"Entretien (carnet) détermine la cause ; vice caché si défaut de pièce.",src:""},
-{id:"th6",title:"GPL : multivalve / réservoir",zone:"Soubassement / coffre",energy:"Thermique",sys:["gpl","fuite"],cause:"Étanchéité défectueuse ou remplissage > 80 %.",mech:"Nappe lourde → flash retour réservoir → boule de feu.",idx:"Souffle arrière, irisation au sol, givre vanne.",dtc:"—",legal:"Rétrofit non conforme = installateur ; usine = rappel.",src:"https://rappel.conso.gouv.fr/"},
-{id:"th7",title:"Freins surchauffés (descente)",zone:"Roues",energy:"Thermique",sys:["freins"],cause:"Absence de frein moteur ou étrier grippé.",mech:"Disques 600–900 °C → pneu 250–300 °C → feu de roue → propagation.",idx:"Disque bleui, pneu fondu, départ en zone roue.",dtc:"—",legal:"Usage / entretien ; vice caché si étrier défectueux.",src:""},
-{id:"th8",title:"Habitacle : mégot / chargeur USB",zone:"Habitacle",energy:"Thermique",sys:["habitacle","basse12"],cause:"Mégot vide-poche ou chargeur USB bas de gamme.",mech:"Pyrolyse PU → couvaison → flamme siège / console.",idx:"V-pattern siège, mousse charbonnée, prise fondue.",dtc:"—",legal:"Cause externe usager ; exclut le vice caché sauf défaut de résistance.",src:""},
-{id:"th9",title:"Batterie 12V coffre : H2 / cosse",zone:"Coffre",energy:"Thermique",sys:["basse12"],cause:"Cosse mal serrée ou dégazage H2.",mech:"Effet Joule cosse → arc → explosion H2 boîtier.",idx:"Boîtier éclaté, sulfate, cosse fondue.",dtc:"—",legal:"Entretien / pose ; vice caché si défaut régulateur.",src:""},
-{id:"th10",title:"Collecteur / ligne : surchauffe chronique",zone:"Échappement",energy:"Thermique",sys:["echappement"],cause:"Mélange pauvre ou ratés → catalyseur 1200 °C.",mech:"Coloration thermique → perforation → inflammation environnement.",idx:"Collecteur bleui / violet, catalyseur en surchauffe.",dtc:"P0300",legal:"Diagnostic mélange = cause ; rappel si défaut de calibration.",src:""},
-{id:"ev1",title:"Runaway interne NMC / NCA",zone:"Plancher / pack",energy:"VE",sys:["ht"],cause:"Défaut cellule : anode, séparateur, impureté.",mech:"Court interne → 180–250 °C → O2 → jet-fire 800–1400 °C.",idx:"Suie interne pack, busbars internes, logs BMS pré-feu.",dtc:"—",legal:"Défaut fabrication → L421-3 ; rappels massifs (Bolt, Kona…).",src:"https://www.nhtsa.gov/recalls"},
-{id:"ev2",title:"Runaway LFP (sans O2)",zone:"Plancher / pack",energy:"VE",sys:["ht"],cause:"Défaut cellule, choc ou surcharge.",mech:"270–310 °C, dégazage H2 / CO → jet-fire moins vif mais durable.",idx:"Évents, suie, absence d’O2 cathode, ré-ignition longue.",dtc:"—",legal:"LFP réputé sûr ; défaut = responsabilité constructeur.",src:""},
-{id:"ev3",title:"Charge DC : contacteur / broches",zone:"Trappe charge",energy:"VE",sys:["charge","ht"],cause:"Relais soudé ou contamination des broches.",mech:"Arc DC > 1000 °C → flamme trappe → pack.",idx:"Broches picotées / fondues, contacteurs soudés, logs borne.",dtc:"—",legal:"Installation wallbox pro = responsabilité ; véhicule = rappel.",src:""},
-{id:"ev4",title:"OBC / onduleur : glycol",zone:"Baie avant",energy:"VE",sys:["charge","refroidissement","faisceau"],cause:"Fuite liquide de refroidissement sur électronique HT.",mech:"Court PCB humide → arc → chauffe → pack.",idx:"Glycol rose sur busbars, PCB carbonisé, codes isolation.",dtc:"P0AA6",legal:"Défaut étanchéité → L421-3 ; campagnes ID. / Q4.",src:""},
-{id:"ev5",title:"Pompe LDR pack MEB",zone:"Sous plancher",energy:"VE",sys:["refroidissement","ht"],cause:"Humidité pompe → court interne.",mech:"Perte refroidissement → ΔT → runaway.",idx:"Glycol busbars, codes BMS, charge limitée.",dtc:"—",legal:"Campagnes KBA / NHTSA 2021-22 ; réparation gratuite.",src:"https://www.nhtsa.gov/recalls"},
-{id:"ev6",title:"Choc mécanique pack",zone:"Plancher",energy:"VE",sys:["ht"],cause:"Impact dos d’âne ou sous-virage.",mech:"Déformation séparateur → court interne différé.",idx:"Empreinte coque, cellules locales, logs post-choc.",dtc:"—",legal:"Accident = cause externe ; garantie collision ; expertise.",src:""},
-{id:"ev7",title:"Post-immersion (crue)",zone:"Pack",energy:"VE",sys:["ht"],cause:"Eau conductrice → corrosion.",mech:"Court différé heures / jours après immersion.",idx:"Dépôts minéraux internes, corrosion busbars.",dtc:"—",legal:"Force majeure / catastrophe naturelle ; assureur ; conservation.",src:""},
-{id:"ev8",title:"Ré-ignition / énergie piégée",zone:"Pack",energy:"VE",sys:["ht"],cause:"Modules isolés encore chauds.",mech:"Reprise 24–72 h, jusqu’à 3 semaines.",idx:"Caméra thermique > 60 °C après extinction, reprise localisée.",dtc:"—",legal:"Protocole surveillance (5 m, extérieur) ; responsabilité gestion sinistre.",src:""},
-{id:"ev9",title:"Propagation externe → pack",zone:"Véhicule entier",energy:"VE",sys:["ht"],cause:"Feu voisin, végétation ou accident.",mech:"Calcination coque d’abord → cellules opposées intactes.",idx:"Ext → int, gradients, cellules lointaines saines.",dtc:"—",legal:"Cause externe documentée ; exclut défaut interne ; expertise NFPA 921.",src:""},
-{id:"ev10",title:"12V / DC-DC : immobilisation + arc",zone:"Coffre / habitacle",energy:"VE",sys:["basse12","ht"],cause:"Décharge parasite ou cosse 12V.",mech:"12V faible → contacteurs ouverts ; effet Joule cosse → arc.",idx:"Cosse fondue, codes DC-DC, autonomie chutée.",dtc:"P0562",legal:"Entretien 12V ; software OTA = constructeur ; vice caché si défaut DC-DC.",src:""}
-];
-var SYSTEMS=[
-{id:"distribution",label:"⛓️ Distribution / courroie",kw:["courroie","distribution","puretech","ecoblue","calage","tendeur"]},
-{id:"injection",label:"⛽ Injection / carburant",kw:["injecteur","rampe","carburant","gdi","common rail"]},
-{id:"gpl",label:"⛽ GPL",kw:["gpl","multivalve"]},
-{id:"echappement",label:"🌫️ Échappement / FAP / cata",kw:["fap","dpf","catalyseur","cata","collecteur","echappement","regen"]},
-{id:"turbo",label:"🌀 Turbo",kw:["turbo"]},
-{id:"fuite",label:"🛢️ Fuites",kw:["fuite","huile","carburant","glycol"]},
-{id:"refroidissement",label:"🌡️ Refroidissement / surchauffe",kw:["surchauffe","ldr","glycol","pompe a eau","thermostat","grippage"]},
-{id:"basse12",label:"🔋 12V / DC-DC / USB",kw:["12v","cosse","dc-dc","usb","chargeur","h2"]},
-{id:"ht",label:"🔌 Pack HT / cellules",kw:["pack","cellule","runaway","nmc","lfp","bms","busbar","immersion"]},
-{id:"charge",label:"🔌 Charge DC / OBC",kw:["charge","obc","contacteur","broches","wallbox","onduleur"]},
-{id:"freins",label:"🛑 Freins",kw:["frein","etrier","disque"]},
-{id:"faisceau",label:"⚡ Faisceau / courts-circuits",kw:["faisceau","court","arc","gaine","rongeur","pcb"]},
-{id:"habitacle",label:"🚬 Habitacle / usager",kw:["megot","habitacle","siege","mousse"]}
-];
-var EXPAND={
-courroie:["distribution","courroie humide","wet belt","Stellantis 1.2 PureTech","Ford 1.5 EcoBlue","Ford 2.0 EcoBlue","EB2","dilution huile","crépine pompe à vide","P0016","calage distribution","tendeur"],
-distribution:["courroie","chaîne","calage","P0016","PureTech","EcoBlue","tendeur"],
-puretech:["courroie humide","distribution","EB2","Stellantis","1.2 essence","rappel courroie"],
-ecoblue:["courroie humide","distribution","Ford 1.5","Ford 2.0","wet belt"],
-fap:["DPF","filtre à particules","régénération","P2463","P244A","catalyseur","herbe sèche","paille"],
-dpf:["FAP","filtre à particules","régénération","P2463"],
-catalyseur:["cata","P0420","surchauffe","collecteur","échappement"],
-egr:["vanne EGR","calamine","refroidisseur EGR","P0400"],
-turbo:["suralimentation","huile turbo","reniflard","auto-inflammation"],
-adblue:["SCR","NOx","injecteur urée","P20EE","cristallisation"],
-batterie:["12V","48V","HT","cosse","H2","DC-DC","P0562"],
-"12v":["batterie plomb","cosse","arc","H2","DC-DC","P0562","chargeur USB"],
-ht:["haute tension","pack","cellules","BMS","isolation","P0AA6","runaway"],
-runaway:["emballement thermique","NMC","NCA","LFP","jet-fire","ré-ignition","BMS"],
-lfp:["runaway","H2","CO","ré-ignition longue"],
-nmc:["runaway","O2 cathode","jet-fire","Bolt","Kona"],
-charge:["charge DC","contacteur","broches","arc DC","wallbox","OBC"],
-obc:["chargeur embarqué","onduleur","glycol","PCB","codes isolation"],
-glycol:["liquide refroidissement","LDR","fuite","OBC","pompe pack"],
-freins:["disques","étrier grippé","descente","pneu","feu de roue"],
-faisceau:["gaine","frottement","rongeurs","court-circuit","arc","perles primaires"],
-gpl:["multivalve","réservoir","remplissage 80%","nappe lourde","flash retour"],
-injection:["rampe commune","GDI","common rail","injecteur","P0087"],
-surchauffe:["pompe à eau","thermostat","LDR","grippage","P0217"],
-immersion:["crue","inondation","corrosion","court différé"],
-rappel:["campagne constructeur","RappelConso","NHTSA","Safety Gate","L421-3"],
-vice:["vice caché","article 1641","antériorité","expertise"]
-};
-var DTC=[
-{code:"P0016",txt:"Corrélation vilebrequin / arbre à cames — calage décalé (courroie, chaîne).",q:"courroie distribution",sys:"distribution"},
-{code:"P0087",txt:"Pression rampe carburant trop basse — fuite HP, pompe, injecteur.",q:"injection fuite",sys:"injection"},
-{code:"P0217",txt:"Surchauffe moteur — pompe à eau, thermostat, perte LDR.",q:"surchauffe refroidissement",sys:"refroidissement"},
-{code:"P0300",txt:"Ratés d’allumage multiples — mélange pauvre, catalyseur chaud.",q:"echappement catalyseur",sys:"echappement"},
-{code:"P0562",txt:"Tension système 12V basse — batterie, cosse, DC-DC.",q:"12v batterie",sys:"basse12"},
-{code:"P2463",txt:"FAP : accumulation de suie — régénérations incomplètes.",q:"fap regeneration",sys:"echappement"},
-{code:"P244A",txt:"FAP : pression différentielle trop basse — filtre fissuré / absent.",q:"fap",sys:"echappement"},
-{code:"P0420",txt:"Rendement catalyseur sous seuil — cata dégradé / surchauffe.",q:"catalyseur",sys:"echappement"},
-{code:"P0AA6",txt:"Défaut d’isolement HT — pack, OBC, câblage haute tension.",q:"ht isolation obc",sys:"ht"},
-{code:"P20EE",txt:"Efficacité SCR NOx sous seuil — AdBlue, injecteur urée.",q:"adblue scr",sys:"adblue"},
-{code:"P0400",txt:"Débit EGR incorrect — vanne encrassée, calamine.",q:"egr",sys:"egr"},
-{code:"P0089",txt:"Régulateur pression carburant — performance pompe HP.",q:"injection",sys:"injection"}
-];
-var LEGAL=[
-{code:"Art. 1641 C. civ.",txt:"Vice caché antérieur à la vente — action rédhibitoire ou estimatoire.",q:"vice cache 1641"},
-{code:"Art. L421-3 C. conso.",txt:"Responsabilité du fait des produits défectueux (10 ans) — défaut de fabrication.",q:"produit defectueux l421-3"},
-{code:"Art. L421-2 C. conso.",txt:"Obligation générale de sécurité et de conseil — usage, notices.",q:"securite conseil l421-2"},
-{code:"Expertise CPC",txt:"Expertise contradictoire — mission, sapiteur, conservation des traces.",q:"expertise contradictoire sapiteur"},
-{code:"Art. R4227-1 C. travail",txt:"Prévention incendie sur lieux de travail — extincteurs, alarmes, dégagements.",q:"r4227 travail incendie"},
-{code:"Assurance / CATNAT",txt:"Immersion, crue, catastrophe naturelle : conservation, déclaration, expertise.",q:"catastrophe naturelle immersion"}
-];
-var METHOD=[
-["Reconnaissance du site","Sécurisation des énergies, périmètre, risques résiduels."],
-["Reconnaissance préliminaire","Zone d’origine macro, lecture générale des dommages."],
-["Documentation","Photos avant toute manipulation, relevés, croquis."],
-["Patterns","V, alligatoring, crazed glass, spalling : orientation et intensité."],
-["Zone d’origine","Convergence des traces et gradients."],
-["Point d’origine","Localisation précise du foyer initial."],
-["Recherche des causes","Élimination méthodique des hypothèses."],
-["Conclusion","Certain / probable / indéterminé — proportionné aux preuves."]
-];
-var PATTERNS=[
-["V-pattern","Pointe basse = origine probable."],
-["Alligatoring","Écailles brillantes = feu rapide / intense."],
-["Crazed glass","Verre microfissuré = chauffe rapide."],
-["Spalling béton","Éclatement = zone de forte chaleur."]
-];
-var PHENOM=[
-["Flashover","600–800 °C : généralisation embrasement de la pièce."],
-["Backdraft","Explosion de fumées lors d’un apport d’air."],
-["Rollover","Langues de feu au plafond, gaz imbrûlés."],
-["Auto-inflammation","Huile 300–350 °C, diesel ~210 °C, essence ~280 °C."]
-];
-var GAZ=[
-["CO","Combustion incomplète","Mortel dès 0,1 %"],
-["HCN","Polyuréthane, laine","Toxique cellulaire"],
-["HF","Batteries Li-ion","Mortel, corrosif"],
-["HCl","PVC","Corrosif, irritant"],
-["NOx","Hautes températures","Œdème pulmonaire"]
-];
-var ZONES=[
-["Compartiment moteur","Moteur, turbo, catalyseur, FAP, faisceau, alternateur, durites.","Huile / carburant sur chaud, B+, régénération."],
-["Habitacle","PU, ABS/PC, 12V, USB, sièges, console.","Mégots, chargeurs, résistances de siège."],
-["Coffre","12V, réservoir, pack HT, hayon.","Bornes, court hayon, dégazage H2."],
-["Soubassement","Échappement, catalyseur, FAP, pack HT.","Cata sur herbes, impact pack."],
-["Roues","Disques, pneus, étriers.","600–900 °C, étrier grippé."],
-["Extérieur","Peinture, pare-chocs PP, végétation.","Feu externe, volontaire, environnement."]
-];
-var FUSION=[
-["Aluminium","660","Fusion locale = indice de point chaud."],
-["Zinc","420","Fusion précoce, zones modérées."],
-["Plomb","327","Très précoce (bornes, soudures)."],
-["Magnésium","650","Réactif, combustion vive."],
-["Cuivre","1085","Arc électrique ou feu intense."],
-["Argent","962","Contacts électriques."],
-["Or","1064","Connectique fine."],
-["Acier","1370–1530","Feu très intense ou arc."],
-["Verre","~700 (ramollissement)","Chauffe rapide, crazed glass."],
-["Titane","1668","Très haute température."]
-];
-var PORTALS=[
-["RappelConso","Rappels officiels France","https://rappel.conso.gouv.fr/"],
-["NHTSA Recalls","Rappels constructeurs US","https://www.nhtsa.gov/recalls"],
-["Safety Gate UE","Alertes produits dangereux","https://ec.europa.eu/safety-gate-alerts/screen/search"],
-["Légifrance","Textes juridiques français","https://www.legifrance.gouv.fr/"]
-];
-
-/* ---------- État & temps réel (ntfy) ---------- */
-var BASE=CFG.NTFY+"/"+CFG.TOPIC,seen={},es=null,queue=read("eik-queue",[]);
-function saveState(){store("eik-state",state);}
-function saveQueue(){store("eik-queue",queue.slice(-60));}
-function deliver(p,mirror){
-  if(!p||!p.mid||seen[p.mid])return;seen[p.mid]=1;
-  onMsg(p);
-  if(mirror&&W.BroadcastChannel){var bc=new BroadcastChannel("eik-sync");bc.postMessage(p);bc.close();}
-}
-function post(p){return fetch(BASE,{method:"POST",body:JSON.stringify(p)}).then(function(r){if(!r.ok)throw new Error(r.status);});}
-function publish(obj){
-  var p=Object.assign({mid:(crypto.randomUUID?crypto.randomUUID():Date.now()+""+Math.random()),ts:Date.now()},obj);
-  deliver(p,true);
-  if(!navigator.onLine){queue.push(p);saveQueue();return;}
-  post(p).catch(function(){queue.push(p);saveQueue();});
-}
-function flush(){var q=queue.slice();queue=[];saveQueue();q.forEach(function(p){post(p).catch(function(){queue.push(p);saveQueue();});});}
-function publishFile(blob,name){
-  return fetch(BASE,{method:"PUT",headers:{"X-Filename":name},body:blob}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(j){return j.attachment&&j.attachment.url;});
-}
-function connect(){
-  if(es)es.close();
-  es=new EventSource(BASE+"/sse");
-  es.onopen=function(){syncBadge(true);};
-  es.onerror=function(){syncBadge(false);};
-  es.onmessage=function(ev){try{var m=JSON.parse(ev.data);if(m.event==="message"&&m.message)deliver(JSON.parse(m.message),true);}catch(e){}};
-}
-function replay(){
-  fetch(BASE+"/json?poll=1&since=12h").then(function(r){return r.text();}).then(function(txt){
-    txt.split("\n").forEach(function(l){if(!l.trim())return;try{var m=JSON.parse(l);if(m.event==="message"&&m.message)deliver(JSON.parse(m.message),true);}catch(e){}});
-  }).catch(function(){});
-}
-function syncBadge(ok){var b=$("#syncBadge");b.textContent=ok?"☁️ Temps réel":"🔁 Reconnexion…";b.className="pill "+(ok?"ok":"warn");}
-function publishState(){state.stateTs=Date.now();saveState();publish({t:"state",devices:state.devices,ts:state.stateTs});}
-function rebroadcast(){
-  if(!isAdmin||Date.now()-lastRebroadcast<60000)return;lastRebroadcast=Date.now();
-  publishState();
-  Object.keys(state.refs).forEach(function(k){publish(state.refs[k]);});
-  if(state.wp){fetch(state.wp.img).then(function(r){return r.blob();}).then(function(b){return publishFile(b,"fond.jpg");}).then(function(url){publish({t:"wp",url:url,ts:state.wp.ts,opacity:state.wp.opacity});}).catch(function(){});}
-}
-function onMsg(m){
-  if(!m||!m.t)return;
-  if(m.t==="hello"&&isAdmin){rebroadcast();return;}
-  if(m.t==="req"&&isAdmin){
-    var cur=state.devices[m.id];
-    state.devices[m.id]={name:String(m.name||"?").slice(0,40),status:cur&&cur.status==="granted"?"granted":"pending",ts:m.ts};
-    saveState();publishState();renderAdmin();toast("📨 Demande : "+String(m.name||"?").slice(0,40));return;
-  }
-  if(m.t==="state"){
-    if((m.ts||0)>=state.stateTs){state.devices=m.devices||{};state.stateTs=m.ts||0;saveState();route();renderAdmin();}
-    return;
-  }
-  if(m.t==="wp"){if(!state.wp||(m.ts||0)>state.wp.ts)fetchWp(m);return;}
-  if(m.t==="wpdel"){state.wp=null;saveState();applyWp();return;}
-  if(m.t==="note"){toast("📢 "+String(m.text||"").slice(0,300));return;}
-  if(m.t==="ref"){if(m.rid){state.refs[m.rid]=m;saveState();renderRefs();rebuildIndex();}return;}
-  if(m.t==="refdel"){if(m.rid){delete state.refs[m.rid];saveState();renderRefs();rebuildIndex();}return;}
-}
-
-/* ---------- Accès / gate ---------- */
-function route(){
-  var me=state.devices[myId];
-  var granted=isAdmin||(me&&me.status==="granted");
-  $("#gate").hidden=granted;D.body.classList.toggle("locked",!granted);
-  $("#admin").hidden=!isAdmin;$("#navAdmin").hidden=!isAdmin;
-  if(granted)return;
-  if(me&&me.status==="pending")gateStatus("pending","⏳ Demande envoyée","En attente de validation admin. L’accès s’ouvre automatiquement.");
-  else if(me&&me.status==="denied")gateStatus("denied","⛔ Accès refusé","L’administrateur a refusé cette demande.");
-  else if(me&&me.status==="revoked")gateStatus("revoked","🔄 Accès révoqué","Votre accès a été révoqué en temps réel.");
-  else if(localStorage.getItem("eik-asked")==="1")gateStatus("pending","⏳ Demande envoyée","En attente de validation admin.");
-  else $("#gateStatus").hidden=true;
-}
-function gateStatus(cls,title,msg){var s=$("#gateStatus");s.className="gate-status "+cls;s.innerHTML="<b>"+esc(title)+"</b>"+esc(msg);s.hidden=false;}
-function showGateTab(which){
-  $("#tabTiers").classList.toggle("active",which==="tiers");
-  $("#tabAdmin").classList.toggle("active",which==="admin");
-  $("#paneTiers").hidden=which!=="tiers";$("#paneAdmin").hidden=which!=="admin";
-  if(which==="admin"){$("#adminPass").value="";setTimeout(function(){$("#adminPass").focus();},80);}
-}
-function askAccess(){
-  var n=$("#gateName").value.trim();if(n.length<2){toast("Prénom trop court");return;}
-  localStorage.setItem("eik-name",n);localStorage.setItem("eik-asked","1");
-  state.devices[myId]={name:n,status:"pending",ts:Date.now()};saveState();route();
-  publish({t:"req",id:myId,name:n});toast("📨 Demande envoyée");
-}
-function armLock(){clearTimeout(lockTimer);lockTimer=setTimeout(lockAdmin,CFG.LOCK_MIN*60000);}
-function lockAdmin(){isAdmin=false;sessionStorage.removeItem("eik-admin");clearTimeout(lockTimer);route();toast("🔒 Session admin verrouillée");}
-function loginAdmin(pass){
-  $("#adminPass").value="";
-  if(pass!==CFG.PASSWORD){$("#loginForm").classList.add("shake");setTimeout(function(){$("#loginForm").classList.remove("shake");},450);toast("⛔ Mot de passe incorrect");return;}
-  isAdmin=true;sessionStorage.setItem("eik-admin","1");armLock();route();renderAdmin();publishState();toast("🛡️ Mode admin actif");
-  setTimeout(function(){location.hash="#admin";},120);
-}
-
-/* ---------- Fond d’écran ---------- */
-function applyWp(){
-  var l=$("#wpLayer");
-  if(state.wp){l.style.backgroundImage="url("+state.wp.img+")";l.style.opacity=state.wp.opacity;}
-  else{l.style.backgroundImage="none";l.style.opacity=1;}
-  var p=$("#wpPreview");if(state.wp){p.style.backgroundImage="url("+state.wp.img+")";p.textContent="";}else{p.style.backgroundImage="none";p.textContent="Aucun fond personnalisé";}
-}
-function fetchWp(m){
-  fetch(m.url).then(function(r){return r.blob();}).then(function(b){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result);};fr.readAsDataURL(b);});}).then(function(img){
-    state.wp={img:img,ts:m.ts,opacity:m.opacity||.25};saveState();applyWp();toast("🖼️ Fond d’écran mis à jour");
-  }).catch(function(){});
-}
-function compress(file,maxDim,q){
-  return new Promise(function(res,rej){
-    var img=new Image();img.onload=function(){
-      var dim=maxDim,quality=q,out="";
-      do{var sc=Math.min(1,dim/Math.max(img.width,img.height));var c=D.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);out=c.toDataURL("image/jpeg",quality);dim=Math.round(dim*.75);quality-=.12;}while(out.length>1400000&&quality>.3);
-      URL.revokeObjectURL(img.src);res(out);
-    };img.onerror=rej;img.src=URL.createObjectURL(file);
-  });
-}
-
-/* ---------- Recherche prédictive ---------- */
-var INDEX=[],currentHits=[],active=-1;
-function sysLabel(id){var s=SYSTEMS.find(function(x){return x.id===id;});return s?s.label:id;}
-function ficheBody(f){return [f.title,f.zone,f.energy,(f.sys||[]).join(" "),f.cause,f.mech,f.idx,f.dtc,f.legal].join(" ");}
-function rebuildIndex(){
-  INDEX=[];
-  FICHES.forEach(function(f){INDEX.push({g:"fiche",id:f.id,title:f.title,sub:f.zone+" · "+f.energy,body:ficheBody(f),keys:(f.sys||[]).join(" "),ref:f});});
-  DTC.forEach(function(d){INDEX.push({g:"dtc",id:d.code,title:d.code+" — "+d.txt,sub:"Code défaut · "+sysLabel(d.sys),body:d.q,keys:d.sys,ref:d});});
-  LEGAL.forEach(function(l){INDEX.push({g:"legal",id:l.code,title:l.code+" — "+l.txt,sub:"Référence juridique",body:l.q,keys:"juridique",ref:l});});
-  METHOD.forEach(function(m,i){INDEX.push({g:"tech",id:"m"+i,title:m[0],sub:"NFPA 921 · étape "+(i+1),body:m[1],keys:"methode nfpa",ref:m});});
-  ZONES.forEach(function(z,i){INDEX.push({g:"tech",id:"z"+i,title:z[0],sub:"Zone véhicule",body:z[1]+" "+z[2],keys:"zone",ref:z});});
-  PHENOM.forEach(function(p,i){INDEX.push({g:"tech",id:"p"+i,title:p[0],sub:"Phénomène thermique",body:p[1],keys:"chimie feu",ref:p});});
-  FUSION.forEach(function(f,i){INDEX.push({g:"tech",id:"f"+i,title:f[0]+" — fusion "+f[1]+" °C",sub:"Cartographie de fusion",body:f[2],keys:"fusion temperature materiau",ref:f});});
-  Object.keys(state.refs).forEach(function(k){var r=state.refs[k];INDEX.push({g:"veille",id:r.rid,title:r.title,sub:(r.cat==="juridique"?"⚖️":"🔧")+" Référence admin",body:r.note||"",keys:"veille rappel",ref:r});});
-  $("#statFiches").textContent=FICHES.length;
-}
-function expandQuery(q){
-  var tokens=norm(q).split(/[^a-z0-9]+/).filter(function(t){return t.length>1;});
-  var terms=tokens.slice(),chips=[];
-  tokens.forEach(function(tk){Object.keys(EXPAND).forEach(function(key){var k=norm(key);
-    if(tk===k||(tk.length>3&&k.indexOf(tk)===0)||(k.length>3&&tk.indexOf(k)===0)){EXPAND[key].forEach(function(e){var n=norm(e);if(terms.indexOf(n)<0){terms.push(n);if(chips.indexOf(e)<0)chips.push(e);}});}
-  });});
-  return {terms:terms,chips:chips.slice(0,12)};
-}
-function doSearch(q,scope){
-  var ex=expandQuery(q),out=[];
-  INDEX.forEach(function(d){
-    if(scope&&scope!=="all"&&d.g!==scope)return;
-    var sc=0,hits=0,ti=norm(d.title),bo=norm(d.body),ke=norm(d.keys);
-    ex.terms.forEach(function(t){if(ti.indexOf(t)>=0){sc+=12;hits++;}else if(ke.indexOf(t)>=0){sc+=8;hits++;}else if(bo.indexOf(t)>=0){sc+=4;hits++;}});
-    if(hits)out.push({d:d,sc:sc});
-  });
-  out.sort(function(a,b){return b.sc-a.sc;});
-  return {ex:ex,hits:out.slice(0,30)};
-}
-function renderSearch(){
-  var q=$("#q").value.trim(),scope=$("#qScope").value;
-  if(q.length<2){$("#results").innerHTML="";$("#chips").innerHTML='<span class="chip muted">Suggestions : courroie · FAP herbe · runaway LFP · 12V cosse · GPL · freins</span>';currentHits=[];active=-1;return;}
-  var r=doSearch(q,scope);currentHits=r.hits;active=r.hits.length?0:-1;
-  $("#chips").innerHTML=r.ex.chips.length?'<span class="chip muted">🧠 Extension :</span>'+r.ex.chips.map(function(c){return '<button type="button" class="chip" data-chip="'+esc(c)+'">'+esc(c)+'</button>';}).join(""):"";
-  var groups={fiche:"🔥 Fiches origine de feu",dtc:"🔧 Codes DTC",legal:"⚖️ Juridique",tech:"🧭 Technique / méthode",veille:"📡 Veille & rappels"};
-  var html="",last="";
-  if(!r.hits.length)html='<div class="empty">Aucun résultat. Essayez « courroie », « FAP », « runaway », « 12V », « GPL »…</div>';
-  r.hits.forEach(function(h,i){
-    if(h.d.g!==last){last=h.d.g;html+='<div class="result-group">'+groups[h.d.g]+'</div>';}
-    html+='<div class="result'+(i===active?' active':'')+'" data-i="'+i+'"><div><b>'+esc(h.d.title)+'</b><small>'+esc(h.d.sub)+'</small></div><span class="tag">'+Math.round(h.sc)+' pts</span></div>';
-  });
-  $("#results").innerHTML=html;
-}
-function updateActive(){
-  $all(".result").forEach(function(el,i){el.classList.toggle("active",i===active);});
-  var el=$all(".result")[active];if(el)el.scrollIntoView({block:"nearest"});
-}
-function openResult(h){
-  var d=h.d;
-  if(d.g==="fiche")return openDeck(d.id);
-  if(d.g==="dtc")return openDrawer("Code DTC",d.title,'<p>'+esc(d.ref.txt)+'</p><p class="hint">Piste : '+esc(d.ref.q)+'</p>',[{label:"Voir fiches liées",fn:function(){closeDrawer();$("#fText").value=d.ref.q.split(" ")[0];renderCards();location.hash="#fiches";}}]);
-  if(d.g==="legal")return openDrawer("Juridique",d.title,'<p>'+esc(d.ref.txt)+'</p>',[{label:"Légifrance ↗",fn:function(){window.open("https://www.legifrance.gouv.fr/search/all?query="+encodeURIComponent(d.ref.q),"_blank","noopener");}}]);
-  if(d.g==="veille"){var u=safeUrl(d.ref.url);if(u!=="#")window.open(u,"_blank","noopener");else{location.hash="#veille";closeDrawer();}return;}
-  openDrawer("Technique",d.title,'<p>'+esc(d.ref[1]||d.ref[2]||"")+'</p>',[]);
-}
-
-/* ---------- Galerie fiches ---------- */
-function legalTags(f){var t=norm(f.legal),o=[];if(t.indexOf("vice cache")>=0)o.push("vice-cache");if(t.indexOf("rappel")>=0||t.indexOf("l421")>=0)o.push("rappel");if(t.indexOf("entretien")>=0||t.indexOf("usage")>=0)o.push("entretien");if(t.indexOf("externe")>=0||t.indexOf("force majeure")>=0||t.indexOf("usager")>=0)o.push("externe");return o;}
-function systemsOf(f){if(f.sys&&f.sys.length)return f.sys;var t=norm(ficheBody(f)),o=[];SYSTEMS.forEach(function(s){if(s.kw.some(function(k){return t.indexOf(norm(k))>=0;}))o.push(s.id);});return o;}
-function fillFilters(){
-  var z=[];FICHES.forEach(function(f){if(z.indexOf(f.zone)<0)z.push(f.zone);});z.sort();
-  $("#fZone").innerHTML='<option value="">📍 Zone : toutes</option>'+z.map(function(x){return '<option>'+esc(x)+'</option>';}).join("");
-  $("#fSystem").innerHTML='<option value="">⚙️ Système : tous</option>'+SYSTEMS.map(function(s){return '<option value="'+s.id+'">'+esc(s.label)+'</option>';}).join("");
-}
-function filteredFiches(){
-  var list=FICHES.slice(),en=$("#fEnergy").value,zo=$("#fZone").value,sy=$("#fSystem").value,le=$("#fLegal").value,tx=$("#fText").value.trim(),so=$("#fSort").value;
-  if(en)list=list.filter(function(f){return f.energy===en;});
-  if(zo)list=list.filter(function(f){return f.zone===zo;});
-  if(sy)list=list.filter(function(f){return systemsOf(f).indexOf(sy)>=0;});
-  if(le)list=list.filter(function(f){return legalTags(f).indexOf(le)>=0;});
-  if(tx){var terms=expandQuery(tx).terms;list=list.map(function(f){var ti=norm(f.title),bo=norm(ficheBody(f)),sc=0;terms.forEach(function(t){if(ti.indexOf(t)>=0)sc+=12;else if(bo.indexOf(t)>=0)sc+=4;});return {f:f,sc:sc};}).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;}).map(function(x){return x.f;});}
-  if(so==="az")list.sort(function(a,b){return a.title.localeCompare(b.title,"fr");});
-  else if(so==="zone")list.sort(function(a,b){return a.zone.localeCompare(b.zone,"fr");});
-  return list;
-}
-function renderCards(){
-  var list=filteredFiches(),grid=$("#proGrid");
-  $("#fCount").textContent=list.length+" fiche"+(list.length>1?"s":"");
-  $("#fEmpty").hidden=list.length>0;grid.hidden=!list.length;
-  grid.innerHTML=list.map(function(f,i){
-    var tags=systemsOf(f).slice(0,3).map(function(s){return '<span class="tag">'+esc(sysLabel(s))+'</span>';}).join("");
-    return '<article class="fiche" data-id="'+esc(f.id)+'" style="animation-delay:'+Math.min(i*35,350)+'ms">'
-      +'<div class="fiche-top '+(f.energy==="VE"?"ev":"th")+'"><span>'+(f.energy==="VE"?"🔋 VE":"🔥 Thermique")+'</span><span>📍 '+esc(f.zone)+'</span></div>'
-      +'<h3>'+esc(f.title)+'</h3><p class="cause">'+esc(f.cause)+'</p><div class="tags">'+tags+(f.dtc&&f.dtc!=="—"?'<span class="tag dtc">🔧 '+esc(f.dtc)+'</span>':'')+'</div>'
-      +'<div class="fiche-actions"><button class="btn-fire" data-act="deck">📽️ Présenter</button><button data-act="more">📋 Détails</button></div>'
-      +'<div class="fiche-more" hidden><p><b>Mécanisme :</b> '+esc(f.mech)+'</p><p><b>Indices :</b> '+esc(f.idx)+'</p><p><b>Juridique :</b> '+esc(f.legal)+'</p>'+(safeUrl(f.src)!=="#"?'<p><a href="'+esc(safeUrl(f.src))+'" target="_blank" rel="noopener">🔗 Source ↗</a></p>':'')+'</div></article>';
-  }).join("");
-}
-
-/* ---------- Présentation interactive ---------- */
-var deckList=[],deckIdx=0,slideIdx=0,deckEl=$("#deck"),touchX=null,autoTimer=null;
-function slidesOf(f){return [
-  {h:f.title,cover:true},
-  {h:"1 · Cause",b:f.cause},
-  {h:"2 · Mécanisme → conséquence",b:f.mech},
-  {h:"3 · Indices sapiteur",b:f.idx},
-  {h:"4 · Code DTC",b:f.dtc&&f.dtc!=="—"?f.dtc:"Aucun DTC spécifique — raisonnement par traces, logs et cartographie."},
-  {h:"5 · Qualification juridique",b:f.legal},
-  {h:"6 · Source & suites",src:f.src||""}
-];}
-function openDeck(id,list){
-  deckList=(list&&list.length?list:FICHES).slice();if(!deckList.length)return;
-  deckIdx=Math.max(0,deckList.findIndex(function(f){return f.id===id;}));slideIdx=0;
-  deckEl.hidden=false;D.body.classList.add("locked");renderSlide();stopAuto();
-}
-function closeDeck(){deckEl.hidden=true;D.body.classList.remove("locked");stopAuto();$("#deckOverview").hidden=true;try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}}
-function step(d){
-  var n=slidesOf(deckList[deckIdx]).length;slideIdx+=d;
-  if(slideIdx>=n){if(deckIdx<deckList.length-1){deckIdx++;slideIdx=0;}else slideIdx=n-1;}
-  if(slideIdx<0){if(deckIdx>0){deckIdx--;slideIdx=slidesOf(deckList[deckIdx]).length-1;}else slideIdx=0;}
-  renderSlide();
-}
-function renderSlide(){
-  var f=deckList[deckIdx];if(!f)return closeDeck();
-  var sl=slidesOf(f),s=sl[slideIdx],box=$("#deckSlide");
-  $("#deckTitle").textContent="🔥 "+f.title;
-  box.classList.remove("anim");void box.offsetWidth;box.classList.add("anim");
-  if(s.cover)box.innerHTML='<div class="deck-cover"><span class="energy-big '+(f.energy==="VE"?"ev":"th")+'">'+(f.energy==="VE"?"🔋 VÉHICULE ÉLECTRIQUE":"🔥 THERMIQUE")+'</span><h2>'+esc(f.title)+'</h2><p>📍 '+esc(f.zone)+'</p><p class="hint">← → pour naviguer · Échap pour quitter</p></div>';
-  else if(s.src!==undefined)box.innerHTML='<h3>'+esc(s.h)+'</h3>'+(safeUrl(s.src)!=="#"?'<p><a class="btn-fire" style="display:inline-block;padding:.7rem 1rem;border-radius:12px;text-decoration:none" href="'+esc(safeUrl(s.src))+'" target="_blank" rel="noopener">🔗 Ouvrir la source ↗</a></p>':'<p class="big">Documentation interne — croiser avec RappelConso / NHTSA.</p>')+'<p class="hint">⏭ pour la fiche suivante</p>';
-  else box.innerHTML='<h3>'+esc(s.h)+'</h3><p class="big">'+esc(s.b||"—")+'</p>';
-  $("#deckProgress").style.width=Math.round((slideIdx+1)/sl.length*100)+"%";
-  $("#deckDots").innerHTML=sl.map(function(x,i){return '<span class="dot'+(i===slideIdx?' on':'')+'"></span>';}).join("");
-  $("#deckCount").textContent="Fiche "+(deckIdx+1)+"/"+deckList.length+" · Diapo "+(slideIdx+1)+"/"+sl.length;
-  try{history.replaceState(null,"","#fiche="+encodeURIComponent(f.id));}catch(e){}
-}
-function toggleOverview(){
-  var g=$("#deckOverview");if(!g.hidden){g.hidden=true;return;}
-  g.innerHTML=deckList.map(function(f,i){return '<button class="ov'+(i===deckIdx?' active':'')+'" data-i="'+i+'"><b>'+esc(f.title)+'</b><small>'+esc(f.zone)+'</small></button>';}).join("");
-  g.hidden=false;
-}
-function stopAuto(){clearInterval(autoTimer);autoTimer=null;$("#deckPlay").textContent="▶";}
-function toggleAuto(){if(autoTimer){stopAuto();return;}$("#deckPlay").textContent="⏸";autoTimer=setInterval(function(){step(1);},6000);}
-
-/* ---------- Drawer ---------- */
-function openDrawer(kind,title,body,actions){
-  $("#drawerKind").textContent=kind;$("#drawerTitle").textContent=title;$("#drawerBody").innerHTML=body;
-  var a=$("#drawerActions");a.innerHTML="";
-  (actions||[]).forEach(function(x){var b=D.createElement("button");b.textContent=x.label;b.onclick=x.fn;a.appendChild(b);});
-  $("#drawer").hidden=false;
-}
-function closeDrawer(){$("#drawer").hidden=true;}
-
-/* ---------- Rendus statiques ---------- */
-function renderStatic(){
-  $("#steps").innerHTML=METHOD.map(function(m,i){return '<div class="step" data-n="'+(i+1)+'"><b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span></div>';}).join("");
-  $("#patterns").innerHTML=PATTERNS.map(function(p){return '<div class="pattern"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>';}).join("");
-  $("#phenom").innerHTML=PHENOM.map(function(p){return '<div class="card"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>';}).join("");
-  $("#gazBody").innerHTML=GAZ.map(function(g){return '<tr><td><b>'+esc(g[0])+'</b></td><td>'+esc(g[1])+'</td><td>'+esc(g[2])+'</td></tr>';}).join("");
-  $("#zonesGrid").innerHTML=ZONES.map(function(z,i){return '<div class="zone" data-i="'+i+'"><b>📍 '+esc(z[0])+'</b><span>'+esc(z[1])+'</span><span style="margin-top:.4rem;color:var(--fire2)">⚠️ '+esc(z[2])+'</span></div>';}).join("");
-  $("#fusionBody").innerHTML=FUSION.map(function(f){return '<tr><td><b>'+esc(f[0])+'</b></td><td>'+esc(f[1])+'</td><td>'+esc(f[2])+'</td></tr>';}).join("");
-  $("#dtcGrid").innerHTML=DTC.map(function(d,i){return '<div class="dtc" data-i="'+i+'"><b>'+esc(d.code)+'</b><span>'+esc(d.txt)+'</span></div>';}).join("");
-  $("#legalGrid").innerHTML=LEGAL.map(function(l,i){return '<div class="legal" data-i="'+i+'"><b>'+esc(l.code)+'</b><span>'+esc(l.txt)+'</span><a href="https://www.legifrance.gouv.fr/search/all?query='+encodeURIComponent(l.q)+'" target="_blank" rel="noopener">Légifrance ↗</a></div>';}).join("");
-  $("#portals").innerHTML=PORTALS.map(function(p){return '<a class="portal" href="'+esc(p[2])+'" target="_blank" rel="noopener"><b>'+esc(p[0])+' ↗</b><span>'+esc(p[1])+'</span></a>';}).join("");
-}
-function renderRefs(){
-  var list=Object.keys(state.refs).map(function(k){return state.refs[k];}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  $("#refEmpty").hidden=list.length>0;
-  $("#refList").innerHTML=list.map(function(r){
-    return '<div class="ref"><div><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><small>'+esc(r.cat==="juridique"?"⚖️ Juridique":"🔧 Technique")+' · '+esc(r.note||"")+'</small></div>'+(isAdmin?'<button class="danger" data-refdel="'+esc(r.rid)+'">🗑️</button>':'')+'</div>';
-  }).join("");
-  var last=list.reduce(function(a,r){return Math.max(a,r.ts||0);},0);
-  $("#refUpdated").textContent=last?"MAJ "+new Date(last).toLocaleString("fr-FR"):"Base embarquée";
-}
-function renderAdmin(){
-  if(!isAdmin)return;
-  var list=Object.keys(state.devices).map(function(id){return {id:id,d:state.devices[id]};}).sort(function(a,b){return (b.d.ts||0)-(a.d.ts||0);});
-  $("#reqCount").textContent=list.length;$("#reqEmpty").hidden=list.length>0;
-  $("#reqList").innerHTML=list.map(function(x){var d=x.d;return '<div class="req"><div class="req-head"><b>'+esc(d.name||"?")+'</b><span class="badge '+esc(d.status)+'">'+esc(LABEL[d.status]||d.status)+'</span><small>'+new Date(d.ts||0).toLocaleString("fr-FR")+'</small></div><div class="req-actions"><button data-id="'+esc(x.id)+'" data-s="granted">✅ Accès</button><button data-id="'+esc(x.id)+'" data-s="denied">⛔ Refus</button><button data-id="'+esc(x.id)+'" data-s="revoked">🔄 Révoquer</button><button class="danger" data-id="'+esc(x.id)+'" data-s="del">🗑️</button></div></div>';}).join("");
-}
-
-/* ---------- Réseau / Bluetooth / PWA ---------- */
-function netBadge(){
-  var c=navigator.connection||{},type="";
-  if(c.type==="wifi")type="Wi-Fi";else if(c.type==="cellular")type=(c.effectiveType||"4g").toUpperCase()+"/5G";else if(c.effectiveType)type=c.effectiveType.toUpperCase();
-  var b=$("#netBadge");b.textContent=navigator.onLine?"🟢 En ligne"+(type?" · "+type:""):"🟠 Hors ligne · local";b.className="pill "+(navigator.onLine?"ok":"warn");
-}
-var btDevice=null;
-function btConnect(){
-  if(!navigator.bluetooth){toast("Bluetooth Web indisponible — utilisez Chrome Android ou l’APK.");return;}
-  navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:["battery_service","device_information"]}).then(function(dev){
-    btDevice=dev;dev.addEventListener("gattserverdisconnected",function(){$("#btBadge").hidden=true;toast("Bluetooth déconnecté");});
-    return dev.gatt.connect().then(function(g){
-      var label=dev.name||"Appareil";
-      return g.getPrimaryService("battery_service").then(function(s){return s.getCharacteristic("battery_level");}).then(function(ch){return ch.readValue();}).then(function(v){label+=" 🔋"+v.getUint8(0)+"%";}).catch(function(){}).then(function(){
-        $("#btBadge").hidden=false;$("#btBadge").textContent="🔵 "+label;toast("Bluetooth connecté : "+label);
-      });
-    });
-  }).catch(function(e){if(e&&e.name!=="NotFoundError")toast("Bluetooth : "+e.message);});
-}
-var deferredPrompt=null;
-W.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredPrompt=e;$("#installBtn").hidden=false;});
-function install(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;$("#installBtn").hidden=true;}else toast("Pour installer : menu du navigateur → « Ajouter à l’écran d’accueil ».");}
-function share(){
-  var data={title:D.title,text:"Étude incendie technique by Kevin",url:location.href};
-  if(navigator.share)navigator.share(data).catch(function(){});
-  else if(navigator.clipboard)navigator.clipboard.writeText(location.href).then(function(){toast("🔗 Lien copié");}).catch(function(){window.open(CFG.APK_URL,"_blank","noopener");});
-  else window.open(CFG.APK_URL,"_blank","noopener");
-}
-
-/* ---------- Braises (canvas) ---------- */
-function embers(){
-  if(W.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  var c=$("#embers"),x=c.getContext("2d"),ps=[],raf=null;
-  function size(){var d=Math.min(devicePixelRatio||1,1.5);c.width=innerWidth*d;c.height=innerHeight*d;x.setTransform(d,0,0,d,0,0);}
-  size();W.addEventListener("resize",size);
-  for(var i=0;i<26;i++)ps.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:1+Math.random()*2.2,s:.25+Math.random()*.7,a:.15+Math.random()*.5,d:Math.random()*6.28});
-  function loop(){
-    x.clearRect(0,0,innerWidth,innerHeight);
-    ps.forEach(function(p){p.y-=p.s;p.x+=Math.sin(p.d+p.y*.01)*.3;if(p.y<-10){p.y=innerHeight+10;p.x=Math.random()*innerWidth;}
-      x.beginPath();x.arc(p.x,p.y,p.r,0,6.28);var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);g.addColorStop(0,"rgba(255,154,61,"+p.a+")");g.addColorStop(1,"rgba(255,107,53,0)");x.fillStyle=g;x.fill();});
-    raf=requestAnimationFrame(loop);
-  }
-  loop();
-  D.addEventListener("visibilitychange",function(){if(D.hidden){cancelAnimationFrame(raf);raf=null;}else if(!raf)loop();});
-}
-
-/* ---------- Scroll reveal & nav ---------- */
-function reveals(){
-  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});
-  $all("main section").forEach(function(s){io.observe(s);});
-  var links=$all("nav a");
-  var spy=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+e.target.id);});}});},{rootMargin:"-40% 0px -55% 0px"});
-  $all("main section").forEach(function(s){spy.observe(s);});
-}
-
-/* ---------- Liaisons ---------- */
-function bind(){
-  $("#menuBtn").onclick=function(){$("#nav").classList.toggle("open");};
-  $all("nav a").forEach(function(a){a.onclick=function(){$("#nav").classList.remove("open");};});
-  $("#heroSearch").onclick=function(){location.hash="#recherche";setTimeout(function(){$("#q").focus();},450);};
-  $("#heroPresent").onclick=function(){openDeck(FICHES[0].id,filteredFiches());};
-  $("#heroMethodo").onclick=function(){location.hash="#methodo";};
-  $("#tabTiers").onclick=function(){showGateTab("tiers");};
-  $("#tabAdmin").onclick=function(){showGateTab("admin");};
-  $("#gateForm").onsubmit=function(e){e.preventDefault();askAccess();};
-  $("#loginForm").onsubmit=function(e){e.preventDefault();loginAdmin($("#adminPass").value);};
-  $("#adminBtn").onclick=function(){if(isAdmin){location.hash="#admin";return;}$("#gate").hidden=false;D.body.classList.add("locked");showGateTab("admin");};
-  $("#lockBtn").onclick=lockAdmin;
-  $("#admin").addEventListener("pointerdown",function(){if(isAdmin)armLock();});
-  $("#reqList").onclick=function(e){
-    var b=e.target.closest("button");if(!b||!isAdmin)return;var id=b.dataset.id,s=b.dataset.s;
-    if(s==="del")delete state.devices[id];else if(state.devices[id])state.devices[id].status=s;
-    saveState();publishState();renderAdmin();toast(s==="del"?"🗑️ Appareil supprimé":"Statut : "+(LABEL[s]||s));
-  };
-  $("#wpFile").onchange=function(e){
-    var f=e.target.files[0];if(!f)return;$("#wpStatus").textContent="Compression…";
-    compress(f,1600,.82).then(function(img){
-      var op=parseFloat($("#wpOpacity").value);state.wp={img:img,ts:Date.now(),opacity:op};saveState();applyWp();
-      return fetch(img).then(function(r){return r.blob();}).then(function(b){return publishFile(b,"fond.jpg");}).then(function(url){publish({t:"wp",url:url,ts:state.wp.ts,opacity:op});$("#wpStatus").textContent="🖼️ Fond diffusé en temps réel.";toast("🖼️ Fond d’écran diffusé");});
-    }).catch(function(){$("#wpStatus").textContent="Fond appliqué localement (réseau indisponible).";});
-    e.target.value="";
-  };
-  $("#wpOpacity").oninput=function(){if(state.wp){state.wp.opacity=parseFloat(this.value);saveState();applyWp();}};
-  $("#wpClear").onclick=function(){state.wp=null;saveState();applyWp();publish({t:"wpdel"});toast("Fond retiré");};
-  $("#pubBtn").onclick=function(){
-    var title=$("#pubTitle").value.trim(),url=$("#pubUrl").value.trim();
-    if(!title||!/^https?:\/\//i.test(url)){toast("Titre + URL https:// requis");return;}
-    publish({t:"ref",rid:(crypto.randomUUID?crypto.randomUUID():"ref"+Date.now()),title:title,url:url,cat:$("#pubCat").value,note:$("#pubNote").value.trim().slice(0,200),ts:Date.now()});
-    $("#pubTitle").value=$("#pubUrl").value=$("#pubNote").value="";toast("📚 Référence publiée");
-  };
-  $("#noteBtn").onclick=function(){var t=$("#noteTxt").value.trim();if(!t)return;publish({t:"note",text:t.slice(0,300)});$("#noteTxt").value="";};
-  $("#syncTest").onclick=function(){publish({t:"note",text:"🧪 Test du canal temps réel — "+new Date().toLocaleTimeString("fr-FR")});};
-  $("#refList").onclick=function(e){var b=e.target.closest("[data-refdel]");if(!b||!isAdmin)return;publish({t:"refdel",rid:b.dataset.refdel});};
-  var qt=null;
-  $("#q").addEventListener("input",function(){clearTimeout(qt);qt=setTimeout(renderSearch,120);});
-  $("#q").addEventListener("keydown",function(e){
-    if(e.key==="ArrowDown"||e.key==="ArrowUp"){if(!currentHits.length)return;e.preventDefault();active=(active+(e.key==="ArrowDown"?1:-1)+currentHits.length)%currentHits.length;updateActive();}
-    else if(e.key==="Enter"){if(currentHits[active]){e.preventDefault();openResult(currentHits[active]);}}
-    else if(e.key==="Escape"){$("#results").innerHTML="";currentHits=[];}
-  });
-  $("#qScope").onchange=renderSearch;
-  $("#searchBtn").onclick=function(){
-    var q=$("#q").value.trim();if(!q){toast("Saisissez un mot-clé");return;}
-    if(currentHits[active])openResult(currentHits[active]);
-    else{var url=$("#qScope").value==="legal"?"https://www.legifrance.gouv.fr/search/all?query="+encodeURIComponent(q):"https://www.google.com/search?q="+encodeURIComponent(q+" incendie véhicule norme NFPA 921");window.open(url,"_blank","noopener");}
-  };
-  $("#chips").onclick=function(e){var b=e.target.closest("[data-chip]");if(!b)return;$("#q").value=b.dataset.chip;renderSearch();$("#q").focus();};
-  $("#results").onclick=function(e){var r=e.target.closest(".result");if(!r)return;openResult(currentHits[+r.dataset.i]);};
-  ["fEnergy","fZone","fSystem","fLegal","fSort"].forEach(function(id){$("#"+id).onchange=renderCards;});
-  var ft=null;$("#fText").addEventListener("input",function(){clearTimeout(ft);ft=setTimeout(renderCards,150);});
-  $("#resetFilters").onclick=$("#emptyReset").onclick=function(){["fEnergy","fZone","fSystem","fLegal"].forEach(function(id){$("#"+id).value="";});$("#fText").value="";$("#fSort").value="pert";renderCards();};
-  $("#presentAll").onclick=function(){var l=filteredFiches();if(l.length)openDeck(l[0].id,l);else toast("Aucune fiche à présenter");};
-  $("#proGrid").onclick=function(e){
-    var b=e.target.closest("[data-act]");if(!b)return;var card=e.target.closest(".fiche"),id=card.dataset.id;
-    if(b.dataset.act==="deck")openDeck(id,filteredFiches());
-    else{var m=card.querySelector(".fiche-more");m.hidden=!m.hidden;b.textContent=m.hidden?"📋 Détails":"▲ Réduire";}
-  };
-  $("#zonesGrid").onclick=function(e){var z=e.target.closest(".zone");if(!z)return;var d=ZONES[+z.dataset.i];openDrawer("Zone véhicule",d[0],'<p><b>Composants :</b> '+esc(d[1])+'</p><p><b>Risques :</b> '+esc(d[2])+'</p>',[]);};
-  $("#dtcGrid").onclick=function(e){var d=e.target.closest(".dtc");if(!d)return;var x=DTC[+d.dataset.i];openDrawer("Code DTC",x.code,'<p>'+esc(x.txt)+'</p><p class="hint">Piste : '+esc(x.q)+'</p>',[{label:"Filtrer les fiches",fn:function(){closeDrawer();$("#fText").value=x.q.split(" ")[0];renderCards();location.hash="#fiches";}}]);};
-  $("#legalGrid").onclick=function(e){var l=e.target.closest(".legal");if(!l||e.target.tagName==="A")return;var x=LEGAL[+l.dataset.i];openDrawer("Juridique",x.code,'<p>'+esc(x.txt)+'</p>',[{label:"Légifrance ↗",fn:function(){window.open("https://www.legifrance.gouv.fr/search/all?query="+encodeURIComponent(x.q),"_blank","noopener");}}]);};
-  $("#deckClose").onclick=closeDeck;$("#deckPrev").onclick=function(){step(-1);};$("#deckNext").onclick=function(){step(1);};
-  $("#deckPrevF").onclick=function(){deckIdx=(deckIdx-1+deckList.length)%deckList.length;slideIdx=0;renderSlide();};
-  $("#deckNextF").onclick=function(){deckIdx=(deckIdx+1)%deckList.length;slideIdx=0;renderSlide();};
-  $("#deckOverviewBtn").onclick=toggleOverview;$("#deckPlay").onclick=toggleAuto;
-  $("#deckFull").onclick=function(){if(D.fullscreenElement)D.exitFullscreen();else if(deckEl.requestFullscreen)deckEl.requestFullscreen();};
-  $("#deckOverview").onclick=function(e){var b=e.target.closest(".ov");if(!b)return;deckIdx=+b.dataset.i;slideIdx=0;$("#deckOverview").hidden=true;renderSlide();};
-  D.addEventListener("keydown",function(e){
-    if(!deckEl.hidden){if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();step(1);}else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();step(-1);}else if(e.key==="Escape")closeDeck();else if(e.key.toLowerCase()==="f")$("#deckFull").click();return;}
-    if(!$("#drawer").hidden&&e.key==="Escape")closeDrawer();
-  });
-  deckEl.addEventListener("touchstart",function(e){touchX=e.touches[0].clientX;},{passive:true});
-  deckEl.addEventListener("touchend",function(e){if(touchX==null)return;var dx=e.changedTouches[0].clientX-touchX;touchX=null;if(Math.abs(dx)>50)step(dx<0?1:-1);},{passive:true});
-  $("#drawerClose").onclick=closeDrawer;$("#drawer").onclick=function(e){if(e.target.id==="drawer")closeDrawer();};
-  $("#btBtn").onclick=btConnect;$("#installBtn").onclick=install;$("#installBtn2").onclick=install;
-  $("#shareBtn").onclick=share;$("#shareBtn2").onclick=share;
-  W.addEventListener("online",function(){netBadge();connect();replay();flush();});
-  W.addEventListener("offline",netBadge);
-  if(navigator.connection)navigator.connection.addEventListener("change",netBadge);
-}
-
-/* ---------- Chargements optionnels (sans bloquer) ---------- */
-function optionalLoads(){
-  fetch("data/keywords.json").then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.expand){EXPAND=j.expand;if(j.themes)SYSTEMS=j.themes;fillFilters();rebuildIndex();renderCards();renderSearch();}}).catch(function(){});
-  fetch("data/recalls-feed.json").then(function(r){return r.ok?r.json():null;}).then(function(j){
-    if(!j)return;var arr=Array.isArray(j)?j:(j.items||j.recalls||[]);
-    arr.slice(0,120).forEach(function(r,i){var t=[r.brand||r.marque,r.model||r.modele,r.subject||r.titre||r.title].filter(Boolean).join(" ");if(t)INDEX.push({g:"veille",id:"recall"+i,title:t,sub:"🚨 Rappel / veille",body:String(r.description||r.detail||""),keys:"rappel",ref:r});});
-  }).catch(function(){});
-  var s=D.createElement("script");s.src="js/fiches-techniques.js";
-  s.onload=function(){if(W.FICHES&&W.FICHES.length){FICHES=W.FICHES.map(function(f){return {id:f.id,title:f.title,zone:f.zone||"",energy:/^ev/i.test(f.id)?"VE":"Thermique",sys:f.sys||[],cause:f.cause||"",mech:f.mech||"",idx:f.idx||"",dtc:f.dtc||"—",legal:f.legal||"",src:f.src||""};});fillFilters();rebuildIndex();renderCards();}};
-  s.onerror=function(){};D.body.appendChild(s);
-}
-
-/* ---------- Démarrage ---------- */
-function boot(){
-  renderStatic();fillFilters();rebuildIndex();renderCards();renderRefs();renderAdmin();applyWp();route();netBadge();syncBadge(false);
-  $("#gateName").value=localStorage.getItem("eik-name")||"";
-  $("#topicInfo").textContent="Canal : "+CFG.TOPIC+" · SSE + historique 12 h + file hors ligne.";
-  bind();reveals();embers();
-  if(W.BroadcastChannel){var bc=new BroadcastChannel("eik-sync");bc.onmessage=function(e){deliver(e.data,false);};}
-  connect();replay();flush();
-  setInterval(function(){if(es&&es.readyState===2)connect();},30000);
-  if(isAdmin)armLock();else publish({t:"hello",id:myId});
-  optionalLoads();
-  if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js").catch(function(){});
-  var m=/#fiche=([^&]+)/.exec(location.hash||"");if(m)setTimeout(function(){openDeck(decodeURIComponent(m[1]));},700);
-  setInterval(function(){if(!navigator.onLine)syncBadge(false);},8000);
-}
-boot();
-})();
-</script>
+<script src="js/app.js"></script>
 </body>
 </html>
