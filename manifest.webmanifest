@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "Étude Incendie Technique by Kevin",
+  "short_name": "Étude Incendie",
+  "description": "Expertise incendie véhicule : fiches origine de feu, analyse technique et juridique, contrôle d'accès temps réel.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
