@@ -1,18 +1,26 @@
 {
   "engines": [
-    { "code": "EB2", "names": ["1.2 puretech", "puretech", "eb2"], "type": "Essence", "knownIssues": ["Courroie humide", "Délamination", "Crépine colmatée"], "brands": ["Peugeot", "Citroën", "DS", "Opel"] },
+    { "code": "EB2", "names": ["1.2 puretech", "puretech", "eb2"], "type": "Essence", "knownIssues": ["Courroie humide", "Délamination", "Crépine"], "brands": ["Peugeot", "Citroën", "DS", "Opel"] },
+    { "code": "1.6 THP", "names": ["1.6 thp", "thp", "ep6", "prince"], "type": "Essence", "knownIssues": ["Chaîne distribution", "Tendeur", "Calamine"], "brands": ["Peugeot", "Citroën", "DS", "Mini"] },
+    { "code": "N47", "names": ["n47", "bmw n47"], "type": "Diesel", "knownIssues": ["Chaîne distribution", "Tendeur", "Casse chaîne"], "brands": ["BMW"] },
+    { "code": "N20", "names": ["n20", "bmw n20"], "type": "Essence", "knownIssues": ["Chaîne distribution", "Tendeur"], "brands": ["BMW"] },
+    { "code": "EA888", "names": ["ea888", "1.8 tsi", "2.0 tsi"], "type": "Essence", "knownIssues": ["Chaîne distribution", "Tendeur", "Consommation huile"], "brands": ["Volkswagen", "Audi", "SEAT", "Škoda"] },
+    { "code": "1.5 BlueHDi", "names": ["1.5 bluehdi", "bluehdi"], "type": "Diesel", "knownIssues": ["Courroie", "FAP", "AdBlue"], "brands": ["Peugeot", "Citroën", "Opel"] },
+    { "code": "1.6 HDi", "names": ["1.6 hdi", "hdi"], "type": "Diesel", "knownIssues": ["Courroie", "FAP", "EGR"], "brands": ["Peugeot", "Citroën"] },
+    { "code": "1.6 BlueHDi", "names": ["1.6 bluehdi"], "type": "Diesel", "knownIssues": ["FAP", "EGR", "AdBlue"], "brands": ["Peugeot", "Citroën"] },
+    { "code": "2.0 BlueHDi", "names": ["2.0 bluehdi"], "type": "Diesel", "knownIssues": ["EGR", "FAP", "AdBlue", "Turbo"], "brands": ["Peugeot", "Citroën", "DS", "Opel"] },
     { "code": "1.5 EcoBlue", "names": ["1.5 ecoblue", "ecoblue"], "type": "Diesel", "knownIssues": ["Courroie humide", "EGR", "FAP"], "brands": ["Ford"] },
     { "code": "2.0 EcoBlue", "names": ["2.0 ecoblue"], "type": "Diesel", "knownIssues": ["Courroie humide", "EGR", "FAP"], "brands": ["Ford"] },
     { "code": "1.0 TSI", "names": ["1.0 tsi", "tsi"], "type": "Essence", "knownIssues": ["Chaîne distribution", "Turbo"], "brands": ["Volkswagen", "SEAT", "Škoda", "Audi"] },
     { "code": "1.5 TSI", "names": ["1.5 tsi"], "type": "Essence", "knownIssues": ["Injection", "Turbo"], "brands": ["Volkswagen", "SEAT", "Škoda", "Audi"] },
     { "code": "2.0 TDI", "names": ["2.0 tdi", "tdi"], "type": "Diesel", "knownIssues": ["EGR", "FAP", "Injecteurs"], "brands": ["Volkswagen", "SEAT", "Škoda", "Audi"] },
-    { "code": "1.5 BlueHDi", "names": ["1.5 bluehdi", "bluehdi"], "type": "Diesel", "knownIssues": ["EGR", "FAP", "AdBlue"], "brands": ["Peugeot", "Citroën", "DS", "Opel"] },
-    { "code": "2.0 BlueHDi", "names": ["2.0 bluehdi"], "type": "Diesel", "knownIssues": ["EGR", "FAP", "AdBlue", "Turbo"], "brands": ["Peugeot", "Citroën", "DS", "Opel"] },
     { "code": "1.0 EcoBoost", "names": ["1.0 ecoboost", "ecoboost"], "type": "Essence", "knownIssues": ["Refroidissement", "Turbo"], "brands": ["Ford"] },
+    { "code": "1.0 TCe", "names": ["1.0 tce", "tce"], "type": "Essence", "knownIssues": ["Injection", "Turbo"], "brands": ["Renault", "Dacia"] },
+    { "code": "1.3 TCe", "names": ["1.3 tce"], "type": "Essence", "knownIssues": ["Injection", "Turbo"], "brands": ["Renault", "Dacia"] },
     { "code": "1.5 Blue dCi", "names": ["1.5 dci", "blue dci"], "type": "Diesel", "knownIssues": ["EGR", "FAP", "Injecteurs"], "brands": ["Renault", "Dacia"] },
-    { "code": "1.3 TCe", "names": ["1.3 tce", "tce"], "type": "Essence", "knownIssues": ["Injection", "Turbo"], "brands": ["Renault", "Dacia"] },
     { "code": "Kona Electric", "names": ["kona electric", "kona ev"], "type": "Électrique", "knownIssues": ["Batterie", "OBC", "Charge"], "brands": ["Hyundai"] },
     { "code": "e-208", "names": ["e-208", "e208"], "type": "Électrique", "knownIssues": ["Batterie", "Charge"], "brands": ["Peugeot"] },
+    { "code": "e-Golf", "names": ["e-golf"], "type": "Électrique", "knownIssues": ["Batterie", "Charge"], "brands": ["Volkswagen"] },
     { "code": "Tesla LR", "names": ["long range", "standard range"], "type": "Électrique", "knownIssues": ["Batterie", "Charge"], "brands": ["Tesla"] }
   ]
 }
