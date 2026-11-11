@@ -1,0 +1,20 @@
+{
+  "correlations": [
+    {"brand": "Peugeot", "model": "308", "engine": "1.2 PureTech", "failure": "Courroie humide délaminée", "probability": 9, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EB2."},
+    {"brand": "Peugeot", "model": "308", "engine": "1.2 PureTech", "failure": "Crépine colmatée", "probability": 8, "severity": "Critique", "system": "lubrification", "description": "Obstruction de la crépine d'aspiration d'huile par débris de courroie."},
+    {"brand": "Peugeot", "model": "3008", "engine": "1.2 PureTech", "failure": "Courroie humide délaminée", "probability": 9, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EB2."},
+    {"brand": "Peugeot", "model": "208", "engine": "1.2 PureTech", "failure": "Courroie humide délaminée", "probability": 9, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EB2."},
+    {"brand": "Citroën", "model": "C3", "engine": "1.2 PureTech", "failure": "Courroie humide délaminée", "probability": 9, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EB2."},
+    {"brand": "Citroën", "model": "C4 Cactus", "engine": "1.2 PureTech", "failure": "Courroie humide délaminée", "probability": 9, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EB2."},
+    {"brand": "Ford", "model": "Focus", "engine": "1.5 EcoBlue", "failure": "Courroie humide délaminée", "probability": 8, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EcoBlue."},
+    {"brand": "Ford", "model": "Kuga", "engine": "1.5 EcoBlue", "failure": "Courroie humide délaminée", "probability": 8, "severity": "Critique", "system": "distribution", "description": "Délamination de la courroie de distribution immergée dans l'huile moteur EcoBlue."},
+    {"brand": "Volkswagen", "model": "Golf", "engine": "1.5 TSI", "failure": "Injecteurs défectueux", "probability": 6, "severity": "Élevé", "system": "injection", "description": "Défaut d'injecteurs sur motorisation TSI."},
+    {"brand": "Volkswagen", "model": "Golf", "engine": "2.0 TDI", "failure": "EGR encrassée", "probability": 7, "severity": "Élevé", "system": "egr", "description": "Encrassement de la vanne EGR sur motorisation TDI."},
+    {"brand": "Volkswagen", "model": "Tiguan", "engine": "2.0 TDI", "failure": "FAP colmaté", "probability": 7, "severity": "Élevé", "system": "echappement", "description": "Colmatage du filtre à particules sur motorisation TDI."},
+    {"brand": "Hyundai", "model": "Kona", "engine": "Kona Electric", "failure": "Runaway batterie HT", "probability": 5, "severity": "Critique", "system": "ht", "description": "Emballement thermique de la batterie haute tension."},
+    {"brand": "Tesla", "model": "Model 3", "engine": "Tesla Model 3", "failure": "Runaway batterie HT", "probability": 4, "severity": "Critique", "system": "ht", "description": "Emballement thermique de la batterie haute tension."},
+    {"brand": "Tesla", "model": "Model Y", "engine": "Tesla Model Y", "failure": "Runaway batterie HT", "probability": 4, "severity": "Critique", "system": "ht", "description": "Emballement thermique de la batterie haute tension."},
+    {"brand": "Renault", "model": "Clio", "engine": "1.5 Blue dCi", "failure": "EGR encrassée", "probability": 6, "severity": "Modéré", "system": "egr", "description": "Encrassement de la vanne EGR sur motorisation dCi."},
+    {"brand": "Renault", "model": "Megane", "engine": "1.3 TCe", "failure": "Turbo défectueux", "probability": 5, "severity": "Élevé", "system": "turbo", "description": "Défaut de turbo sur motorisation TCe."}
+  ]
+}
