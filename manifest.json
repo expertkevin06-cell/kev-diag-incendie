@@ -1,8 +1,8 @@
 {
   "id": "/etude-incendie-technique-by-kevin/",
-  "name": "Étude incendie technique by Kevin — Analyse scientifique",
+  "name": "Étude incendie technique by Kevin — Base massive",
   "short_name": "ÉtudeFeu",
-  "description": "Recherche par mots-clés, analyse causale des pannes connues, fiches origine de feu, méthodologie NFPA 921, preuves et plan de vérification, présentation interactive, accès administrateur, auto-vérification APK et base technique locale hors ligne.",
+  "description": "Recherche par mots-clés, analyse causale des pannes connues, mise à jour manuelle multi-sources TechKevin 2026 et Auto-Diagnostic, fiches origine de feu, NFPA 921, preuves, présentation interactive, accès admin, auto-vérification APK et base locale hors ligne.",
   "lang": "fr-FR",
   "dir": "ltr",
   "start_url": "./?source=pwa",
@@ -33,56 +33,32 @@
   ],
   "shortcuts": [
     {
+      "name": "Mettre à jour les pannes",
+      "short_name": "MAJ pannes",
+      "description": "Actualise et renouvelle la base depuis TechKevin 2026 et Auto-Diagnostic.",
+      "url": "./?action=update",
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
       "name": "Analyser courroie humide",
       "short_name": "Analyse",
-      "description": "Ouvre directement la chaîne causale courroie humide → PureTech / EcoBlue → crépine → lubrification.",
+      "description": "Chaîne causale courroie humide → PureTech / EcoBlue → crépine → lubrification.",
       "url": "./?analyse=courroie%20humide",
-      "icons": [
-        {
-          "src": "images/icon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Recherche unifiée",
       "short_name": "Recherche",
-      "description": "Recherche prédictive : pannes connues, DTC, méthode scientifique et veille technique.",
+      "description": "Recherche prédictive pannes, DTC, méthode et veille.",
       "url": "./?action=search",
-      "icons": [
-        {
-          "src": "images/icon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Auto-vérification APK",
       "short_name": "Vérifier",
-      "description": "Contrôle les fichiers, versions, connexion admin, cache, service worker, canal temps réel et partage.",
+      "description": "Contrôle fichiers, versions, admin, cache, canal, sources et partage.",
       "url": "./tools/verify.html",
-      "icons": [
-        {
-          "src": "images/icon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Icônes APK PNG",
-      "short_name": "Icônes",
-      "description": "Génère les icônes PNG 192, 512, maskable et 1024 px pour PWABuilder.",
-      "url": "./tools/icon-gen.html",
-      "icons": [
-        {
-          "src": "images/icon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
+      "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
   "share_target": {
