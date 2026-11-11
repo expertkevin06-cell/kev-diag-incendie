@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Étude incendie technique by Kevin — Catalogue massif",
   "short_name": "ÉtudeFeu",
-  "description": "Catalogue massif marques/modèles/motorisations/puissances intégré en base locale, import massif depuis TechKevin 2026 et Auto-Diagnostic, recherche prédictive et analyse causale hors ligne.",
+  "description": "Catalogue massif embarqué marques/modèles/motorisations/puissances, autochargement des deux sources en complément, sauvegarde locale automatique, recherche prédictive et analyse causale hors ligne.",
   "lang": "fr-FR",
   "dir": "ltr",
   "start_url": "./",
@@ -20,7 +20,7 @@
     { "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Import massif", "short_name": "Import", "url": "./?action=import", "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+    { "name": "Import massif + sauvegarde", "short_name": "Import", "url": "./?action=import", "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
     { "name": "Chaîne de distribution", "short_name": "Chaîne", "url": "./?analyse=cha%C3%AEne%20de%20distribution", "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
     { "name": "Peugeot 3008 1.6 THP", "short_name": "3008 THP", "url": "./?analyse=Peugeot%203008%201.6%20THP%20165", "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
     { "name": "Auto-vérification", "short_name": "Vérifier", "url": "./tools/verify.html", "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml" }] }
