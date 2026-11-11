@@ -1,8 +1,8 @@
-/* Moteur prédictif v44 — inférence marques/modèles/motorisations/puissances + corrélations.
-   Base embarquée (fonctionne hors ligne / APK même si data/*.json absents), fusion avec fichiers distants. */
+/* Moteur prédictif v45 — inférence marques/modèles/motorisations/puissances + corrélations.
+   Base massive EMBARQUÉE (fonctionne hors ligne / APK même si data/*.json absents), fusion avec fichiers distants. */
 window.EIK_PREDICTOR = (function () {
   "use strict";
-  var VERSION = "44.0.0";
+  var VERSION = "45.0.0";
   var EIK = window.EIK;
   var D = document, W = window;
   function norm(s) { return String(s == null ? "" : s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
@@ -25,8 +25,8 @@ window.EIK_PREDICTOR = (function () {
       { brand: "Ford", name: "Focus", aliases: ["focus"], years: "1998-2026", variants: [{ engine: "1.0 EcoBoost", power: "125" }, { engine: "1.5 EcoBlue", power: "120" }, { engine: "2.0 EcoBlue", power: "150" }] },
       { brand: "Ford", name: "Kuga", aliases: ["kuga"], years: "2008-2026", variants: [{ engine: "1.5 EcoBlue", power: "120" }, { engine: "2.0 EcoBlue", power: "150" }] },
       { brand: "Hyundai", name: "Kona", aliases: ["kona"], years: "2017-2026", variants: [{ engine: "1.0 T-GDi", power: "120" }, { engine: "Kona Electric", power: "136", type: "VE" }, { engine: "Kona Electric", power: "204", type: "VE" }] },
-      { brand: "Tesla", name: "Model 3", aliases: ["model 3"], years: "2017-2026", variants: [{ engine: "Standard Range", power: "283", type: "VE" }, { engine: "Long Range", power: "346", type: "VE" }] },
-      { brand: "Tesla", name: "Model Y", aliases: ["model y"], years: "2020-2026", variants: [{ engine: "Standard Range", power: "283", type: "VE" }, { engine: "Long Range", power: "346", type: "VE" }] },
+      { brand: "Tesla", name: "Model 3", aliases: ["model 3"], years: "2017-2026", variants: [{ engine: "Tesla LR", power: "283", type: "VE" }, { engine: "Tesla LR", power: "346", type: "VE" }] },
+      { brand: "Tesla", name: "Model Y", aliases: ["model y"], years: "2020-2026", variants: [{ engine: "Tesla LR", power: "283", type: "VE" }, { engine: "Tesla LR", power: "346", type: "VE" }] },
       { brand: "Renault", name: "Clio", aliases: ["clio"], years: "1990-2026", variants: [{ engine: "1.0 TCe", power: "100" }, { engine: "1.5 Blue dCi", power: "115" }] },
       { brand: "Renault", name: "Megane", aliases: ["megane", "mégane"], years: "1995-2026", variants: [{ engine: "1.3 TCe", power: "140" }, { engine: "1.5 Blue dCi", power: "115" }] }
     ],
@@ -76,10 +76,11 @@ window.EIK_PREDICTOR = (function () {
   function uniqVariants(v) { var seen = {}, out = []; (v || []).forEach(function (x) { if (!x) return; var k = norm(x.engine) + "|" + (x.power || ""); if (!seen[k]) { seen[k] = 1; out.push(x); } }); return out; }
   function dedupeEngines(list) { var seen = {}, out = []; list.forEach(function (e) { if (!e || !e.code) return; var k = norm(e.code); if (seen[k]) { var cur = out[seen[k] - 1]; cur.names = uniq((cur.names || []).concat(e.names || [])); cur.knownIssues = uniq((cur.knownIssues || []).concat(e.knownIssues || [])); } else out.push(JSON.parse(JSON.stringify(e))); }); return out; }
   function dedupeCorr(list) { var seen = {}, out = []; list.forEach(function (c) { if (!c || !c.failure) return; var k = norm(c.brand) + "|" + norm(c.model) + "|" + norm(c.failure); if (!seen[k]) { seen[k] = 1; out.push(JSON.parse(JSON.stringify(c))); } }); return out; }
+  function dedupeBrands(list) { var seen = {}, out = []; list.forEach(function (b) { if (!b || !b.name) return; var k = norm(b.name); if (!seen[k]) { seen[k] = 1; out.push(JSON.parse(JSON.stringify(b))); } }); return out; }
 
   function applyData(j) {
     if (!j) return;
-    if (Array.isArray(j.brands)) brands = uniq(brands.concat(j.brands).map(function (b) { return b; })).filter(function (b) { return b && b.name; });
+    if (Array.isArray(j.brands)) brands = dedupeBrands(brands.concat(j.brands));
     if (Array.isArray(j.models)) models = dedupeModels(models.concat(j.models));
     if (Array.isArray(j.engines)) engines = dedupeEngines(engines.concat(j.engines));
     if (Array.isArray(j.correlations)) correlations = dedupeCorr(correlations.concat(j.correlations));
@@ -91,7 +92,7 @@ window.EIK_PREDICTOR = (function () {
     EIK.vehicleCount = models.length;
     EIK.engineCount = engines.length;
     EIK.corrCount = correlations.length;
-    EIK.setCheck("predictor", "Moteur prédictif", "ok", VERSION + " · " + brands.length + " marques · " + models.length + " modèles · " + correlations.length + " corr.");
+    EIK.setCheck("pred", "Moteur prédictif", "ok", VERSION + " · " + brands.length + " marques · " + models.length + " modèles · " + correlations.length + " corr.");
   }
   function loadRemote() {
     var jobs = [
@@ -99,11 +100,7 @@ window.EIK_PREDICTOR = (function () {
       fetch("data/engines.json?v=" + VERSION, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
       fetch("data/correlations.json?v=" + VERSION, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
     ];
-    return Promise.all(jobs).then(function (res) {
-      res.forEach(function (j) { if (j) applyData(j); });
-      publishCounts();
-      return true;
-    });
+    return Promise.all(jobs).then(function (res) { res.forEach(function (j) { if (j) applyData(j); }); publishCounts(); return true; });
   }
 
   function inferVehicle(query) {
@@ -114,8 +111,8 @@ window.EIK_PREDICTOR = (function () {
     brands.forEach(function (b) { var bn = norm(b.name); if (bn.length > 1 && q.indexOf(bn) >= 0) detectedBrand = b.name; (b.aliases || []).forEach(function (a) { var an = norm(a); if (an.length > 2 && q.indexOf(an) >= 0) detectedBrand = b.name; }); });
     models.forEach(function (m) { var mn = norm(m.name); var hit = mn.length > 1 && q.indexOf(mn) >= 0; (m.aliases || []).forEach(function (a) { var an = norm(a); if (an.length > 1 && q.indexOf(an) >= 0) hit = true; }); if (hit && (!detectedBrand || detectedBrand === m.brand)) { detectedModel = m; detectedBrand = m.brand; } });
     engines.forEach(function (e) { var en = norm(e.code); if (en.length > 2 && q.indexOf(en) >= 0) detectedEngine = e; (e.names || []).forEach(function (n) { var nn = norm(n); if (nn.length > 3 && q.indexOf(nn) >= 0) detectedEngine = e; }); });
-    if (!detectedEngine && detectedModel) { var vm = norm(query); detectedModel.variants && detectedModel.variants.forEach(function (v) { if (v.engine && vm.indexOf(norm(v.engine)) >= 0) { detectedEngine = { code: v.engine }; if (v.power) detectedPower = detectedPower || v.power; } }); }
-    if (detectedModel) { var best = null; detectedModel.variants && detectedModel.variants.forEach(function (v) { if (detectedPower && String(v.power) === String(detectedPower)) best = v; else if (!best && (!detectedEngine || norm(v.engine) === norm(detectedEngine.code))) best = v; }); if (best) { detectedEngine = detectedEngine || { code: best.engine }; detectedPower = detectedPower || best.power; } }
+    if (!detectedEngine && detectedModel) { var vm = norm(query); (detectedModel.variants || []).forEach(function (v) { if (v.engine && vm.indexOf(norm(v.engine)) >= 0) { detectedEngine = { code: v.engine }; if (v.power) detectedPower = detectedPower || v.power; } }); }
+    if (detectedModel) { var best = null; (detectedModel.variants || []).forEach(function (v) { if (detectedPower && String(v.power) === String(detectedPower)) best = v; else if (!best && (!detectedEngine || norm(v.engine) === norm(detectedEngine.code))) best = v; }); if (best) { detectedEngine = detectedEngine || { code: best.engine }; detectedPower = detectedPower || best.power; } }
     if (!detectedBrand && !detectedModel && !detectedEngine) return null;
     return { brand: detectedBrand, model: detectedModel ? detectedModel.name : null, engine: detectedEngine ? detectedEngine.code : null, power: detectedPower, years: detectedModel ? (detectedModel.years || "") : "", confidence: (detectedBrand && detectedModel && detectedEngine) ? "Élevé" : (detectedModel || detectedEngine) ? "Moyen" : "Partiel" };
   }
