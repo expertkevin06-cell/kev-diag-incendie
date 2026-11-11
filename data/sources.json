@@ -1,4 +1,20 @@
 [
-  { "id": "techkevin2026", "name": "TechKevin 2026 — Véhicules", "url": "https://expertkevin06-cell.github.io/techkevin2026/#/veh", "enabled": true, "deep": true, "probes": ["data/veh.json", "data/vehicles.json", "data/catalog.json", "data/marques.json", "data/modeles.json", "data/motorisations.json", "data/puissances.json", "data/pannes.json", "data/db.json", "data/data.json", "assets/data.json", "assets/vehicles.json", "manifest.json", "asset-manifest.json"] },
-  { "id": "auto-diagnostic", "name": "Auto-Diagnostic", "url": "https://expertkevin06-cell.github.io/auto-diagnostic/", "enabled": true, "deep": true, "probes": ["data/pannes.json", "data/diagnostics.json", "data/dtc.json", "data/vehicles.json", "data/catalog.json", "data/marques.json", "data/modeles.json", "data/motorisations.json", "data/puissances.json", "data/db.json", "data/data.json", "assets/data.json", "manifest.json", "asset-manifest.json"] }
+  {
+    "id": "techkevin2026",
+    "name": "TechKevin 2026 — Véhicules",
+    "url": "https://expertkevin06-cell.github.io/techkevin2026/#/veh",
+    "enabled": true,
+    "deep": true,
+    "probes": ["data/veh.json","data/vehicles.json","data/vehicules.json","data/catalog.json","data/catalogue.json","data/marques.json","data/modeles.json","data/motorisations.json","data/puissances.json","data/pannes.json","data/db.json","data/data.json","data/base.json","assets/data.json","assets/vehicles.json","assets/catalog.json","json/vehicles.json","manifest.json","asset-manifest.json"],
+    "routes": ["#/veh","#/vehicules","#/vehicles","#/marques","#/modeles","#/motorisations","#/catalogue","#/base","#/"]
+  },
+  {
+    "id": "auto-diagnostic",
+    "name": "Auto-Diagnostic",
+    "url": "https://expertkevin06-cell.github.io/auto-diagnostic/",
+    "enabled": true,
+    "deep": true,
+    "probes": ["data/pannes.json","data/diagnostics.json","data/dtc.json","data/vehicles.json","data/vehicules.json","data/catalog.json","data/catalogue.json","data/marques.json","data/modeles.json","data/motorisations.json","data/puissances.json","data/db.json","data/data.json","data/base.json","assets/data.json","assets/catalog.json","json/data.json","manifest.json","asset-manifest.json"],
+    "routes": ["#/","#/veh","#/vehicules","#/diagnostic","#/diagnostics","#/pannes","#/catalogue","#/base"]
+  }
 ]
